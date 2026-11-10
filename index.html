@@ -1,34 +1,32 @@
+Готовый `index.html` ниже. Учебные модули начисляют **5 баллов за правильный ответ, максимум 50**, только за первую завершённую попытку. Проходной порог не задан: первая попытка с ответами на все вопросы фиксирует результат, а повторы его не заменяют. Квесты остаются по прежней схеме.
+
+SQL для защиты от повторных записей указан в начале скрипта. Если раньше уже использовался индекс для трёх учебных тем, его нужно обновить по этому SQL.
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
-  >
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
-  <title>Deutsch Quest</title>
-
+  <title>Deutsch Quest · A1</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     :root {
       color-scheme: dark;
-
       --bg: #0b1020;
-      --panel: rgba(255, 255, 255, .065);
-      --panel-strong: rgba(255, 255, 255, .11);
-      --border: rgba(255, 255, 255, .11);
-
+      --panel: rgba(255,255,255,.065);
+      --panel-strong: rgba(255,255,255,.11);
+      --border: rgba(255,255,255,.11);
       --text: #f4f6ff;
       --muted: #a6aecb;
-
       --primary: #9280ff;
       --primary-2: #6654e8;
       --green: #60dfad;
       --red: #ff8299;
       --yellow: #ffcf77;
-
       --radius: 24px;
       --safe-top: max(
         env(safe-area-inset-top, 0px),
@@ -40,34 +38,19 @@
       );
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      min-height: 100%;
-      background: var(--bg);
-    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
 
     body {
       margin: 0;
       min-height: 100vh;
       min-height: 100dvh;
       color: var(--text);
-      font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       -webkit-tap-highlight-color: transparent;
       background:
-        radial-gradient(
-          ellipse at 0% 0%,
-          rgba(116, 83, 255, .20),
-          transparent 45%
-        ),
-        radial-gradient(
-          ellipse at 100% 25%,
-          rgba(46, 173, 175, .13),
-          transparent 40%
-        ),
+        radial-gradient(ellipse at 0% 0%,rgba(116,83,255,.20),transparent 45%),
+        radial-gradient(ellipse at 100% 25%,rgba(46,173,175,.13),transparent 40%),
         var(--bg);
       overflow-x: hidden;
     }
@@ -78,32 +61,24 @@
       cursor: pointer;
       touch-action: manipulation;
     }
-
-    button:disabled {
-      cursor: default;
-    }
-
+    button:disabled { cursor: default; }
     button:focus-visible {
       outline: 3px solid var(--yellow);
       outline-offset: 4px;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     .app {
-      width: min(100%, 720px);
+      width: min(100%,720px);
       margin: auto;
       padding:
         calc(20px + var(--safe-top))
         18px
-        calc(30px + var(--safe-bottom));
+        calc(112px + var(--safe-bottom));
     }
 
-    .screen {
-      animation: appear .25s ease;
-    }
+    .screen { animation: appear .25s ease; }
 
     .glass {
       background: var(--panel);
@@ -111,149 +86,108 @@
       border-radius: var(--radius);
       -webkit-backdrop-filter: blur(18px);
       backdrop-filter: blur(18px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, .13);
+      box-shadow: 0 16px 40px rgba(0,0,0,.13);
     }
 
-    .brand-row,
-    .section-row,
-    .quiz-top,
-    .question-heading {
+    .brand-row,.section-row,.quiz-top,.question-heading {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
 
-    .brand-row {
-      margin-bottom: 20px;
-    }
-
+    .brand-row { margin-bottom: 20px; }
     .brand {
       font-size: 22px;
       font-weight: 850;
       letter-spacing: -.7px;
     }
-
-    .brand span {
-      color: var(--primary);
-    }
+    .brand span { color: var(--primary); }
 
     .pill {
       border-radius: 100px;
       padding: 7px 11px;
-      background: rgba(146, 128, 255, .12);
-      border: 1px solid rgba(146, 128, 255, .2);
+      background: rgba(146,128,255,.12);
+      border: 1px solid rgba(146,128,255,.2);
       color: #c4baff;
       font-size: 12px;
       white-space: nowrap;
     }
 
-    h1, h2, h3, p {
-      margin-top: 0;
-    }
-
+    h1,h2,h3,p { margin-top: 0; }
     h1 {
-      font-size: clamp(25px, 6vw, 34px);
+      font-size: clamp(25px,6vw,34px);
       letter-spacing: -.8px;
       margin-bottom: 10px;
     }
-
-    h2 {
-      font-size: 20px;
-      letter-spacing: -.4px;
-    }
-
-    .muted {
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .small {
-      font-size: 13px;
-    }
+    h2 { font-size: 20px; letter-spacing: -.4px; }
+    .muted { color: var(--muted); line-height: 1.5; }
+    .small { font-size: 13px; }
 
     .notice {
       margin-bottom: 16px;
       padding: 13px 15px;
       border-radius: 16px;
       color: var(--yellow);
-      background: rgba(255, 207, 119, .08);
-      border: 1px solid rgba(255, 207, 119, .2);
+      background: rgba(255,207,119,.08);
+      border: 1px solid rgba(255,207,119,.2);
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
-    .profile {
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
+    .profile { padding: 20px; margin-bottom: 24px; }
     .profile-head {
       display: flex;
       align-items: center;
       gap: 13px;
       margin-bottom: 20px;
     }
-
     .avatar {
       flex: 0 0 54px;
       height: 54px;
       display: grid;
       place-items: center;
       border-radius: 18px;
-      background: linear-gradient(135deg, #9280ff, #5143b2);
+      background: linear-gradient(135deg,#9280ff,#5143b2);
       font-size: 23px;
       font-weight: 800;
     }
-
     .profile-name {
       overflow-wrap: anywhere;
       font-weight: 750;
       font-size: 18px;
       margin-bottom: 5px;
     }
-
-    .rank {
-      color: var(--yellow);
-      font-size: 13px;
-    }
+    .rank { color: var(--yellow); font-size: 13px; }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3,1fr);
       gap: 10px;
     }
-
     .stat {
       padding: 12px 6px;
-      background: rgba(255, 255, 255, .04);
+      background: rgba(255,255,255,.04);
       border-radius: 15px;
       text-align: center;
     }
-
     .stat strong {
       display: block;
       font-size: 21px;
       margin-bottom: 4px;
     }
-
-    .stat span {
-      font-size: 11px;
+    .stat span { font-size: 11px; color: var(--muted); }
+    .rank-progress { margin-top: 17px; }
+    .rank-progress p {
+      margin-bottom: 9px;
+      font-size: 12px;
       color: var(--muted);
+      line-height: 1.5;
     }
 
-    .section-row {
-      margin: 22px 0 12px;
-    }
-
-    .section-row h2 {
-      margin-bottom: 0;
-    }
-
-    .modules {
-      display: grid;
-      gap: 12px;
-    }
+    .section-row { margin: 22px 0 12px; }
+    .section-row h2 { margin-bottom: 0; }
+    .modules { display: grid; gap: 12px; }
 
     .module-card {
       position: relative;
@@ -263,59 +197,37 @@
       gap: 15px;
       padding: 19px;
       text-align: left;
-      transition:
-        transform .18s ease,
-        background .18s ease,
-        opacity .18s ease;
+      transition: transform .18s ease,background .18s ease,opacity .18s ease;
     }
-
-    .module-card:not(:disabled):active {
-      transform: scale(.98);
-    }
-
-    .module-card:not(:disabled):hover {
-      background: var(--panel-strong);
-    }
-
-    .module-card:disabled {
-      opacity: .55;
-    }
-
+    .module-card:not(:disabled):active { transform: scale(.98); }
+    .module-card:not(:disabled):hover { background: var(--panel-strong); }
+    .module-card:disabled { opacity: .55; }
     .module-card.completed {
-      opacity: .8;
-      border-color: rgba(96, 223, 173, .25);
-      background: rgba(96, 223, 173, .065);
+      border-color: rgba(96,223,173,.25);
+      background: rgba(96,223,173,.065);
     }
-
     .module-icon {
       flex: 0 0 48px;
+      width: 48px;
       height: 48px;
       display: grid;
       place-items: center;
       border-radius: 16px;
-      background: rgba(146, 128, 255, .13);
+      background: rgba(146,128,255,.13);
       font-size: 24px;
     }
-
-    .module-copy {
-      flex: 1;
-      min-width: 0;
-    }
-
+    .module-copy { flex: 1; min-width: 0; }
     .module-copy strong {
       display: block;
       font-size: 18px;
       margin-bottom: 5px;
     }
-
     .module-copy span {
       color: var(--muted);
       font-size: 13px;
+      line-height: 1.5;
     }
-
-    .module-status {
-      font-size: 21px;
-    }
+    .module-status { font-size: 21px; }
 
     .tabs {
       display: grid;
@@ -324,9 +236,8 @@
       gap: 5px;
       border-radius: 16px;
       margin: 14px 0;
-      background: rgba(255, 255, 255, .05);
+      background: rgba(255,255,255,.05);
     }
-
     .tab {
       border: 0;
       background: transparent;
@@ -334,56 +245,28 @@
       border-radius: 12px;
       color: var(--muted);
       font-weight: 650;
-      transition: background .18s ease, color .18s ease;
+      transition: background .18s ease,color .18s ease;
     }
-
-    .tab.active {
-      background: var(--primary-2);
-      color: white;
-    }
-
-    .leaderboard {
-      overflow: hidden;
-    }
-
+    .tab.active { background: var(--primary-2); color: white; }
+    .leaderboard { overflow: hidden; }
     .leader-row {
       display: grid;
-      grid-template-columns: 32px minmax(0, 1fr) auto;
+      grid-template-columns: 32px minmax(0,1fr) auto;
       align-items: center;
       gap: 10px;
       padding: 15px 17px;
-      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
     }
-
-    .leader-row:last-child {
-      border-bottom: 0;
-    }
-
-    .leader-row.me {
-      background: rgba(146, 128, 255, .12);
-    }
-
-    .leader-place {
-      color: var(--muted);
-      font-weight: 700;
-    }
-
+    .leader-row:last-child { border-bottom: 0; }
+    .leader-row.me { background: rgba(146,128,255,.12); }
+    .leader-place { color: var(--muted); font-weight: 700; }
     .leader-name {
       overflow-wrap: anywhere;
       font-weight: 600;
       font-size: 14px;
     }
-
-    .leader-meta {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .leader-score {
-      font-weight: 850;
-      color: var(--green);
-    }
+    .leader-meta { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .leader-score { font-weight: 850; color: var(--green); }
 
     .empty {
       padding: 28px 18px;
@@ -392,7 +275,6 @@
       font-size: 14px;
       line-height: 1.5;
     }
-
     .button {
       min-height: 49px;
       padding: 14px 18px;
@@ -400,29 +282,20 @@
       border: 1px solid var(--border);
       background: var(--panel-strong);
       font-weight: 750;
-      transition: transform .18s ease, opacity .18s ease;
+      transition: transform .18s ease,opacity .18s ease;
     }
-
-    .button:not(:disabled):active {
-      transform: scale(.98);
-    }
-
-    .button:disabled {
-      opacity: .5;
-    }
-
+    .button:not(:disabled):active { transform: scale(.98); }
+    .button:disabled { opacity: .5; }
     .button.primary {
       border-color: transparent;
-      background: linear-gradient(135deg, #9683ff, #6753e8);
-      box-shadow: 0 8px 24px rgba(103, 83, 232, .24);
+      background: linear-gradient(135deg,#9683ff,#6753e8);
+      box-shadow: 0 8px 24px rgba(103,83,232,.24);
       color: white;
     }
-
-    .button.full {
-      width: 100%;
-    }
+    .button.full { width: 100%; }
 
     .icon-button {
+      flex: 0 0 42px;
       width: 42px;
       height: 42px;
       border-radius: 13px;
@@ -432,27 +305,18 @@
       place-items: center;
       font-size: 20px;
     }
-
-    .quiz-top {
-      margin-bottom: 19px;
-    }
-
-    .quiz-title {
-      flex: 1;
-      font-size: 20px;
-      font-weight: 800;
-    }
+    .quiz-top { margin-bottom: 19px; }
+    .quiz-title { flex: 1; font-size: 20px; font-weight: 800; }
 
     .progress-shell {
       position: sticky;
       top: calc(8px + var(--safe-top));
       z-index: 5;
       padding: 14px;
-      background: rgba(17, 22, 43, .93);
+      background: rgba(17,22,43,.93);
       margin-bottom: 18px;
       border-radius: 17px;
     }
-
     .progress-label {
       display: flex;
       justify-content: space-between;
@@ -460,52 +324,34 @@
       font-size: 12px;
       margin-bottom: 9px;
     }
-
     .progress-track {
       height: 6px;
       overflow: hidden;
-      background: rgba(255, 255, 255, .09);
+      background: rgba(255,255,255,.09);
       border-radius: 20px;
     }
-
     .progress-fill {
       height: 100%;
       width: 0%;
       border-radius: inherit;
-      background: linear-gradient(90deg, var(--primary), var(--green));
+      background: linear-gradient(90deg,var(--primary),var(--green));
       transition: width .25s ease;
     }
 
-    .questions {
-      display: grid;
-      gap: 15px;
-    }
-
+    .questions { display: grid; gap: 15px; }
     .question {
       padding: 19px;
       scroll-margin-top: calc(110px + var(--safe-top));
       transition: border-color .2s ease;
     }
-
-    .question.missing {
-      border-color: var(--yellow);
-      animation: shake .3s ease;
-    }
-
-    .question.is-correct {
-      border-color: rgba(96, 223, 173, .38);
-    }
-
-    .question.is-wrong {
-      border-color: rgba(255, 130, 153, .4);
-    }
-
+    .question.missing { border-color: var(--yellow); animation: shake .3s ease; }
+    .question.is-correct { border-color: rgba(96,223,173,.38); }
+    .question.is-wrong { border-color: rgba(255,130,153,.4); }
     .question-heading {
       color: var(--muted);
       font-size: 12px;
       margin-bottom: 14px;
     }
-
     .question-text {
       font-size: 21px;
       font-weight: 750;
@@ -513,86 +359,43 @@
       overflow-wrap: anywhere;
       margin-bottom: 8px;
     }
-
     .question-translation {
       color: var(--muted);
       font-size: 14px;
       margin-bottom: 0;
     }
-
-    .gap {
-      color: var(--yellow);
-      letter-spacing: 2px;
-    }
-
-    .answers {
-      display: grid;
-      gap: 9px;
-      margin-top: 18px;
-    }
-
-    .answers.articles {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
+    .gap { color: var(--yellow); letter-spacing: 2px; }
+    .answers { display: grid; gap: 9px; margin-top: 18px; }
+    .answers.articles { grid-template-columns: repeat(3,1fr); }
     .answer {
       min-height: 48px;
       padding: 12px 13px;
       border: 1px solid var(--border);
       border-radius: 13px;
-      background: rgba(255, 255, 255, .035);
+      background: rgba(255,255,255,.035);
       line-height: 1.4;
       text-align: left;
-      transition:
-        background .18s ease,
-        border-color .18s ease,
-        transform .18s ease;
+      transition: background .18s ease,border-color .18s ease,transform .18s ease;
     }
-
-    .articles .answer {
-      text-align: center;
-      font-size: 18px;
-      font-weight: 750;
-    }
-
-    .answer:not(:disabled):active {
-      transform: scale(.98);
-    }
-
+    .articles .answer { text-align: center; font-size: 18px; font-weight: 750; }
+    .answer:not(:disabled):active { transform: scale(.98); }
     .answer.selected {
-      background: rgba(146, 128, 255, .22);
+      background: rgba(146,128,255,.22);
       border-color: var(--primary);
     }
-
     .answer.correct {
       color: #a9f6d6;
-      background: rgba(96, 223, 173, .12);
-      border-color: rgba(96, 223, 173, .55);
+      background: rgba(96,223,173,.12);
+      border-color: rgba(96,223,173,.55);
     }
-
     .answer.wrong {
       color: #ffb4c2;
-      background: rgba(255, 130, 153, .12);
-      border-color: rgba(255, 130, 153, .55);
+      background: rgba(255,130,153,.12);
+      border-color: rgba(255,130,153,.55);
     }
-
-    .feedback {
-      margin-top: 13px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .feedback.good {
-      color: var(--green);
-    }
-
-    .feedback.bad {
-      color: var(--red);
-    }
-
-    #quizScreen {
-      padding-bottom: 100px;
-    }
+    .feedback { margin-top: 13px; font-size: 13px; line-height: 1.5; }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--red); }
 
     .floating-bar {
       position: fixed;
@@ -601,30 +404,17 @@
       left: 0;
       width: 100%;
       padding: 14px 18px calc(14px + var(--safe-bottom));
-      background: linear-gradient(
-        transparent,
-        rgba(11, 16, 32, .96) 25%
-      );
+      background: linear-gradient(transparent,rgba(11,16,32,.96) 25%);
       pointer-events: none;
     }
-
     .floating-inner {
-      width: min(100%, 684px);
+      width: min(100%,684px);
       margin: auto;
       pointer-events: auto;
     }
 
-    .result-card {
-      padding: 28px 20px;
-      text-align: center;
-      margin-bottom: 18px;
-    }
-
-    .result-emoji {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-
+    .result-card { padding: 28px 20px; text-align: center; margin-bottom: 18px; }
+    .result-emoji { font-size: 48px; margin-bottom: 12px; }
     .result-score {
       font-size: 64px;
       font-weight: 900;
@@ -632,19 +422,8 @@
       color: var(--green);
       margin: 12px 0;
     }
-
-    .result-score span {
-      font-size: 25px;
-      letter-spacing: -1px;
-      color: var(--muted);
-    }
-
-    .result-actions {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
+    .result-score span { font-size: 25px; letter-spacing: -1px; color: var(--muted); }
+    .result-actions { display: grid; gap: 10px; margin-bottom: 24px; }
     .save-status {
       margin: 15px 0 0;
       color: var(--muted);
@@ -652,13 +431,80 @@
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
+    .save-status.error { color: var(--red); }
+    .save-status.success { color: var(--green); }
 
-    .save-status.error {
-      color: var(--red);
+    .theory-hero { padding: 24px 20px; margin-bottom: 16px; }
+    .theory-hero .module-icon { margin-bottom: 16px; }
+    .theory-hero .pill { display: inline-block; margin-bottom: 14px; }
+    .theory-content { padding: 22px 20px; line-height: 1.7; overflow-wrap: anywhere; }
+    .theory-content h2 { margin-top: 25px; margin-bottom: 12px; }
+    .theory-content h2:first-child { margin-top: 0; }
+    .theory-content p,.theory-content li { color: var(--muted); font-size: 15px; }
+    .theory-content strong { color: var(--text); }
+    .theory-content ul { padding-left: 21px; }
+    .table-scroll {
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      -webkit-overflow-scrolling: touch;
     }
+    .theory-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .theory-table th,.theory-table td {
+      padding: 12px 13px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .theory-table th { color: #c4baff; background: rgba(146,128,255,.10); }
+    .theory-table tbody tr:last-child td { border-bottom: 0; }
+    .theory-table td:first-child { font-weight: 750; }
+    .rule-box,.example-box {
+      padding: 15px;
+      margin: 16px 0;
+      border-radius: 16px;
+      background: rgba(146,128,255,.08);
+      border: 1px solid rgba(146,128,255,.2);
+    }
+    .example-box { background: rgba(96,223,173,.06); border-color: rgba(96,223,173,.18); }
+    .rule-box p:last-child,.example-box p:last-child { margin-bottom: 0; }
+    .theory-actions { margin-top: 20px; }
 
-    .save-status.success {
-      color: var(--green);
+    .bottom-nav {
+      position: fixed;
+      z-index: 30;
+      left: 50%;
+      bottom: calc(10px + var(--safe-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100% - 28px),684px);
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 5px;
+      padding: 7px;
+      background: rgba(19,24,45,.92);
+      border-radius: 23px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+    }
+    .nav-button {
+      min-height: 58px;
+      border: 0;
+      border-radius: 17px;
+      background: transparent;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 750;
+      transition: background .18s ease,color .18s ease;
+    }
+    .nav-icon { font-size: 21px; }
+    .nav-button.active {
+      color: var(--primary);
+      background: rgba(146,128,255,.13);
     }
 
     .toast {
@@ -671,26 +517,18 @@
       padding: 13px 18px;
       border-radius: 16px;
       background: #29243e;
-      border: 1px solid rgba(255, 255, 255, .16);
-      box-shadow: 0 10px 35px rgba(0, 0, 0, .35);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 10px 35px rgba(0,0,0,.35);
       text-align: center;
       font-size: 14px;
       line-height: 1.4;
       opacity: 0;
-      transform: translate(-50%, -15px);
-      transition: opacity .2s ease, transform .2s ease;
+      transform: translate(-50%,-15px);
+      transition: opacity .2s ease,transform .2s ease;
       pointer-events: none;
     }
-
-    .toast.visible {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    .toast.error {
-      border-color: rgba(255, 130, 153, .5);
-    }
-
+    .toast.visible { opacity: 1; transform: translate(-50%,0); }
+    .toast.error { border-color: rgba(255,130,153,.5); }
     .footer-note {
       margin-top: 14px;
       text-align: center;
@@ -703,21 +541,19 @@
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes shake {
       25% { transform: translateX(-3px); }
       75% { transform: translateX(3px); }
     }
-
     @media (max-width: 360px) {
       .app { padding-left: 12px; padding-right: 12px; }
-      .question, .module-card { padding: 15px; }
-      .module-icon { flex-basis: 42px; height: 42px; }
+      .question,.module-card { padding: 15px; }
+      .module-icon { flex-basis: 42px; width: 42px; height: 42px; }
       .pill { font-size: 10px; }
+      .theory-content { padding: 18px 15px; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+      *,*::before,*::after {
         animation: none !important;
         transition: none !important;
         scroll-behavior: auto !important;
@@ -728,31 +564,25 @@
 
 <body>
   <main class="app">
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <section id="menuScreen" class="screen">
-      <header class="brand-row">
-        <div class="brand">Deutsch<span>Quest</span></div>
-        <div class="pill">Учись · Играй · Расти</div>
-      </header>
+    <header class="brand-row">
+      <div class="brand">Deutsch<span>Quest</span></div>
+      <div class="pill">A1 · От туриста до Гёте</div>
+    </header>
 
-      <div id="demoNotice" class="notice hidden">
-        Демо-режим: приложение открыто вне Telegram.
-        Результаты сохраняются только в памяти этой страницы
-        и не отправляются в Supabase.
-      </div>
+    <div id="demoNotice" class="notice hidden">
+      Демо-режим вне Telegram. Результаты хранятся только в памяти
+      страницы, без отправки в Supabase.
+    </div>
 
-      <div id="menuError" class="notice hidden">
-        <div id="menuErrorText"></div>
-        <button
-          id="reloadButton"
-          class="button full"
-          style="margin-top: 10px"
-          type="button"
-        >
-          Повторить загрузку
-        </button>
-      </div>
+    <div id="dataError" class="notice hidden">
+      <div id="dataErrorText"></div>
+      <button id="reloadButton" class="button full"
+              style="margin-top:10px" type="button">
+        Повторить загрузку
+      </button>
+    </div>
 
+    <section id="questsScreen" class="screen">
       <section class="profile glass">
         <div class="profile-head">
           <div id="avatar" class="avatar">D</div>
@@ -763,453 +593,738 @@
         </div>
 
         <div class="stats">
-          <div class="stat">
-            <strong id="totalScore">—</strong>
-            <span>всего баллов</span>
-          </div>
-          <div class="stat">
-            <strong id="playedDays">—</strong>
-            <span>сыграно дней</span>
-          </div>
-          <div class="stat">
-            <strong id="todayScore">—</strong>
-            <span>баллов сегодня</span>
+          <div class="stat"><strong id="totalScore">—</strong><span>всего баллов</span></div>
+          <div class="stat"><strong id="playedDays">—</strong><span>сыграно дней</span></div>
+          <div class="stat"><strong id="todayScore">—</strong><span>баллов сегодня</span></div>
+        </div>
+
+        <div class="rank-progress">
+          <p id="nextRankText" aria-live="polite">Загружаем звание…</p>
+          <div id="rankProgressBar" class="progress-track" role="progressbar"
+               aria-label="Прогресс до следующего звания"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="rankProgressFill" class="progress-fill"></div>
           </div>
         </div>
       </section>
 
       <h1>Твой ежедневный квест</h1>
       <p class="muted small">
-        Три модуля. За каждый правильный ответ — 1 балл.
-        Каждый модуль можно завершить один раз в день.
+        Артикли, перевод и грамматика. По 20 вопросов, по 1 баллу за
+        правильный ответ. Каждый квест можно завершить один раз в день.
       </p>
-
-      <div id="modules" class="modules">
-        <button
-          class="module-card glass"
-          data-module="articles"
-          type="button"
-          disabled
-        >
-          <span class="module-icon">🧩</span>
-          <span class="module-copy">
-            <strong>Артикли</strong>
-            <span class="module-description">20 слов · der / die / das</span>
-          </span>
-          <span class="module-status" aria-hidden="true">→</span>
-        </button>
-
-        <button
-          class="module-card glass"
-          data-module="translation"
-          type="button"
-          disabled
-        >
-          <span class="module-icon">💬</span>
-          <span class="module-copy">
-            <strong>Перевод</strong>
-            <span class="module-description">20 предложений · 4 варианта</span>
-          </span>
-          <span class="module-status" aria-hidden="true">→</span>
-        </button>
-
-        <button
-          class="module-card glass"
-          data-module="grammar"
-          type="button"
-          disabled
-        >
-          <span class="module-icon">⚡</span>
-          <span class="module-copy">
-            <strong>Грамматика</strong>
-            <span class="module-description">20 заданий · заполни пропуски</span>
-          </span>
-          <span class="module-status" aria-hidden="true">→</span>
-        </button>
-      </div>
-
-      <div class="section-row">
-        <h2>🏆 Таблица лидеров</h2>
-        <span id="leaderCount" class="muted small"></span>
-      </div>
-
-      <div class="tabs" role="tablist" aria-label="Период рейтинга">
-        <button
-          id="tabToday"
-          class="tab active"
-          role="tab"
-          aria-selected="true"
-          aria-controls="leaderboard"
-          type="button"
-        >Сегодня</button>
-
-        <button
-          id="tabAll"
-          class="tab"
-          role="tab"
-          aria-selected="false"
-          aria-controls="leaderboard"
-          type="button"
-        >За всё время</button>
-      </div>
-
-      <div
-        id="leaderboard"
-        class="leaderboard glass"
-        role="tabpanel"
-      >
-        <div class="empty">Загружаем рейтинг…</div>
-      </div>
-
+      <div id="questCards" class="modules"></div>
       <div id="dayNote" class="footer-note"></div>
     </section>
 
-    <!-- ТЕСТ -->
+    <section id="studyScreen" class="screen hidden">
+      <h1>📚 Учёба</h1>
+      <h2>Сначала учись. Потом разнеси тест.</h2>
+      <p class="muted">
+        Теория открыта всегда. Тренироваться в тестах можно сколько угодно.
+        За первое успешное прохождение модуля ты получишь 50 баллов
+        (5 за каждый правильный ответ). Баллы за эти темы даются только
+        один раз. Привязки к дням здесь нет!
+      </p>
+      <div class="notice">
+        Максимум — 50 баллов. Первая завершённая попытка фиксирует
+        фактический результат. Повторы не добавляют баллы и не заменяют его.
+      </div>
+      <div id="studyCards" class="modules"></div>
+      <p class="footer-note">
+        Авторская теория и упражнения по темам грамматики A1.
+      </p>
+    </section>
+
+    <section id="ratingScreen" class="screen hidden">
+      <h1>🏆 Таблица лидеров</h1>
+      <p class="muted small">Общие баллы за ежедневные квесты и учебные темы.</p>
+      <div class="section-row">
+        <h2>Кто здесь гений?</h2>
+        <span id="leaderCount" class="muted small"></span>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Период рейтинга">
+        <button id="tabToday" class="tab active" role="tab"
+                aria-selected="true" aria-controls="leaderboard" type="button">
+          Сегодня
+        </button>
+        <button id="tabAll" class="tab" role="tab"
+                aria-selected="false" aria-controls="leaderboard" type="button">
+          За всё время
+        </button>
+      </div>
+      <div id="leaderboard" class="leaderboard glass" role="tabpanel">
+        <div class="empty">Загружаем рейтинг…</div>
+      </div>
+    </section>
+
+    <section id="theoryScreen" class="screen hidden">
+      <header class="quiz-top">
+        <button id="theoryBack" class="icon-button"
+                aria-label="Вернуться к учебным темам" type="button">←</button>
+        <div class="quiz-title">Учебная карточка</div>
+        <div class="pill">База A1</div>
+      </header>
+      <section class="theory-hero glass">
+        <div id="theoryIcon" class="module-icon"></div>
+        <div id="theoryTopic" class="pill"></div>
+        <h1 id="theoryTitle"></h1>
+        <p id="theoryDescription" class="muted small"></p>
+      </section>
+      <div id="theoryContent" class="theory-content glass"></div>
+      <div class="theory-actions">
+        <div id="theoryRewardNote" class="notice"></div>
+        <button id="startStudyButton" class="button primary full" type="button">
+          Пройти тест
+        </button>
+      </div>
+    </section>
+
     <section id="quizScreen" class="screen hidden">
       <header class="quiz-top">
-        <button
-          id="quizBack"
-          class="icon-button"
-          aria-label="Вернуться в меню"
-          type="button"
-        >←</button>
+        <button id="quizBack" class="icon-button" aria-label="Назад" type="button">←</button>
         <div id="quizTitle" class="quiz-title"></div>
-        <div class="pill">Ежедневный модуль</div>
+        <div id="quizMode" class="pill"></div>
       </header>
-
       <div class="progress-shell glass">
         <div class="progress-label">
           <span>Выбрано ответов</span>
-          <strong id="progressText">0 / 20</strong>
+          <strong id="progressText"></strong>
         </div>
-        <div
-          id="progressBar"
-          class="progress-track"
-          role="progressbar"
-          aria-label="Количество выбранных ответов"
-          aria-valuemin="0"
-          aria-valuemax="20"
-          aria-valuenow="0"
-        >
+        <div id="progressBar" class="progress-track" role="progressbar"
+             aria-label="Количество выбранных ответов"
+             aria-valuemin="0" aria-valuemax="20" aria-valuenow="0">
           <div id="progressFill" class="progress-fill"></div>
         </div>
       </div>
-
       <div id="quizQuestions" class="questions"></div>
-
       <div class="floating-bar">
         <div class="floating-inner">
-          <button
-            id="checkButton"
-            class="button primary full"
-            type="button"
-          >Проверить ответы</button>
+          <button id="checkButton" class="button primary full" type="button">
+            Проверить ответы
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- РЕЗУЛЬТАТ -->
     <section id="resultScreen" class="screen hidden">
       <div class="result-card glass">
         <div id="resultEmoji" class="result-emoji">👑</div>
-        <div id="resultModule" class="pill" style="display: inline-block"></div>
-        <h1 id="resultTitle" style="margin-top: 18px">Модуль завершён!</h1>
+        <div id="resultModule" class="pill" style="display:inline-block"></div>
+        <h1 id="resultTitle" style="margin-top:18px"></h1>
         <div id="resultScore" class="result-score"></div>
+        <p id="resultDetails" class="muted small"></p>
         <p id="resultMessage" class="muted"></p>
-        <div
-          id="saveStatus"
-          class="save-status"
-          role="status"
-          aria-live="polite"
-        ></div>
+        <div id="saveStatus" class="save-status" role="status" aria-live="polite"></div>
       </div>
 
       <div class="result-actions">
-        <button
-          id="retrySaveButton"
-          class="button primary full hidden"
-          type="button"
-        >Повторить отправку результата</button>
-
-        <button
-          id="errorsButton"
-          class="button full"
-          type="button"
-        >Показать только где лох 🤡</button>
-
-        <button
-          id="resultMenuButton"
-          class="button primary full"
-          type="button"
-        >Вернуться в Главное меню</button>
+        <button id="retrySaveButton" class="button primary full hidden" type="button">
+          Повторить отправку результата
+        </button>
+        <button id="errorsButton" class="button full" type="button">
+          Показать только где лох 🤡
+        </button>
+        <button id="repeatStudyButton" class="button full hidden" type="button">
+          Ещё раз — тренироваться 💪
+        </button>
+        <button id="resultTheoryButton" class="button full hidden" type="button">
+          Вернуться к теории
+        </button>
+        <button id="resultHomeButton" class="button primary full" type="button">
+          Вернуться к квестам
+        </button>
       </div>
-
-      <div class="section-row">
-        <h2 id="reviewTitle">Разбор ответов</h2>
-      </div>
-
+      <div class="section-row"><h2 id="reviewTitle">Разбор ответов</h2></div>
       <div id="reviewQuestions" class="questions"></div>
     </section>
   </main>
+
+  <nav id="bottomNav" class="bottom-nav glass" aria-label="Главная навигация">
+    <button class="nav-button active" data-tab="quests" aria-current="page" type="button">
+      <span class="nav-icon" aria-hidden="true">🎯</span><span>Квесты</span>
+    </button>
+    <button class="nav-button" data-tab="study" type="button">
+      <span class="nav-icon" aria-hidden="true">📚</span><span>Учёба</span>
+    </button>
+    <button class="nav-button" data-tab="rating" type="button">
+      <span class="nav-icon" aria-hidden="true">🏆</span><span>Рейтинг</span>
+    </button>
+  </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     "use strict";
 
+    /*
+      SUPABASE: выполните в SQL Editor.
+
+      create unique index if not exists leaderboard_quests_daily_unique
+      on public."Leaderboard" (id, date, module)
+      where module in ('articles', 'translation', 'grammar');
+
+      -- Пересоздаём старый индекс, чтобы включить все шесть тем.
+      -- Перед выполнением проверьте и устраните существующие дубликаты.
+      begin;
+      drop index if exists public.leaderboard_study_lifetime_unique;
+      create unique index leaderboard_study_lifetime_unique
+      on public."Leaderboard" (id, module)
+      where module in (
+        'study_personalpronomen',
+        'study_praesens',
+        'study_sein_haben',
+        'study_vokalwechsel',
+        'study_modalverben',
+        'study_trennbare'
+      );
+      commit;
+
+      Старый общий индекс (id,date,module) можно оставить.
+
+      ВАЖНО:
+      Publishable key не секретный, но требует корректных RLS.
+      initDataUnsafe не подтверждает пользователя на сервере.
+      Для production используйте Edge Function с проверкой Telegram
+      initData и начисления. Клиентские проверки не защищают от
+      прямых запросов к API.
+
+      Учебные баллы: correctCount * 5, максимум 50.
+      Первый полностью заполненный тест фиксируется, включая 0 баллов.
+      Проходной порог не установлен. Повторы — без начисления.
+
+      Старые результаты (например, по 100 баллов) не переписываются.
+      Теория и упражнения ниже авторские, не копия учебника.
+    */
+
     // ============================================================
-    // ДАННЫЕ МОДУЛЕЙ: редактируйте эти три массива.
-    // Каждый модуль содержит ровно 20 заданий.
+    // ЕЖЕДНЕВНЫЕ КВЕСТЫ — 20 ВОПРОСОВ
     // ============================================================
 
     const moduleArticles = [
-      { word: "Tisch", translation: "стол", article: "der" },
-      { word: "Lampe", translation: "лампа", article: "die" },
-      { word: "Buch", translation: "книга", article: "das" },
-      { word: "Stuhl", translation: "стул", article: "der" },
-      { word: "Tür", translation: "дверь", article: "die" },
-      { word: "Fenster", translation: "окно", article: "das" },
-      { word: "Apfel", translation: "яблоко", article: "der" },
-      { word: "Banane", translation: "банан", article: "die" },
-      { word: "Auto", translation: "автомобиль", article: "das" },
-      { word: "Hund", translation: "собака", article: "der" },
-      { word: "Katze", translation: "кошка", article: "die" },
-      { word: "Kind", translation: "ребёнок", article: "das" },
-      { word: "Bahnhof", translation: "вокзал", article: "der" },
-      { word: "Schule", translation: "школа", article: "die" },
-      { word: "Haus", translation: "дом", article: "das" },
-      { word: "Garten", translation: "сад", article: "der" },
-      { word: "Zeitung", translation: "газета", article: "die" },
-      { word: "Wasser", translation: "вода", article: "das" },
-      { word: "Schlüssel", translation: "ключ", article: "der" },
-      { word: "Sprache", translation: "язык", article: "die" }
+      { word:"Tisch", translation:"стол", article:"der" },
+      { word:"Lampe", translation:"лампа", article:"die" },
+      { word:"Buch", translation:"книга", article:"das" },
+      { word:"Stuhl", translation:"стул", article:"der" },
+      { word:"Tür", translation:"дверь", article:"die" },
+      { word:"Fenster", translation:"окно", article:"das" },
+      { word:"Apfel", translation:"яблоко", article:"der" },
+      { word:"Banane", translation:"банан", article:"die" },
+      { word:"Auto", translation:"автомобиль", article:"das" },
+      { word:"Hund", translation:"собака", article:"der" },
+      { word:"Katze", translation:"кошка", article:"die" },
+      { word:"Kind", translation:"ребёнок", article:"das" },
+      { word:"Bahnhof", translation:"вокзал", article:"der" },
+      { word:"Schule", translation:"школа", article:"die" },
+      { word:"Haus", translation:"дом", article:"das" },
+      { word:"Garten", translation:"сад", article:"der" },
+      { word:"Zeitung", translation:"газета", article:"die" },
+      { word:"Wasser", translation:"вода", article:"das" },
+      { word:"Schlüssel", translation:"ключ", article:"der" },
+      { word:"Sprache", translation:"язык", article:"die" }
     ];
 
     const moduleTranslation = [
-      {
-        de: "Ich gehe in die Schule.",
-        options: [
-          "Я иду в школу.",
-          "Я нахожусь в школе.",
-          "Я иду возле школы.",
-          "Я бросаю школу."
-        ],
-        correctIndex: 0
-      },
-      {
-        de: "Wir trinken jeden Morgen Kaffee.",
-        options: [
-          "Мы пьём кофе каждый вечер.",
-          "Мы пьём кофе каждое утро.",
-          "Мы покупаем кофе каждое утро.",
-          "Мы никогда не пьём кофе."
-        ],
-        correctIndex: 1
-      },
-      {
-        de: "Das Wetter ist heute schön.",
-        options: [
-          "Сегодня плохая погода.",
-          "Завтра будет хорошая погода.",
-          "Сегодня хорошая погода.",
-          "Сегодня очень холодно."
-        ],
-        correctIndex: 2
-      },
-      {
-        de: "Meine Schwester arbeitet im Krankenhaus.",
-        options: [
-          "Моя сестра учится в школе.",
-          "Мой брат работает в больнице.",
-          "Моя сестра находится дома.",
-          "Моя сестра работает в больнице."
-        ],
-        correctIndex: 3
-      },
-      {
-        de: "Ich habe meinen Schlüssel verloren.",
-        options: [
-          "Я потерял свой ключ.",
-          "Я нашёл свой ключ.",
-          "Я купил новый ключ.",
-          "Я забыл закрыть дверь."
-        ],
-        correctIndex: 0
-      },
-      {
-        de: "Kannst du mir bitte helfen?",
-        options: [
-          "Ты можешь меня подождать?",
-          "Ты можешь мне помочь, пожалуйста?",
-          "Я могу тебе помочь?",
-          "Ты можешь мне позвонить?"
-        ],
-        correctIndex: 1
-      },
-      {
-        de: "Der Zug fährt um acht Uhr ab.",
-        options: [
-          "Поезд прибывает в восемь часов.",
-          "Поезд отправляется в девять часов.",
-          "Поезд отправляется в восемь часов.",
-          "Поезд опаздывает на восемь минут."
-        ],
-        correctIndex: 2
-      },
-      {
-        de: "Wir haben gestern einen Film gesehen.",
-        options: [
-          "Мы будем смотреть фильм завтра.",
-          "Мы вчера сняли фильм.",
-          "Мы сегодня смотрим фильм.",
-          "Мы вчера посмотрели фильм."
-        ],
-        correctIndex: 3
-      },
-      {
-        de: "Ich möchte ein Glas Wasser.",
-        options: [
-          "Я хотел бы стакан воды.",
-          "Я хотел бы чашку кофе.",
-          "Мне нужна бутылка молока.",
-          "Я не хочу пить воду."
-        ],
-        correctIndex: 0
-      },
-      {
-        de: "Das Buch liegt auf dem Tisch.",
-        options: [
-          "Книга лежит под столом.",
-          "Книга лежит на столе.",
-          "Книга стоит на полке.",
-          "Стол находится возле книги."
-        ],
-        correctIndex: 1
-      },
-      {
-        de: "Am Wochenende besuchen wir unsere Eltern.",
-        options: [
-          "На выходных родители навещают нас.",
-          "В понедельник мы навещаем родителей.",
-          "На выходных мы навещаем родителей.",
-          "На выходных мы остаёмся одни."
-        ],
-        correctIndex: 2
-      },
-      {
-        de: "Sie lernt seit zwei Jahren Deutsch.",
-        options: [
-          "Она начнёт учить немецкий через два года.",
-          "Она изучает немецкий два месяца.",
-          "Она учит два иностранных языка.",
-          "Она изучает немецкий уже два года."
-        ],
-        correctIndex: 3
-      },
-      {
-        de: "Bitte schließen Sie die Tür.",
-        options: [
-          "Пожалуйста, закройте дверь.",
-          "Пожалуйста, откройте дверь.",
-          "Пожалуйста, закройте окно.",
-          "Пожалуйста, подойдите к двери."
-        ],
-        correctIndex: 0
-      },
-      {
-        de: "Ich bin müde, aber ich muss arbeiten.",
-        options: [
-          "Я устал, поэтому не буду работать.",
-          "Я устал, но должен работать.",
-          "Я не устал и хочу работать.",
-          "Я работал и теперь отдыхаю."
-        ],
-        correctIndex: 1
-      },
-      {
-        de: "Wie viel kostet dieses Brot?",
-        options: [
-          "Где можно купить этот хлеб?",
-          "Сколько стоит это молоко?",
-          "Сколько стоит этот хлеб?",
-          "Когда испекли этот хлеб?"
-        ],
-        correctIndex: 2
-      },
-      {
-        de: "Die Kinder spielen im Garten.",
-        options: [
-          "Дети работают в саду.",
-          "Родители играют в саду.",
-          "Дети играют в доме.",
-          "Дети играют в саду."
-        ],
-        correctIndex: 3
-      },
-      {
-        de: "Ich freue mich auf den Urlaub.",
-        options: [
-          "Я с нетерпением жду отпуска.",
-          "Я боюсь предстоящего отпуска.",
-          "Я уже вернулся из отпуска.",
-          "Я работаю во время отпуска."
-        ],
-        correctIndex: 0
-      },
-      {
-        de: "Er hat heute keine Zeit.",
-        options: [
-          "У него сегодня много времени.",
-          "У него сегодня нет времени.",
-          "У него завтра нет времени.",
-          "Он сегодня не знает время."
-        ],
-        correctIndex: 1
-      },
-      {
-        de: "Wenn es regnet, bleiben wir zu Hause.",
-        options: [
-          "Если будет солнечно, мы останемся дома.",
-          "Когда идёт дождь, мы идём гулять.",
-          "Если идёт дождь, мы остаёмся дома.",
-          "Мы остаёмся дома, потому что холодно."
-        ],
-        correctIndex: 2
-      },
-      {
-        de: "Ich habe vergessen, Milch zu kaufen.",
-        options: [
-          "Я решил купить молоко.",
-          "Я забыл выпить молоко.",
-          "Я не смог найти молоко.",
-          "Я забыл купить молоко."
-        ],
-        correctIndex: 3
-      }
+      { de:"Ich gehe in die Schule.", options:["Я иду в школу.","Я нахожусь в школе.","Я иду возле школы.","Я бросаю школу."], correctIndex:0 },
+      { de:"Wir trinken jeden Morgen Kaffee.", options:["Мы пьём кофе каждый вечер.","Мы пьём кофе каждое утро.","Мы покупаем кофе каждое утро.","Мы никогда не пьём кофе."], correctIndex:1 },
+      { de:"Das Wetter ist heute schön.", options:["Сегодня плохая погода.","Завтра будет хорошая погода.","Сегодня хорошая погода.","Сегодня очень холодно."], correctIndex:2 },
+      { de:"Meine Schwester arbeitet im Krankenhaus.", options:["Моя сестра учится в школе.","Мой брат работает в больнице.","Моя сестра находится дома.","Моя сестра работает в больнице."], correctIndex:3 },
+      { de:"Ich habe meinen Schlüssel verloren.", options:["Я потерял свой ключ.","Я нашёл свой ключ.","Я купил новый ключ.","Я забыл закрыть дверь."], correctIndex:0 },
+      { de:"Kannst du mir bitte helfen?", options:["Ты можешь меня подождать?","Ты можешь мне помочь, пожалуйста?","Я могу тебе помочь?","Ты можешь мне позвонить?"], correctIndex:1 },
+      { de:"Der Zug fährt um acht Uhr ab.", options:["Поезд прибывает в восемь часов.","Поезд отправляется в девять часов.","Поезд отправляется в восемь часов.","Поезд опаздывает на восемь минут."], correctIndex:2 },
+      { de:"Wir haben gestern einen Film gesehen.", options:["Мы будем смотреть фильм завтра.","Мы вчера сняли фильм.","Мы сегодня смотрим фильм.","Мы вчера посмотрели фильм."], correctIndex:3 },
+      { de:"Ich möchte ein Glas Wasser.", options:["Я хотел бы стакан воды.","Я хотел бы чашку кофе.","Мне нужна бутылка молока.","Я не хочу пить воду."], correctIndex:0 },
+      { de:"Das Buch liegt auf dem Tisch.", options:["Книга лежит под столом.","Книга лежит на столе.","Книга стоит на полке.","Стол находится возле книги."], correctIndex:1 },
+      { de:"Am Wochenende besuchen wir unsere Eltern.", options:["На выходных родители навещают нас.","В понедельник мы навещаем родителей.","На выходных мы навещаем родителей.","На выходных мы остаёмся одни."], correctIndex:2 },
+      { de:"Sie lernt seit zwei Jahren Deutsch.", options:["Она начнёт учить немецкий через два года.","Она изучает немецкий два месяца.","Она учит два иностранных языка.","Она изучает немецкий уже два года."], correctIndex:3 },
+      { de:"Bitte schließen Sie die Tür.", options:["Пожалуйста, закройте дверь.","Пожалуйста, откройте дверь.","Пожалуйста, закройте окно.","Пожалуйста, подойдите к двери."], correctIndex:0 },
+      { de:"Ich bin müde, aber ich muss arbeiten.", options:["Я устал, поэтому не буду работать.","Я устал, но должен работать.","Я не устал и хочу работать.","Я работал и теперь отдыхаю."], correctIndex:1 },
+      { de:"Wie viel kostet dieses Brot?", options:["Где можно купить этот хлеб?","Сколько стоит это молоко?","Сколько стоит этот хлеб?","Когда испекли этот хлеб?"], correctIndex:2 },
+      { de:"Die Kinder spielen im Garten.", options:["Дети работают в саду.","Родители играют в саду.","Дети играют в доме.","Дети играют в саду."], correctIndex:3 },
+      { de:"Ich freue mich auf den Urlaub.", options:["Я с нетерпением жду отпуска.","Я боюсь предстоящего отпуска.","Я уже вернулся из отпуска.","Я работаю во время отпуска."], correctIndex:0 },
+      { de:"Er hat heute keine Zeit.", options:["У него сегодня много времени.","У него сегодня нет времени.","У него завтра нет времени.","Он сегодня не знает время."], correctIndex:1 },
+      { de:"Wenn es regnet, bleiben wir zu Hause.", options:["Если будет солнечно, мы останемся дома.","Когда идёт дождь, мы идём гулять.","Если идёт дождь, мы остаёмся дома.","Мы остаёмся дома, потому что холодно."], correctIndex:2 },
+      { de:"Ich habe vergessen, Milch zu kaufen.", options:["Я решил купить молоко.","Я забыл выпить молоко.","Я не смог найти молоко.","Я забыл купить молоко."], correctIndex:3 }
     ];
 
     const moduleGrammar = [
-      { sentence: "Ich ___ aus der Ukraine.", options: ["komme", "kommst", "kommt", "kommen"], correctIndex: 0 },
-      { sentence: "Wir ___ Deutsch.", options: ["lerne", "lernen", "lernt", "lernst"], correctIndex: 1 },
-      { sentence: "Das ___ mein Freund.", options: ["ist", "bist", "sind", "seid"], correctIndex: 0 },
-      { sentence: "Woher ___ du?", options: ["komme", "kommst", "kommt", "kommen"], correctIndex: 1 },
-      { sentence: "Ich ___ 20 Jahre alt.", options: ["habe", "bin", "ist", "bist"], correctIndex: 1 },
-      { sentence: "Er ___ einen Bruder.", options: ["habe", "hast", "hat", "haben"], correctIndex: 2 },
-      { sentence: "Wir ___ heute ins Kino.", options: ["gehen", "gehst", "geht", "gehe"], correctIndex: 0 },
-      { sentence: "Wie ___ du?", options: ["heißt", "heiße", "heißen", "heißet"], correctIndex: 0 },
-      { sentence: "Sie (она) ___ Musik.", options: ["hören", "hört", "hörst", "höre"], correctIndex: 1 },
-      { sentence: "Das Buch liegt ___ dem Tisch.", options: ["auf", "in", "aus", "bei"], correctIndex: 0 },
-      { sentence: "Ich trinke Kaffee ___ Milch.", options: ["mit", "ohne", "aus", "für"], correctIndex: 0 },
-      { sentence: "Ich wohne ___ Berlin.", options: ["in", "aus", "auf", "zu"], correctIndex: 0 },
-      { sentence: "Was machst ___ heute?", options: ["er", "wir", "du", "ich"], correctIndex: 2 },
-      { sentence: "Der Hund ___ sehr groß.", options: ["ist", "sind", "bin", "seid"], correctIndex: 0 },
-      { sentence: "Wir ___ ein neues Auto.", options: ["haben", "hat", "hast", "habe"], correctIndex: 0 },
-      { sentence: "Die Blume ist ___ dich.", options: ["für", "mit", "aus", "bei"], correctIndex: 0 },
-      { sentence: "Ich gehe ___ Hause.", options: ["nach", "in", "auf", "aus"], correctIndex: 0 },
-      { sentence: "Ich bin ___ Hause.", options: ["zu", "in", "nach", "auf"], correctIndex: 0 },
-      { sentence: "Er hat ___ Hunger.", options: ["keinen", "nicht", "nein", "nichts"], correctIndex: 0 },
-      { sentence: "Ich fahre mit ___ Bus.", options: ["dem", "den", "der", "das"], correctIndex: 0 }
+      { sentence:"Ich ___ aus der Ukraine.", options:["komme","kommst","kommt","kommen"], correctIndex:0 },
+      { sentence:"Wir ___ Deutsch.", options:["lerne","lernen","lernt","lernst"], correctIndex:1 },
+      { sentence:"Das ___ mein Freund.", options:["ist","bist","sind","seid"], correctIndex:0 },
+      { sentence:"Woher ___ du?", options:["komme","kommst","kommt","kommen"], correctIndex:1 },
+      { sentence:"Ich ___ 20 Jahre alt.", options:["habe","bin","ist","bist"], correctIndex:1 },
+      { sentence:"Er ___ einen Bruder.", options:["habe","hast","hat","haben"], correctIndex:2 },
+      { sentence:"Wir ___ heute ins Kino.", options:["gehen","gehst","geht","gehe"], correctIndex:0 },
+      { sentence:"Wie ___ du?", options:["heißt","heiße","heißen","heißet"], correctIndex:0 },
+      { sentence:"Sie (она) ___ Musik.", options:["hören","hört","hörst","höre"], correctIndex:1 },
+      { sentence:"Das Buch liegt ___ dem Tisch.", options:["auf","in","aus","bei"], correctIndex:0 },
+      { sentence:"Ich trinke Kaffee ___ Milch.", options:["mit","ohne","aus","für"], correctIndex:0 },
+      { sentence:"Ich wohne ___ Berlin.", options:["in","aus","auf","zu"], correctIndex:0 },
+      { sentence:"Was machst ___ heute?", options:["er","wir","du","ich"], correctIndex:2 },
+      { sentence:"Der Hund ___ sehr groß.", options:["ist","sind","bin","seid"], correctIndex:0 },
+      { sentence:"Wir ___ ein neues Auto.", options:["haben","hat","hast","habe"], correctIndex:0 },
+      { sentence:"Die Blume ist ___ dich.", options:["für","mit","aus","bei"], correctIndex:0 },
+      { sentence:"Ich gehe ___ Hause.", options:["nach","in","auf","aus"], correctIndex:0 },
+      { sentence:"Ich bin ___ Hause.", options:["zu","in","nach","auf"], correctIndex:0 },
+      { sentence:"Er hat ___ Hunger.", options:["keinen","nicht","nein","nichts"], correctIndex:0 },
+      { sentence:"Ich fahre mit ___ Bus.", options:["dem","den","der","das"], correctIndex:0 }
     ];
+
+    // ============================================================
+    // УЧЕБНЫЕ МОДУЛИ — ПО 10 ВОПРОСОВ
+    // ============================================================
+
+    const modulePersonalpronomen = [
+      { sentence:"Меня зовут Олена: ___ heiße Olena.", options:["Ich","Du","Er","Wir"], correctIndex:0 },
+      { sentence:"К одному другу: Woher kommst ___?", options:["ich","du","wir","ihr"], correctIndex:1 },
+      { sentence:"Das ist Max. ___ wohnt in Berlin.", options:["Sie","Es","Er","Wir"], correctIndex:2 },
+      { sentence:"Das ist Anna. ___ lernt Deutsch.", options:["Er","Es","Ihr","Sie"], correctIndex:3 },
+      { sentence:"Das ist ein Kind. ___ ist fünf Jahre alt.", options:["Es","Wir","Ihr","Du"], correctIndex:0 },
+      { sentence:"Anna und ich lernen zusammen. ___ lernen Deutsch.", options:["Ihr","Wir","Er","Du"], correctIndex:1 },
+      { sentence:"К двум друзьям: ___ seid sehr nett.", options:["Ich","Er","Ihr","Es"], correctIndex:2 },
+      { sentence:"Max und Anna wohnen hier. ___ kommen aus der Ukraine.", options:["Er","Es","Du","Sie"], correctIndex:3 },
+      { sentence:"Вежливо: Wo wohnen ___, Frau Meier?", options:["Sie","du","er","ich"], correctIndex:0 },
+      { sentence:"Das ist ein Buch. ___ ist interessant.", options:["Er","Es","Wir","Ihr"], correctIndex:1 }
+    ];
+
+    const modulePraesens = [
+      { sentence:"Ich ___ aus der Ukraine.", options:["komme","kommst","kommt","kommen"], correctIndex:0 },
+      { sentence:"Woher ___ du?", options:["komme","kommst","kommt","kommen"], correctIndex:1 },
+      { sentence:"Anna ___ Deutsch.", options:["lerne","lernen","lernt","lernst"], correctIndex:2 },
+      { sentence:"Wir ___ in Berlin.", options:["wohne","wohnt","wohnst","wohnen"], correctIndex:3 },
+      { sentence:"Ihr ___ heute Musik.", options:["hört","höre","hörst","hören"], correctIndex:0 },
+      { sentence:"Die Kinder ___ im Garten.", options:["spielt","spielen","spielst","spiele"], correctIndex:1 },
+      { sentence:"Du ___ heute.", options:["arbeite","arbeitet","arbeitest","arbeiten"], correctIndex:2 },
+      { sentence:"Er ___ auf den Bus.", options:["warten","warte","wartest","wartet"], correctIndex:3 },
+      { sentence:"Ihr ___ im Büro.", options:["arbeitet","arbeiten","arbeitest","arbeite"], correctIndex:0 },
+      { sentence:"Wie ___ du?", options:["heiße","heißt","heißen","heißet"], correctIndex:1 }
+    ];
+
+    const moduleSeinHaben = [
+      { sentence:"Ich ___ Olena.", options:["bin","habe","ist","hat"], correctIndex:0 },
+      { sentence:"Du ___ einen Bruder.", options:["bist","hast","hat","haben"], correctIndex:1 },
+      { sentence:"Er ___ müde.", options:["hat","bin","ist","sind"], correctIndex:2 },
+      { sentence:"Wir ___ ein Auto.", options:["sind","hat","habt","haben"], correctIndex:3 },
+      { sentence:"Ihr ___ sehr nett.", options:["seid","habt","sind","ist"], correctIndex:0 },
+      { sentence:"Anna ___ eine Katze.", options:["ist","hat","haben","hast"], correctIndex:1 },
+      { sentence:"Max und Anna ___ zu Hause.", options:["haben","ist","sind","seid"], correctIndex:2 },
+      { sentence:"Ich ___ Hunger.", options:["bin","hat","hast","habe"], correctIndex:3 },
+      { sentence:"Вежливо: ___ Sie Frau Meier?", options:["Sind","Haben","Ist","Seid"], correctIndex:0 },
+      { sentence:"Ihr ___ heute keine Zeit.", options:["seid","habt","haben","hat"], correctIndex:1 }
+    ];
+
+    const moduleVokalwechsel = [
+      { sentence:"Du ___ sehr gut Deutsch. (sprechen)", options:["sprichst","sprechst","spricht","sprechen"], correctIndex:0 },
+      { sentence:"Er ___ einen Apfel. (essen)", options:["esst","isst","esse","essen"], correctIndex:1 },
+      { sentence:"Anna ___ mit dem Bus. (fahren)", options:["fahrt","fährst","fährt","fahren"], correctIndex:2 },
+      { sentence:"Du ___ lange. (schlafen)", options:["schlaft","schläft","schlafen","schläfst"], correctIndex:3 },
+      { sentence:"Wir ___ nach Berlin. (fahren)", options:["fahren","fährt","fährst","fahrt"], correctIndex:0 },
+      { sentence:"Ihr ___ Deutsch. (sprechen)", options:["spricht","sprecht","sprichst","spreche"], correctIndex:1 },
+      { sentence:"Er ___ ein Buch. (lesen)", options:["lest","lese","liest","lesen"], correctIndex:2 },
+      { sentence:"Du ___ mir das Buch. (geben)", options:["gebst","gibt","geben","gibst"], correctIndex:3 },
+      { sentence:"Ich ___ heute lange. (schlafen)", options:["schlafe","schläfst","schläft","schlafen"], correctIndex:0 },
+      { sentence:"Er ___ seiner Mutter. (helfen)", options:["helft","hilft","hilfst","helfen"], correctIndex:1 }
+    ];
+
+    const moduleModalverben = [
+      { sentence:"Ich ___ Deutsch sprechen. (können)", options:["kann","kannst","könnt","können"], correctIndex:0 },
+      { sentence:"Du ___ heute arbeiten. (müssen)", options:["muss","musst","müsst","müssen"], correctIndex:1 },
+      { sentence:"Anna ___ hier nicht rauchen. (dürfen)", options:["dürft","dürfen","darf","darfst"], correctIndex:2 },
+      { sentence:"Wir ___ ins Kino gehen. (wollen)", options:["will","willst","wollt","wollen"], correctIndex:3 },
+      { sentence:"Ihr ___ das lesen. (sollen)", options:["sollt","soll","sollst","sollen"], correctIndex:0 },
+      { sentence:"Ich ___ Kaffee. (mögen)", options:["magst","mag","mögt","mögen"], correctIndex:1 },
+      { sentence:"Du ___ gut schwimmen. (können)", options:["kann","könnt","kannst","können"], correctIndex:2 },
+      { sentence:"Вежливо: ___ Sie mir bitte helfen? (können)", options:["Kann","Kannst","Könnt","Können"], correctIndex:3 },
+      { sentence:"Выбери правильный порядок слов: ___", options:["Ich muss heute lernen.","Ich heute muss lernen.","Ich muss lernen heute.","Ich lernen muss heute."], correctIndex:0 },
+      { sentence:"Er muss früh ___. (aufstehen)", options:["steht auf","aufstehen","aufsteht","aufgestanden"], correctIndex:1 }
+    ];
+
+    const moduleTrennbare = [
+      { sentence:"Ich stehe um sieben Uhr ___. (aufstehen)", options:["auf","an","ein","mit"], correctIndex:0 },
+      { sentence:"Du ___ deine Mutter an. (anrufen)", options:["rufe","rufst","ruft","rufen"], correctIndex:1 },
+      { sentence:"Wir kaufen heute ___. (einkaufen)", options:["auf","an","ein","aus"], correctIndex:2 },
+      { sentence:"Er macht die Tür ___. (zumachen)", options:["mit","ein","an","zu"], correctIndex:3 },
+      { sentence:"Der Zug fährt um acht Uhr ___. (abfahren)", options:["ab","an","auf","ein"], correctIndex:0 },
+      { sentence:"Du ___ das Fenster auf. (aufmachen)", options:["mache","machst","macht","machen"], correctIndex:1 },
+      { sentence:"Выбери правильное предложение: ___", options:["Ich anrufe dich heute.","Ich rufe an dich heute.","Ich rufe dich heute an.","Ich dich heute anrufe."], correctIndex:2 },
+      { sentence:"Wann ___ du auf? (aufstehen)", options:["stehe","steht","stehen","stehst"], correctIndex:3 },
+      { sentence:"Ich muss morgen früh ___. (aufstehen)", options:["aufstehen","stehe auf","aufsteht","aufgestanden"], correctIndex:0 },
+      { sentence:"Er ___ um sechs Uhr auf. (aufstehen)", options:["stehen","steht","stehst","stehe"], correctIndex:1 }
+    ];
+
+    // ============================================================
+    // КАТАЛОГ И ТЕОРИЯ
+    // ============================================================
+
+    const MODULES = {
+      articles: {
+        kind:"quest", format:"articles", title:"Артикли", icon:"🧩",
+        description:"20 слов · der / die / das", data:moduleArticles
+      },
+      translation: {
+        kind:"quest", format:"translation", title:"Перевод", icon:"💬",
+        description:"20 предложений · 4 варианта", data:moduleTranslation
+      },
+      grammar: {
+        kind:"quest", format:"grammar", title:"Грамматика", icon:"⚡",
+        description:"20 заданий · заполни пропуски", data:moduleGrammar
+      },
+
+      study_personalpronomen: {
+        kind:"study", format:"grammar", title:"Личные местоимения",
+        topic:"Personalpronomen", icon:"👥",
+        description:"Кто здесь ich, а кто Sie? Разбираемся без паники.",
+        data:modulePersonalpronomen,
+        theoryHTML: `
+          <h2>Кто делает действие?</h2>
+          <p>Местоимение заменяет имя или существительное.
+          Здесь изучаем формы подлежащего: <strong>кто?</strong></p>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Местоимение</th><th>Перевод</th><th>Пример</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>я</td><td>ich lerne</td></tr>
+                <tr><td>du</td><td>ты</td><td>du lernst</td></tr>
+                <tr><td>er</td><td>он</td><td>er lernt</td></tr>
+                <tr><td>sie</td><td>она</td><td>sie lernt</td></tr>
+                <tr><td>es</td><td>оно</td><td>es ist klein</td></tr>
+                <tr><td>wir</td><td>мы</td><td>wir lernen</td></tr>
+                <tr><td>ihr</td><td>вы, неформально</td><td>ihr lernt</td></tr>
+                <tr><td>sie</td><td>они</td><td>sie lernen</td></tr>
+                <tr><td>Sie</td><td>Вы, вежливо</td><td>Sie lernen</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Du или Sie?</h2>
+          <div class="rule-box">
+            <p><strong>Informell:</strong> du — одному другу,
+            родственнику или ребёнку. ihr — нескольким людям,
+            к которым обращаешься на «ты».</p>
+            <p><strong>Formell:</strong> Sie — вежливо одному человеку
+            или группе. Пишется с большой буквы.</p>
+          </div>
+          <div class="example-box">
+            <p><strong>Wo wohnst du?</strong> — Где ты живёшь?</p>
+            <p><strong>Wo wohnt ihr?</strong> — Где вы живёте? К друзьям.</p>
+            <p><strong>Wo wohnen Sie?</strong> — Где Вы живёте? Вежливо.</p>
+          </div>
+          <h2>Три sie — не баг</h2>
+          <ul>
+            <li><strong>sie lernt</strong> — она учится.</li>
+            <li><strong>sie lernen</strong> — они учатся.</li>
+            <li><strong>Sie lernen</strong> — Вы учитесь.</li>
+          </ul>
+          <p>В начале предложения любая форма пишется с большой буквы.
+          Смотри на контекст и глагол.</p>
+          <h2>Учитывай немецкий род</h2>
+          <p><strong>der → er, die → sie, das → es.</strong>
+          Род русского перевода не определяет немецкое местоимение.</p>
+          <div class="example-box">
+            <p>der Tisch → <strong>er</strong>; die Lampe → <strong>sie</strong>.</p>
+            <p>das Buch → <strong>es</strong>; das Kind → <strong>es</strong>.</p>
+          </div>
+        `
+      },
+
+      study_praesens: {
+        kind:"study", format:"grammar", title:"Спряжение в Präsens",
+        topic:"Konjugation Präsens", icon:"⚡",
+        description:"Меняем окончания, а не глагол наугад.",
+        data:modulePraesens,
+        theoryHTML: `
+          <h2>Один глагол — разные окончания</h2>
+          <p><strong>Präsens</strong> — настоящее время:
+          действие сейчас, привычка или общий факт.
+          У регулярного глагола обычно убираем <strong>-en</strong>:
+          lernen → <strong>lern-</strong>, затем добавляем окончание.</p>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Кто?</th><th>Окончание</th><th>lernen</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>-e</td><td>lerne</td></tr>
+                <tr><td>du</td><td>-st</td><td>lernst</td></tr>
+                <tr><td>er / sie / es</td><td>-t</td><td>lernt</td></tr>
+                <tr><td>wir</td><td>-en</td><td>lernen</td></tr>
+                <tr><td>ihr</td><td>-t</td><td>lernt</td></tr>
+                <tr><td>sie / Sie</td><td>-en</td><td>lernen</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rule-box">
+            <p><strong>Шпаргалка:</strong> -e, -st, -t, -en, -t, -en.</p>
+          </div>
+          <h2>Основа на -d или -t</h2>
+          <p>У регулярных глаголов arbeiten и warten вставляем
+          <strong>e</strong> перед -st и -t, чтобы слово было удобно произносить.</p>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Кто?</th><th>arbeiten</th><th>warten</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>arbeite</td><td>warte</td></tr>
+                <tr><td>du</td><td>arbeitest</td><td>wartest</td></tr>
+                <tr><td>er / sie / es</td><td>arbeitet</td><td>wartet</td></tr>
+                <tr><td>wir</td><td>arbeiten</td><td>warten</td></tr>
+                <tr><td>ihr</td><td>arbeitet</td><td>wartet</td></tr>
+                <tr><td>sie / Sie</td><td>arbeiten</td><td>warten</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Особенность heißen</h2>
+          <p>После основы на -s, -ß, -x, -z у du окончание
+          <strong>-t</strong> вместо -st: <strong>du heißt</strong>.</p>
+          <div class="example-box">
+            <p><strong>Ich komme aus der Ukraine.</strong> — Я из Украины.</p>
+            <p><strong>Woher kommst du?</strong> — Откуда ты?</p>
+            <p><strong>Er wartet auf den Bus.</strong> — Он ждёт автобус.</p>
+          </div>
+          <h2>Место глагола</h2>
+          <p>В простом утверждении спрягаемый глагол на второй позиции:
+          Ich <strong>lerne</strong> Deutsch.
+          С вопросительным словом: Woher <strong>kommst</strong> du?</p>
+          <p>Некоторые глаголы меняют гласную в основе.
+          Их разберём в отдельной теме.</p>
+        `
+      },
+
+      study_sein_haben: {
+        kind:"study", format:"grammar", title:"Глаголы sein и haben",
+        topic:"Sein und haben", icon:"🧩",
+        description:"Быть или иметь? Два глагола на каждый день.",
+        data:moduleSeinHaben,
+        theoryHTML: `
+          <h2>Sein — быть. Haben — иметь.</h2>
+          <p><strong>sein</strong> помогает сказать, кто ты, какой ты
+          и где находишься. <strong>haben</strong> — что у тебя есть.</p>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Кто?</th><th>sein</th><th>haben</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>bin</td><td>habe</td></tr>
+                <tr><td>du</td><td>bist</td><td>hast</td></tr>
+                <tr><td>er / sie / es</td><td>ist</td><td>hat</td></tr>
+                <tr><td>wir</td><td>sind</td><td>haben</td></tr>
+                <tr><td>ihr</td><td>seid</td><td>habt</td></tr>
+                <tr><td>sie / Sie</td><td>sind</td><td>haben</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Когда нужен sein?</h2>
+          <ul>
+            <li>Имя: <strong>Ich bin Olena.</strong></li>
+            <li>Профессия: <strong>Er ist Arzt.</strong></li>
+            <li>Состояние: <strong>Ich bin müde.</strong></li>
+            <li>Место: <strong>Wir sind zu Hause.</strong></li>
+            <li>Возраст: <strong>Ich bin 20 Jahre alt.</strong></li>
+          </ul>
+          <div class="rule-box">
+            <p>По-русски «Я дома», по-немецки
+            <strong>Ich bin zu Hause</strong>. Глагол не исчезает.</p>
+            <p>Возраст — через sein, не через haben.</p>
+          </div>
+          <h2>Когда нужен haben?</h2>
+          <ul>
+            <li>Вещи: <strong>Wir haben ein Auto.</strong></li>
+            <li>Семья: <strong>Du hast einen Bruder.</strong></li>
+            <li>Время: <strong>Ich habe Zeit.</strong></li>
+            <li>Голод и жажда: <strong>Ich habe Hunger / Durst.</strong></li>
+          </ul>
+          <div class="example-box">
+            <p><strong>Sind Sie Frau Meier?</strong> — Вы госпожа Майер?</p>
+            <p><strong>Habt ihr Zeit?</strong> — У вас есть время?</p>
+            <p><strong>Anna hat eine Katze.</strong> — У Анны есть кошка.</p>
+          </div>
+          <p>Учи выражения целиком:
+          <strong>müde sein, Hunger haben, Zeit haben</strong>.</p>
+        `
+      },
+
+      study_vokalwechsel: {
+        kind:"study", format:"grammar", title:"Изменение корневой гласной",
+        topic:"Verben mit Vokalwechsel", icon:"🔄",
+        description:"Du sprichst, er fährt — почему гласная вдруг переехала?",
+        data:moduleVokalwechsel,
+        theoryHTML: `
+          <h2>Меняется не только окончание</h2>
+          <p>У некоторых сильных глаголов в Präsens меняется гласная
+          в основе. Изменение происходит <strong>только у du
+          и er / sie / es</strong>.</p>
+          <div class="rule-box">
+            <p><strong>ich, wir, ihr, sie / Sie</strong> сохраняют
+            обычную гласную основы. Не говорим «wir fähren».</p>
+            <p>Это не правило для любого глагола с e или a.
+            Нужные глаголы и их формы запоминаем.</p>
+          </div>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Изменение</th><th>Инфинитив</th><th>du</th><th>er / sie / es</th></tr></thead>
+              <tbody>
+                <tr><td>e → i</td><td>sprechen</td><td>sprichst</td><td>spricht</td></tr>
+                <tr><td>e → i</td><td>geben</td><td>gibst</td><td>gibt</td></tr>
+                <tr><td>e → i</td><td>helfen</td><td>hilfst</td><td>hilft</td></tr>
+                <tr><td>e → i</td><td>essen</td><td>isst</td><td>isst</td></tr>
+                <tr><td>e → ie</td><td>lesen</td><td>liest</td><td>liest</td></tr>
+                <tr><td>e → ie</td><td>sehen</td><td>siehst</td><td>sieht</td></tr>
+                <tr><td>a → ä</td><td>fahren</td><td>fährst</td><td>fährt</td></tr>
+                <tr><td>a → ä</td><td>schlafen</td><td>schläfst</td><td>schläft</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Полное спряжение для сравнения</h2>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Кто?</th><th>sprechen</th><th>fahren</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>spreche</td><td>fahre</td></tr>
+                <tr><td>du</td><td>sprichst</td><td>fährst</td></tr>
+                <tr><td>er / sie / es</td><td>spricht</td><td>fährt</td></tr>
+                <tr><td>wir</td><td>sprechen</td><td>fahren</td></tr>
+                <tr><td>ihr</td><td>sprecht</td><td>fahrt</td></tr>
+                <tr><td>sie / Sie</td><td>sprechen</td><td>fahren</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="example-box">
+            <p><strong>Du sprichst Deutsch.</strong> — Ты говоришь по-немецки.</p>
+            <p><strong>Er fährt mit dem Bus.</strong> — Он едет на автобусе.</p>
+            <p><strong>Wir fahren nach Berlin.</strong> — Мы едем в Берлин.</p>
+            <p><strong>Ihr sprecht sehr gut.</strong> — Вы очень хорошо говорите.</p>
+          </div>
+          <h2>Ловушка для гения</h2>
+          <p>У lesen формы <strong>du liest</strong> и
+          <strong>er liest</strong> совпадают. У essen:
+          <strong>du isst, er isst</strong>. Не добавляй лишнее s.</p>
+        `
+      },
+
+      study_modalverben: {
+        kind:"study", format:"grammar", title:"Модальные глаголы",
+        topic:"Modalverben", icon:"🎛️",
+        description:"Могу, должен, хочу. И второй глагол в конце.",
+        data:moduleModalverben,
+        theoryHTML: `
+          <h2>Не действие, а отношение к действию</h2>
+          <ul>
+            <li><strong>können</strong> — мочь, уметь.</li>
+            <li><strong>müssen</strong> — быть должным по необходимости.</li>
+            <li><strong>dürfen</strong> — иметь разрешение.</li>
+            <li><strong>wollen</strong> — хотеть, намереваться.</li>
+            <li><strong>sollen</strong> — должен по указанию или совету.</li>
+            <li><strong>mögen</strong> — любить, нравиться.</li>
+          </ul>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead>
+                <tr><th>Кто?</th><th>können</th><th>müssen</th><th>dürfen</th><th>wollen</th><th>sollen</th><th>mögen</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>ich</td><td>kann</td><td>muss</td><td>darf</td><td>will</td><td>soll</td><td>mag</td></tr>
+                <tr><td>du</td><td>kannst</td><td>musst</td><td>darfst</td><td>willst</td><td>sollst</td><td>magst</td></tr>
+                <tr><td>er / sie / es</td><td>kann</td><td>muss</td><td>darf</td><td>will</td><td>soll</td><td>mag</td></tr>
+                <tr><td>wir</td><td>können</td><td>müssen</td><td>dürfen</td><td>wollen</td><td>sollen</td><td>mögen</td></tr>
+                <tr><td>ihr</td><td>könnt</td><td>müsst</td><td>dürft</td><td>wollt</td><td>sollt</td><td>mögt</td></tr>
+                <tr><td>sie / Sie</td><td>können</td><td>müssen</td><td>dürfen</td><td>wollen</td><td>sollen</td><td>mögen</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="rule-box">
+            <p><strong>ich</strong> и <strong>er / sie / es</strong>
+            имеют одинаковую форму: ich kann, er kann.</p>
+            <p>Во множественном числе формы обычно возвращаются
+            к основе инфинитива: wir können, ihr könnt.</p>
+          </div>
+          <h2>Глагольная рамка</h2>
+          <p>В утверждении модальный глагол стоит
+          <strong>на второй позиции</strong>. Второй глагол —
+          <strong>в конце, в инфинитиве, без zu</strong>.</p>
+          <div class="example-box">
+            <p>Ich <strong>muss</strong> heute <strong>lernen</strong>.</p>
+            <p>Du <strong>kannst</strong> gut <strong>schwimmen</strong>.</p>
+            <p>Wir <strong>wollen</strong> ins Kino <strong>gehen</strong>.</p>
+            <p><strong>Können</strong> Sie mir bitte <strong>helfen</strong>?</p>
+          </div>
+          <h2>Не перепутай запрет и отсутствие необходимости</h2>
+          <ul>
+            <li><strong>Du darfst nicht rauchen.</strong> — Тебе нельзя курить.</li>
+            <li><strong>Du musst nicht kommen.</strong> — Тебе не обязательно приходить.</li>
+          </ul>
+          <h2>Mögen и möchten</h2>
+          <p><strong>Ich mag Kaffee.</strong> — Мне нравится кофе.
+          Для вежливого желания часто используется
+          <strong>möchten</strong>: Ich möchte einen Kaffee.
+          Это отдельная форма глагола mögen, не его инфинитив.</p>
+          <p>Формы: ich möchte, du möchtest, er möchte,
+          wir möchten, ihr möchtet, sie / Sie möchten.</p>
+        `
+      },
+
+      study_trennbare: {
+        kind:"study", format:"grammar", title:"Отделяемые приставки",
+        topic:"Trennbare Verben", icon:"✂️",
+        description:"Приставка уходит в конец, но глагол не разваливается.",
+        data:moduleTrennbare,
+        theoryHTML: `
+          <h2>Глагол из двух частей</h2>
+          <p>У отделяемых глаголов приставка в простом предложении
+          отделяется и становится <strong>в конец</strong>.
+          Основная часть спрягается как обычно.</p>
+          <div class="rule-box">
+            <p><strong>aufstehen → Ich stehe um sieben Uhr auf.</strong></p>
+            <p>Спрягаемая часть — на второй позиции.
+            Приставка — в конце. Это тоже глагольная рамка.</p>
+          </div>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Инфинитив</th><th>Значение</th><th>Пример</th></tr></thead>
+              <tbody>
+                <tr><td>aufstehen</td><td>вставать</td><td>Ich stehe auf.</td></tr>
+                <tr><td>anrufen</td><td>звонить</td><td>Ich rufe dich an.</td></tr>
+                <tr><td>einkaufen</td><td>делать покупки</td><td>Wir kaufen ein.</td></tr>
+                <tr><td>zumachen</td><td>закрывать</td><td>Er macht die Tür zu.</td></tr>
+                <tr><td>aufmachen</td><td>открывать</td><td>Du machst das Fenster auf.</td></tr>
+                <tr><td>abfahren</td><td>отправляться</td><td>Der Zug fährt ab.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>Спряжение aufstehen</h2>
+          <div class="table-scroll">
+            <table class="theory-table">
+              <thead><tr><th>Кто?</th><th>Форма</th></tr></thead>
+              <tbody>
+                <tr><td>ich</td><td>stehe … auf</td></tr>
+                <tr><td>du</td><td>stehst … auf</td></tr>
+                <tr><td>er / sie / es</td><td>steht … auf</td></tr>
+                <tr><td>wir</td><td>stehen … auf</td></tr>
+                <tr><td>ihr</td><td>steht … auf</td></tr>
+                <tr><td>sie / Sie</td><td>stehen … auf</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h2>А в вопросах?</h2>
+          <div class="example-box">
+            <p><strong>Wann stehst du auf?</strong> — Когда ты встаёшь?</p>
+            <p><strong>Rufst du mich an?</strong> — Ты мне позвонишь?</p>
+          </div>
+          <p>Приставка всё равно остаётся в конце.
+          В вопросе без вопросительного слова спрягаемая часть
+          стоит на первой позиции.</p>
+          <h2>С модальным глаголом ничего не режем</h2>
+          <p>В инфинитиве приставка соединена с глаголом.
+          Если есть модальный глагол, весь инфинитив идёт в конец:</p>
+          <div class="example-box">
+            <p>Ich <strong>muss</strong> früh <strong>aufstehen</strong>.</p>
+            <p>Du <strong>kannst</strong> mich <strong>anrufen</strong>.</p>
+          </div>
+          <h2>Не любая приставка отделяется</h2>
+          <p>Частые отделяемые приставки:
+          <strong>ab-, an-, auf-, aus-, ein-, mit-, zu-, zurück-</strong>.
+          У них обычно есть ударение.</p>
+          <p><strong>be-, emp-, ent-, er-, ge-, miss-, ver-, zer-</strong>
+          не отделяются: Ich <strong>besuche</strong> dich.
+          Некоторые другие приставки зависят от конкретного глагола —
+          проверяй словарь.</p>
+        `
+      }
+    };
 
     // ============================================================
     // НАСТРОЙКИ
@@ -1217,35 +1332,30 @@
 
     const SUPABASE_URL =
       "https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
-
-    // Publishable-ключ допустим в клиентском приложении.
-    // НИКОГДА не размещайте здесь service_role / secret key.
     const SUPABASE_KEY =
       "sb_publishable_bTmaC-ZOR2dpN9OzerfWdg_CTcujMY1";
-
-    // Игровой день определяется по киевскому времени.
-    // Летнее и зимнее время учитываются автоматически.
     const GAME_TIME_ZONE = "Europe/Kyiv";
+    const STUDY_POINTS_PER_CORRECT = 5;
     const PAGE_SIZE = 1000;
     const REQUEST_TIMEOUT = 15000;
 
-    const MODULES = {
-      articles: {
-        title: "Артикли",
-        data: moduleArticles,
-        description: "20 слов · der / die / das"
-      },
-      translation: {
-        title: "Перевод",
-        data: moduleTranslation,
-        description: "20 предложений · 4 варианта"
-      },
-      grammar: {
-        title: "Грамматика",
-        data: moduleGrammar,
-        description: "20 заданий · заполни пропуски"
-      }
-    };
+    const TRAINING_MESSAGE =
+      "Тренировка завершена. Очки за этот модуль уже были получены ранее";
+
+    const RANKS = [
+      { min:0, name:"Новичок", emoji:"🌱" },
+      { min:50, name:"Турист", emoji:"🎒" },
+      { min:150, name:"Охотник за артиклями", emoji:"🧩" },
+      { min:300, name:"Студент", emoji:"📚" },
+      { min:500, name:"Покоритель Präsens", emoji:"⚡" },
+      { min:800, name:"Берлинец", emoji:"🐻" },
+      { min:1200, name:"Знаток", emoji:"🔥" },
+      { min:1800, name:"Мастер грамматики", emoji:"💎" },
+      { min:2600, name:"Шиллер", emoji:"✒️" },
+      { min:3600, name:"Гёте", emoji:"📜" },
+      { min:5000, name:"Немецкий гений", emoji:"🧠" },
+      { min:7000, name:"Легенда Deutsch", emoji:"👑" }
+    ];
 
     // ============================================================
     // TELEGRAM
@@ -1256,24 +1366,17 @@
     try {
       tg?.ready();
       tg?.expand();
-
       if (
         typeof tg?.requestFullscreen === "function" &&
         tg.isVersionAtLeast?.("8.0")
-      ) {
-        tg.requestFullscreen();
-      }
-
+      ) tg.requestFullscreen();
       tg?.setHeaderColor?.("#0b1020");
       tg?.setBackgroundColor?.("#0b1020");
     } catch (error) {
-      console.warn("Telegram UI initialization:", error);
+      console.warn("Telegram initialization:",error);
     }
 
-    // Эти данные удобны для интерфейса, но НЕ являются
-    // серверно подтверждённой идентификацией пользователя.
     const telegramUser = tg?.initDataUnsafe?.user;
-
     const isDemo = !(
       telegramUser &&
       Number.isSafeInteger(telegramUser.id) &&
@@ -1282,192 +1385,205 @@
 
     const player = {
       id: isDemo ? "demo" : String(telegramUser.id),
-      name: isDemo
-        ? "Демо-игрок"
-        : (
-            [telegramUser.first_name, telegramUser.last_name]
-              .filter(Boolean)
-              .join(" ")
-            || telegramUser.username
-            || "Игрок"
-          ).slice(0, 120)
+      name: isDemo ? "Демо-игрок" : (
+        [telegramUser.first_name,telegramUser.last_name]
+          .filter(Boolean).join(" ") ||
+        telegramUser.username || "Игрок"
+      ).slice(0,120)
     };
 
     // ============================================================
-    // СОСТОЯНИЕ
+    // СОСТОЯНИЕ И УТИЛИТЫ
     // ============================================================
 
     const state = {
-      screen: "menu",
-      date: getTodayDate(),
-      tab: "today",
-      records: [],
-      demoRecords: [],
-      completed: new Set(),
-      pendingResults: new Map(),
-      drafts: new Map(),
-      menuReady: false,
-      loading: false,
-      menuRequestId: 0,
-      attempt: null,
-      saving: false,
-      onlyErrors: false,
-      toastTimer: null
+      screen:"quests",
+      rootTab:"quests",
+      date:getTodayDate(),
+      ratingTab:"today",
+      selectedStudy:null,
+      records:[],
+      demoRecords:[],
+      dailyCompleted:new Set(),
+      studyRewarded:new Set(),
+      pending:new Map(),
+      drafts:new Map(),
+      attempt:null,
+      ready:false,
+      loading:false,
+      loadId:0,
+      busy:false,
+      onlyErrors:false,
+      valid:false,
+      toastTimer:null
     };
 
     const $ = id => document.getElementById(id);
+    const ROOT_TABS = ["quests","study","rating"];
+    const SCREENS = [...ROOT_TABS,"theory","quiz","result"];
 
-    function createElement(tag, className = "", text) {
-      const element = document.createElement(tag);
-      if (className) element.className = className;
-      if (text !== undefined) element.textContent = String(text);
-      return element;
+    function el(tag,className = "",text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = String(text);
+      return node;
     }
 
     function getTodayDate() {
-      const parts = new Intl.DateTimeFormat("en-US", {
-        timeZone: GAME_TIME_ZONE,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
+      const parts = new Intl.DateTimeFormat("en-US",{
+        timeZone:GAME_TIME_ZONE,
+        year:"numeric",month:"2-digit",day:"2-digit"
       }).formatToParts(new Date());
-
-      const values = Object.fromEntries(
-        parts.map(part => [part.type, part.value])
-      );
-
+      const values = Object.fromEntries(parts.map(p => [p.type,p.value]));
       return `${values.year}-${values.month}-${values.day}`;
     }
 
-    function numericScore(record) {
-      const score = Number(record.score);
-      return Number.isFinite(score) ? score : 0;
+    function scoreOf(record) {
+      const value = Number(record.score);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function getRankInfo(score) {
+      let index = 0;
+      RANKS.forEach((rank,i) => { if (score >= rank.min) index = i; });
+      const current = RANKS[index];
+      const next = RANKS[index+1] || null;
+      const progress = next
+        ? Math.max(0,Math.min(
+            100,(score-current.min)/(next.min-current.min)*100
+          ))
+        : 100;
+      return { current,next,progress };
     }
 
     function getRank(score) {
-      if (score >= 1500) return "👑 Легенда Deutsch";
-      if (score >= 700) return "💎 Мастер";
-      if (score >= 300) return "🔥 Знаток";
-      if (score >= 100) return "🚀 Исследователь";
-      return "🌱 Новичок";
+      const { current } = getRankInfo(score);
+      return `${current.emoji} ${current.name}`;
     }
 
     function haptic(type = "selection") {
       try {
-        if (type === "selection") {
-          tg?.HapticFeedback?.selectionChanged();
-        } else {
-          tg?.HapticFeedback?.notificationOccurred(type);
-        }
+        if (type === "selection") tg?.HapticFeedback?.selectionChanged();
+        else tg?.HapticFeedback?.notificationOccurred(type);
       } catch (_) {}
     }
 
-    function toast(message, error = false) {
-      const element = $("toast");
+    function toast(message,error = false) {
       clearTimeout(state.toastTimer);
-      element.textContent = message;
-      element.classList.toggle("error", error);
-      element.classList.add("visible");
-
-      state.toastTimer = setTimeout(() => {
-        element.classList.remove("visible");
-      }, 3500);
+      $("toast").textContent = message;
+      $("toast").classList.toggle("error",error);
+      $("toast").classList.add("visible");
+      state.toastTimer = setTimeout(
+        () => $("toast").classList.remove("visible"),3500
+      );
     }
 
     function showScreen(name) {
       state.screen = name;
+      if (ROOT_TABS.includes(name)) state.rootTab = name;
 
-      for (const screen of ["menu", "quiz", "result"]) {
-        $(`${screen}Screen`).classList.toggle("hidden", screen !== name);
-      }
+      SCREENS.forEach(screen => {
+        $(`${screen}Screen`).classList.toggle("hidden",screen !== name);
+      });
 
-      window.scrollTo({ top: 0, behavior: "instant" });
+      // На тесте/разборе скрываем навигацию, чтобы она не мешала
+      // плавающей кнопке и незавершённой отправке.
+      const isRoot = ROOT_TABS.includes(name);
+      $("bottomNav").classList.toggle("hidden",!isRoot);
+
+      document.querySelectorAll("[data-tab]").forEach(button => {
+        const active = button.dataset.tab === state.rootTab;
+        button.classList.toggle("active",active);
+        if (active) button.setAttribute("aria-current","page");
+        else button.removeAttribute("aria-current");
+      });
+
+      window.scrollTo({ top:0,behavior:"instant" });
 
       try {
-        if (name === "menu") tg?.BackButton?.hide();
+        if (isRoot) tg?.BackButton?.hide();
         else tg?.BackButton?.show();
       } catch (_) {}
     }
 
     function validateData() {
-      for (const [key, module] of Object.entries(MODULES)) {
-        if (module.data.length !== 20) {
-          throw new Error(
-            `Модуль "${module.title}" должен содержать 20 заданий.`
-          );
+      Object.values(MODULES).forEach(module => {
+        const expected = module.kind === "quest" ? 20 : 10;
+        if (!Array.isArray(module.data) || module.data.length !== expected) {
+          throw new Error(`В "${module.title}" должно быть ${expected} вопросов.`);
+        }
+        if (module.kind === "study" && !module.theoryHTML?.trim()) {
+          throw new Error(`Нет теории: ${module.title}.`);
         }
 
-        module.data.forEach((question, index) => {
-          if (key === "articles") {
-            if (
-              !question.word ||
-              !question.translation ||
-              !["der", "die", "das"].includes(question.article)
-            ) {
-              throw new Error(
-                `Некорректное задание ${index + 1}: ${module.title}.`
-              );
-            }
-          } else if (
-            !Array.isArray(question.options) ||
-            question.options.length !== 4 ||
-            !question.options.every(option => typeof option === "string") ||
-            !Number.isInteger(question.correctIndex) ||
-            question.correctIndex < 0 ||
-            question.correctIndex > 3 ||
-            !(key === "grammar" ? question.sentence : question.de) ||
-            (key === "grammar" && !question.sentence.includes("___"))
-          ) {
-            throw new Error(
-              `Некорректное задание ${index + 1}: ${module.title}.`
-            );
+        module.data.forEach((q,index) => {
+          let valid;
+          if (module.format === "articles") {
+            valid = q.word && q.translation &&
+              ["der","die","das"].includes(q.article);
+          } else {
+            valid = Array.isArray(q.options) &&
+              q.options.length === 4 &&
+              q.options.every(option =>
+                typeof option === "string" && option.trim()
+              ) &&
+              Number.isInteger(q.correctIndex) &&
+              q.correctIndex >= 0 && q.correctIndex <= 3 &&
+              (module.format === "translation"
+                ? typeof q.de === "string" && q.de.trim()
+                : typeof q.sentence === "string" && q.sentence.includes("___"));
+          }
+          if (!valid) {
+            throw new Error(`Ошибка вопроса ${index+1}: ${module.title}.`);
           }
         });
-      }
+      });
+    }
+
+    function uuid() {
+      if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6]&15)|64;
+      bytes[8] = (bytes[8]&63)|128;
+      const hex = Array.from(bytes,b => b.toString(16).padStart(2,"0")).join("");
+      return [
+        hex.slice(0,8),hex.slice(8,12),hex.slice(12,16),
+        hex.slice(16,20),hex.slice(20)
+      ].join("-");
     }
 
     // ============================================================
     // SUPABASE REST API
     // ============================================================
 
-    async function apiRequest(query = {}, options = {}) {
+    async function apiRequest(query = {},options = {}) {
       const url = new URL(SUPABASE_URL);
-
-      for (const [key, value] of Object.entries(query)) {
-        url.searchParams.set(key, String(value));
-      }
+      Object.entries(query).forEach(([key,value]) => {
+        url.searchParams.set(key,String(value));
+      });
 
       const controller = new AbortController();
-      const timer = setTimeout(
-        () => controller.abort(),
-        REQUEST_TIMEOUT
-      );
+      const timer = setTimeout(() => controller.abort(),REQUEST_TIMEOUT);
 
       try {
-        const response = await fetch(url.toString(), {
-          method: options.method || "GET",
-          headers: {
-            // sb_publishable_* передаётся в apikey, не как Bearer JWT.
-            apikey: SUPABASE_KEY,
-            "Content-Type": "application/json",
+        const response = await fetch(url.toString(),{
+          method:options.method || "GET",
+          headers:{
+            // Publishable-ключ передаётся в apikey, не как Bearer JWT.
+            apikey:SUPABASE_KEY,
+            "Content-Type":"application/json",
             ...(options.headers || {})
           },
-          body: options.body
-            ? JSON.stringify(options.body)
-            : undefined,
-          signal: controller.signal,
-          cache: "no-store"
+          body:options.body ? JSON.stringify(options.body) : undefined,
+          signal:controller.signal,
+          cache:"no-store"
         });
 
         const text = await response.text();
         let data = null;
-
         if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (_) {
-            data = { message: text };
-          }
+          try { data = JSON.parse(text); }
+          catch (_) { data = { message:text }; }
         }
 
         if (!response.ok) {
@@ -1478,13 +1594,10 @@
           error.status = response.status;
           throw error;
         }
-
         return data;
       } catch (error) {
         if (error.name === "AbortError") {
-          throw new Error(
-            "Сервер не ответил вовремя. Проверьте подключение и повторите."
-          );
+          throw new Error("Сервер не ответил вовремя. Проверьте сеть.");
         }
         throw error;
       } finally {
@@ -1496,561 +1609,458 @@
       const records = [];
       let offset = 0;
 
-      // Постраничная загрузка: рейтинг не обрывается на первой
-      // странице стандартного лимита Supabase.
       while (true) {
         const page = await apiRequest({
-          select: "record_id,id,name,score,date,module",
-          order: "record_id.asc",
-          limit: PAGE_SIZE,
+          select:"record_id,id,name,score,date,module",
+          order:"record_id.asc",
+          limit:PAGE_SIZE,
           offset,
           ...filters
         });
-
         if (!Array.isArray(page)) {
           throw new Error("Сервер вернул неожиданный формат данных.");
         }
-
-        if (page.length === 0) break;
-
+        if (!page.length) break;
         records.push(...page);
         offset += page.length;
-
-        // Продолжаем до пустой страницы: это работает и если
-        // серверный лимит меньше PAGE_SIZE.
       }
-
       return records;
     }
 
-    function makeUuid() {
-      if (typeof crypto.randomUUID === "function") {
-        return crypto.randomUUID();
-      }
-
-      const bytes = crypto.getRandomValues(new Uint8Array(16));
-      bytes[6] = (bytes[6] & 15) | 64;
-      bytes[8] = (bytes[8] & 63) | 128;
-
-      const hex = Array.from(
-        bytes,
-        byte => byte.toString(16).padStart(2, "0")
-      ).join("");
-
-      return [
-        hex.slice(0, 8),
-        hex.slice(8, 12),
-        hex.slice(12, 16),
-        hex.slice(16, 20),
-        hex.slice(20)
-      ].join("-");
+    function recordMatches(record,attempt) {
+      return String(record.id) === player.id &&
+        record.module === attempt.module &&
+        (attempt.kind === "study" || record.date === attempt.date);
     }
 
     async function findSavedRecord(attempt) {
-      const rows = await apiRequest({
-        select: "record_id,id,name,score,date,module",
-        id: `eq.${player.id}`,
-        date: `eq.${attempt.date}`,
-        module: `eq.${attempt.module}`,
-        limit: 1
-      });
+      if (isDemo) {
+        return state.demoRecords.find(
+          record => recordMatches(record,attempt)
+        ) || null;
+      }
 
-      return Array.isArray(rows) ? rows[0] || null : null;
+      const query = {
+        select:"record_id,id,name,score,date,module",
+        id:`eq.${player.id}`,
+        module:`eq.${attempt.module}`,
+        limit:1
+      };
+
+      // Дата учитывается только для ежедневных квестов.
+      if (attempt.kind === "quest") query.date = `eq.${attempt.date}`;
+
+      const rows = await apiRequest(query);
+      if (!Array.isArray(rows)) {
+        throw new Error("Не удалось проверить полученные очки.");
+      }
+      return rows[0] || null;
+    }
+
+    function rememberRecord(record) {
+      const index = state.records.findIndex(
+        item => item.record_id === record.record_id
+      );
+      if (index === -1) state.records.push(record);
+      else state.records[index] = record;
+
+      if (String(record.id) !== player.id) return;
+      const module = MODULES[record.module];
+      if (!module) return;
+
+      if (module.kind === "study") state.studyRewarded.add(record.module);
+      else if (record.date === state.date) {
+        state.dailyCompleted.add(record.module);
+      }
     }
 
     // ============================================================
-    // МЕНЮ, ПРОФИЛЬ И ОБЩИЙ РЕЙТИНГ
+    // КАРТОЧКИ, ПРОФИЛЬ И РЕЙТИНГ
     // ============================================================
 
-    function renderModules() {
+    function buildCards() {
+      $("questCards").replaceChildren();
+      $("studyCards").replaceChildren();
+
+      Object.entries(MODULES).forEach(([key,module]) => {
+        const button = el("button","module-card glass");
+        button.type = "button";
+        button.dataset.module = key;
+
+        const copy = el("span","module-copy");
+        copy.append(
+          el("strong","",module.title),
+          el("span","module-description",module.description)
+        );
+
+        const status = el("span","module-status","→");
+        status.setAttribute("aria-hidden","true");
+        button.append(el("span","module-icon",module.icon),copy,status);
+
+        $(module.kind === "quest" ? "questCards" : "studyCards").append(button);
+      });
+
+      renderCards();
+    }
+
+    function renderCards() {
       document.querySelectorAll("[data-module]").forEach(button => {
         const key = button.dataset.module;
-        const completed = state.completed.has(key);
-        const pending = state.pendingResults.has(key);
+        const module = MODULES[key];
+        const quest = module.kind === "quest";
+        const done = quest
+          ? state.dailyCompleted.has(key)
+          : state.studyRewarded.has(key);
+        const pending = state.pending.has(key);
 
-        button.disabled =
-          state.loading ||
-          !state.menuReady ||
-          completed;
-
-        button.classList.toggle("completed", completed);
-
+        button.disabled = !state.valid ||
+          (quest && (state.loading || !state.ready || done));
+        button.classList.toggle("completed",done);
         button.querySelector(".module-status").textContent =
-          completed ? "✅" : pending ? "↻" : "→";
+          pending ? "↻" : done ? "✅" : "→";
 
-        button.querySelector(".module-description").textContent =
-          completed
-            ? "Сегодня пройдено · до встречи завтра"
-            : pending
-              ? "Результат не отправлен · нажмите для повтора"
-              : MODULES[key].description;
+        button.querySelector(".module-description").textContent = pending
+          ? "Результат не отправлен · нажми для повтора"
+          : quest
+            ? done ? "Сегодня пройдено · до встречи завтра" : module.description
+            : done
+              ? "Очки уже получены · теория и тренировка открыты"
+              : "Теория + 10 вопросов · до 50 баллов один раз";
       });
     }
 
     function renderProfile() {
-      const ownRecords = state.records.filter(
-        record => String(record.id) === player.id
-      );
-
-      const total = ownRecords.reduce(
-        (sum, record) => sum + numericScore(record), 0
-      );
-
-      const days = new Set(
-        ownRecords.map(record => record.date).filter(Boolean)
-      ).size;
-
-      const todayTotal = ownRecords
-        .filter(record => record.date === state.date)
-        .reduce((sum, record) => sum + numericScore(record), 0);
-
       $("profileName").textContent = player.name;
       $("avatar").textContent =
         Array.from(player.name.trim())[0]?.toUpperCase() || "D";
-      $("profileRank").textContent = getRank(total);
+
+      if (!state.ready) {
+        ["totalScore","playedDays","todayScore"].forEach(id => $(id).textContent = "—");
+        $("profileRank").textContent = "Звание загружается…";
+        $("nextRankText").textContent =
+          "Прогресс появится после загрузки статистики.";
+        $("rankProgressFill").style.width = "0%";
+        $("rankProgressBar").setAttribute("aria-valuenow","0");
+        return;
+      }
+
+      const own = state.records.filter(r => String(r.id) === player.id);
+      const total = own.reduce((sum,r) => sum+scoreOf(r),0);
+      const today = own.filter(r => r.date === state.date)
+        .reduce((sum,r) => sum+scoreOf(r),0);
+      const days = new Set(own.map(r => r.date).filter(Boolean)).size;
+      const { next,progress } = getRankInfo(total);
+
       $("totalScore").textContent = total;
       $("playedDays").textContent = days;
-      $("todayScore").textContent = todayTotal;
+      $("todayScore").textContent = today;
+      $("profileRank").textContent = getRank(total);
+      $("nextRankText").textContent = next
+        ? `До следующего звания «${next.name}» осталось ${next.min-total} очков`
+        : "Максимальное звание достигнуто. Гёте передаёт респект 👑";
+
+      $("rankProgressFill").style.width = `${progress}%`;
+      $("rankProgressBar").setAttribute("aria-valuenow",String(Math.round(progress)));
+      $("rankProgressBar").setAttribute("aria-valuetext",$("nextRankText").textContent);
     }
 
     function renderLeaderboard() {
-      $("tabToday").classList.toggle("active", state.tab === "today");
-      $("tabAll").classList.toggle("active", state.tab === "all");
-      $("tabToday").setAttribute(
-        "aria-selected", String(state.tab === "today")
-      );
-      $("tabAll").setAttribute(
-        "aria-selected", String(state.tab === "all")
-      );
+      $("tabToday").classList.toggle("active",state.ratingTab === "today");
+      $("tabAll").classList.toggle("active",state.ratingTab === "all");
+      $("tabToday").setAttribute("aria-selected",String(state.ratingTab === "today"));
+      $("tabAll").setAttribute("aria-selected",String(state.ratingTab === "all"));
 
       const container = $("leaderboard");
       container.replaceChildren();
+      $("leaderCount").textContent = "";
 
-      if (state.loading) {
-        container.append(
-          createElement("div", "empty", "Загружаем рейтинг…")
-        );
-        $("leaderCount").textContent = "";
+      if (state.loading || !state.ready) {
+        container.append(el("div","empty",state.loading
+          ? "Загружаем рейтинг…"
+          : "Рейтинг недоступен. Повторите загрузку."));
         return;
       }
 
-      if (!state.menuReady) {
-        container.append(
-          createElement(
-            "div", "empty",
-            "Рейтинг недоступен. Повторите загрузку."
-          )
-        );
-        $("leaderCount").textContent = "";
-        return;
-      }
-
-      const relevant = state.tab === "today"
-        ? state.records.filter(record => record.date === state.date)
+      const rows = state.ratingTab === "today"
+        ? state.records.filter(r => r.date === state.date)
         : state.records;
-
       const grouped = new Map();
 
-      for (const record of relevant) {
+      rows.forEach(record => {
+        if (record.id === null || record.id === undefined) return;
         const id = String(record.id);
-        if (!id || id === "undefined" || id === "null") continue;
-
         if (!grouped.has(id)) {
-          grouped.set(id, {
-            id,
-            name: record.name || "Игрок",
-            score: 0,
-            days: new Set(),
-            latestDate: ""
+          grouped.set(id,{
+            id,name:record.name || "Игрок",score:0,
+            days:new Set(),latest:""
           });
         }
 
         const entry = grouped.get(id);
-        entry.score += numericScore(record);
+        entry.score += scoreOf(record);
         if (record.date) entry.days.add(record.date);
-
-        if ((record.date || "") >= entry.latestDate) {
-          entry.latestDate = record.date || "";
+        if ((record.date || "") >= entry.latest) {
+          entry.latest = record.date || "";
           entry.name = record.name || "Игрок";
         }
-      }
-
-      const entries = Array.from(grouped.values()).sort((a, b) => {
-        if (a.score !== b.score) return b.score - a.score;
-        const nameOrder = a.name.localeCompare(b.name, "ru");
-        return nameOrder || a.id.localeCompare(b.id);
       });
+
+      const entries = Array.from(grouped.values()).sort((a,b) =>
+        b.score-a.score ||
+        a.name.localeCompare(b.name,"ru") ||
+        a.id.localeCompare(b.id)
+      );
 
       $("leaderCount").textContent = `Игроков: ${entries.length}`;
 
       if (!entries.length) {
-        container.append(
-          createElement(
-            "div",
-            "empty",
-            "Пока нет результатов. Стань первым! 🚀"
-          )
-        );
+        container.append(el("div","empty","Пока нет результатов. Стань первым! 🚀"));
         return;
       }
 
-      // Показываем топ-50 и свою позицию, если она ниже.
-      // Суммы при этом рассчитаны по всем загруженным записям.
-      const ownIndex = entries.findIndex(
-        entry => entry.id === player.id
-      );
+      const ownIndex = entries.findIndex(entry => entry.id === player.id);
+      const visible = entries.slice(0,50).map((entry,index) => ({ entry,index }));
+      if (ownIndex >= 50) visible.push({ entry:entries[ownIndex],index:ownIndex });
+      const medals = ["🥇","🥈","🥉"];
 
-      const visible = entries.slice(0, 50).map((entry, index) => ({
-        entry,
-        index
-      }));
-
-      if (ownIndex >= 50) {
-        visible.push({ entry: entries[ownIndex], index: ownIndex });
-      }
-
-      const medals = ["🥇", "🥈", "🥉"];
-
-      for (const { entry, index } of visible) {
-        const row = createElement("div", "leader-row");
-        row.classList.toggle("me", entry.id === player.id);
-
-        row.append(
-          createElement(
-            "div",
-            "leader-place",
-            medals[index] || String(index + 1)
-          )
-        );
-
-        const info = createElement("div");
-
+      visible.forEach(({ entry,index }) => {
+        const row = el("div","leader-row");
+        row.classList.toggle("me",entry.id === player.id);
+        const info = el("div");
         info.append(
-          createElement(
-            "div",
-            "leader-name",
-            entry.name + (entry.id === player.id ? " · ты" : "")
-          ),
-          createElement(
-            "div",
-            "leader-meta",
-            state.tab === "today"
-              ? "Баллы за все модули сегодня"
-              : `Сыграно дней: ${entry.days.size}`
-          )
+          el("div","leader-name",entry.name+(entry.id === player.id ? " · ты" : "")),
+          el("div","leader-meta",state.ratingTab === "today"
+            ? "Квесты + учебные баллы сегодня"
+            : `Сыграно дней: ${entry.days.size}`)
         );
-
         row.append(
-          info,
-          createElement("div", "leader-score", entry.score)
+          el("div","leader-place",medals[index] || String(index+1)),
+          info,el("div","leader-score",entry.score)
         );
-
         container.append(row);
-      }
+      });
 
       if (entries.length > 50) {
-        container.append(
-          createElement(
-            "div", "empty",
-            "Показаны первые 50 игроков и ваша позиция."
-          )
-        );
+        container.append(el("div","empty","Показаны первые 50 игроков и ваша позиция."));
       }
     }
 
-    async function loadMenu() {
-      const requestId = ++state.menuRequestId;
+    async function loadData() {
+      const requestId = ++state.loadId;
       const dateAtStart = getTodayDate();
-
       state.date = dateAtStart;
       state.loading = true;
-      state.menuReady = false;
+      state.ready = false;
 
-      $("menuError").classList.add("hidden");
-      $("demoNotice").classList.toggle("hidden", !isDemo);
+      $("dataError").classList.add("hidden");
+      $("demoNotice").classList.toggle("hidden",!isDemo);
       $("dayNote").textContent =
         `🇺🇦 Игровой день: ${state.date} · По киевскому времени`;
 
-      renderModules();
+      renderCards();
+      renderProfile();
       renderLeaderboard();
 
       try {
-        let records;
-        let ownToday;
+        let records,ownToday;
 
         if (isDemo) {
           records = [...state.demoRecords];
-          ownToday = records.filter(
-            record => record.date === state.date
+          ownToday = records.filter(r =>
+            String(r.id) === player.id && r.date === dateAtStart
           );
         } else {
-          // Отдельный запрос для проверки сегодняшних
-          // прохождений игрока.
-          [records, ownToday] = await Promise.all([
+          [records,ownToday] = await Promise.all([
             fetchAllRecords(),
             fetchAllRecords({
-              id: `eq.${player.id}`,
-              date: `eq.${dateAtStart}`
+              id:`eq.${player.id}`,
+              date:`eq.${dateAtStart}`
             })
           ]);
         }
 
-        if (requestId !== state.menuRequestId) return;
-
-        // Если во время загрузки наступил новый игровой день,
-        // повторяем проверку уже для новой даты.
-        if (dateAtStart !== getTodayDate()) {
-          return loadMenu();
-        }
+        if (requestId !== state.loadId) return;
+        if (dateAtStart !== getTodayDate()) return loadData();
 
         state.records = records;
-        state.completed = new Set(
-          ownToday
-            .map(record => record.module)
-            .filter(module => Object.hasOwn(MODULES, module))
+        state.dailyCompleted = new Set(
+          ownToday.filter(r => MODULES[r.module]?.kind === "quest")
+            .map(r => r.module)
+        );
+        state.studyRewarded = new Set(
+          records.filter(r =>
+            String(r.id) === player.id &&
+            MODULES[r.module]?.kind === "study"
+          ).map(r => r.module)
         );
 
-        for (const key of state.completed) {
-          state.pendingResults.delete(key);
-          state.drafts.delete(key);
+        // Если запись сохранилась, но ответ POST потерялся.
+        for (const attempt of Array.from(state.pending.values())) {
+          const saved = records.find(r => recordMatches(r,attempt));
+          if (saved) resolveAttempt(attempt,saved);
         }
 
-        state.menuReady = true;
-        renderProfile();
+        state.ready = true;
       } catch (error) {
-        if (requestId !== state.menuRequestId) return;
-
-        console.error("Menu loading:", error);
-        $("menuErrorText").textContent =
+        if (requestId !== state.loadId) return;
+        console.error("Data loading:",error);
+        $("dataErrorText").textContent =
           `Не удалось загрузить данные: ${error.message}`;
-        $("menuError").classList.remove("hidden");
+        $("dataError").classList.remove("hidden");
       } finally {
-        if (requestId === state.menuRequestId) {
+        if (requestId === state.loadId) {
           state.loading = false;
-          renderModules();
+          renderCards();
+          renderProfile();
           renderLeaderboard();
+          if (state.screen === "theory") renderTheoryStatus();
         }
       }
     }
 
-    async function goToMenu() {
-      if (state.saving) return;
-      showScreen("menu");
-      await loadMenu();
+    async function goRoot(tab,refresh = true) {
+      if (state.busy) return;
+      showScreen(tab);
+      if (refresh && !state.loading) await loadData();
     }
 
     // ============================================================
-    // РЕНДЕР ЗАДАНИЙ
+    // ТЕОРИЯ
     // ============================================================
 
-    function optionsFor(module, question) {
-      return module === "articles"
-        ? ["der", "die", "das"]
-        : question.options;
+    function openTheory(key) {
+      const module = MODULES[key];
+      if (state.busy || !state.valid || module?.kind !== "study") return;
+
+      state.selectedStudy = key;
+      state.rootTab = "study";
+      $("theoryIcon").textContent = module.icon;
+      $("theoryTopic").textContent = module.topic;
+      $("theoryTitle").textContent = module.title;
+      $("theoryDescription").textContent = module.description;
+
+      // Только доверенный локальный HTML из MODULES.
+      // Не подставляйте сюда непроверенный HTML из внешних данных.
+      $("theoryContent").innerHTML = module.theoryHTML;
+
+      renderTheoryStatus();
+      showScreen("theory");
+      haptic();
     }
 
-    function correctAnswerIndex(module, question) {
-      return module === "articles"
-        ? ["der", "die", "das"].indexOf(question.article)
+    function renderTheoryStatus() {
+      const key = state.selectedStudy;
+      if (!key) return;
+      const pending = state.pending.has(key);
+      const rewarded = state.studyRewarded.has(key);
+
+      $("startStudyButton").textContent = pending
+        ? "Открыть неотправленный результат ↻"
+        : "Пройти тест";
+      $("startStudyButton").disabled = state.busy;
+
+      $("theoryRewardNote").textContent = pending
+        ? "Предыдущий результат ещё не подтверждён. Сначала повтори отправку."
+        : rewarded
+          ? "✅ Очки за эту тему уже получены. Тренироваться можно сколько угодно."
+          : "5 баллов за правильный ответ, максимум 50. " +
+            "Первая завершённая попытка фиксируется один раз за всё время.";
+    }
+
+    // ============================================================
+    // ОБЩИЙ ИНТЕРФЕЙС ТЕСТА
+    // ============================================================
+
+    function answerOptions(module,question) {
+      return module.format === "articles"
+        ? ["der","die","das"] : question.options;
+    }
+
+    function correctIndex(module,question) {
+      return module.format === "articles"
+        ? ["der","die","das"].indexOf(question.article)
         : question.correctIndex;
     }
 
-    function appendSentence(element, sentence) {
-      // Без innerHTML: данные и имена безопасно выводятся текстом.
+    function appendSentence(node,sentence) {
       const parts = sentence.split("___");
-
-      parts.forEach((part, index) => {
-        element.append(document.createTextNode(part));
-        if (index < parts.length - 1) {
-          element.append(createElement("span", "gap", "_____"));
-        }
+      parts.forEach((part,index) => {
+        node.append(document.createTextNode(part));
+        if (index < parts.length-1) node.append(el("span","gap","_____"));
       });
     }
 
-    function buildQuestion(attempt, index, review = false) {
-      const question = attempt.questions[index];
-      const options = optionsFor(attempt.module, question);
-      const correctIndex = correctAnswerIndex(attempt.module, question);
-      const selected = attempt.answers[index];
-      const isCorrect = selected === correctIndex;
+    async function startModule(key,fresh = false) {
+      const module = MODULES[key];
+      if (!module || !state.valid || state.busy) return;
 
-      const card = createElement("article", "question glass");
-      card.dataset.index = String(index);
-
-      if (review) {
-        card.classList.add(isCorrect ? "is-correct" : "is-wrong");
+      if (state.loading) {
+        toast("Секунду, проверяем статистику.");
+        return;
       }
 
-      const heading = createElement("div", "question-heading");
-      heading.append(
-        createElement(
-          "span", "", `Задание ${index + 1} / ${attempt.questions.length}`
-        ),
-        createElement(
-          "span", "",
-          review ? (isCorrect ? "✅ Верно" : "❌ Ошибка") : "1 балл"
-        )
-      );
-
-      const text = createElement("div", "question-text");
-
-      if (attempt.module === "articles") {
-        text.textContent = question.word;
-      } else if (attempt.module === "grammar") {
-        appendSentence(text, question.sentence);
-      } else {
-        text.textContent = question.de;
-      }
-
-      card.append(heading, text);
-
-      if (attempt.module === "articles") {
-        card.append(
-          createElement(
-            "p", "question-translation", question.translation
-          )
-        );
-      }
-
-      const answerList = createElement(
-        "div",
-        `answers${attempt.module === "articles" ? " articles" : ""}`
-      );
-
-      options.forEach((option, optionIndex) => {
-        const button = createElement("button", "answer", option);
-        button.type = "button";
-
-        if (review) {
-          button.disabled = true;
-
-          if (optionIndex === correctIndex) {
-            button.classList.add("correct");
-          } else if (optionIndex === selected) {
-            button.classList.add("wrong");
-          }
-        } else {
-          button.classList.toggle("selected", optionIndex === selected);
-          button.setAttribute(
-            "aria-pressed", String(optionIndex === selected)
-          );
-
-          button.addEventListener("click", () => {
-            if (attempt.checked || state.saving) return;
-
-            attempt.answers[index] = optionIndex;
-            card.classList.remove("missing");
-
-            Array.from(answerList.children).forEach((child, childIndex) => {
-              const active = childIndex === optionIndex;
-              child.classList.toggle("selected", active);
-              child.setAttribute("aria-pressed", String(active));
-            });
-
-            updateProgress();
-            haptic();
-          });
+      if (!state.ready || state.date !== getTodayDate()) {
+        await loadData();
+        if (!state.ready) {
+          toast("Не удалось проверить очки. Теорию можно читать без сети.",true);
+          return;
         }
-
-        answerList.append(button);
-      });
-
-      card.append(answerList);
-
-      if (review) {
-        card.append(
-          createElement(
-            "div",
-            `feedback ${isCorrect ? "good" : "bad"}`,
-            isCorrect
-              ? "✓ Четко! Не лох"
-              : `🤡 Лох! Правильно: ${options[correctIndex]}`
-          )
-        );
       }
 
-      return card;
-    }
-
-    function updateProgress() {
-      const attempt = state.attempt;
-      if (!attempt) return;
-
-      const answered = attempt.answers.filter(
-        answer => answer !== null
-      ).length;
-
-      const total = attempt.questions.length;
-
-      $("progressText").textContent = `${answered} / ${total}`;
-      $("progressFill").style.width = `${answered / total * 100}%`;
-      $("progressBar").setAttribute("aria-valuemax", String(total));
-      $("progressBar").setAttribute("aria-valuenow", String(answered));
-    }
-
-    // ============================================================
-    // ПРОХОЖДЕНИЕ МОДУЛЯ
-    // ============================================================
-
-    async function startModule(key) {
-      if (!Object.hasOwn(MODULES, key)) return;
-
-      if (state.date !== getTodayDate()) {
-        toast("Начался новый игровой день. Обновляем меню.");
-        await loadMenu();
-        return;
-      }
-
-      if (state.loading || !state.menuReady) return;
-
-      if (state.completed.has(key)) {
-        toast("Этот модуль уже пройден сегодня.");
-        return;
-      }
-
-      const pending = state.pendingResults.get(key);
-
+      const pending = state.pending.get(key);
       if (pending) {
         state.attempt = pending;
         state.onlyErrors = false;
-        showScreen("result");
         renderResult();
+        showScreen("result");
         return;
       }
 
-      let attempt = state.drafts.get(key);
+      if (module.kind === "quest" && state.dailyCompleted.has(key)) {
+        toast("Этот квест уже пройден сегодня.");
+        return;
+      }
 
-      if (!attempt || attempt.date !== state.date) {
-        // Снимок заданий: ответы соответствуют именно этим данным.
-        const questions = JSON.parse(JSON.stringify(MODULES[key].data));
+      let attempt = fresh ? null : state.drafts.get(key);
 
+      // Учебный черновик не зависит от игрового дня.
+      if (
+        !attempt ||
+        (module.kind === "quest" && attempt.date !== state.date)
+      ) {
+        const questions = JSON.parse(JSON.stringify(module.data));
         attempt = {
-          module: key,
-          date: state.date,
+          module:key,
+          kind:module.kind,
+          date:state.date,
           questions,
-          answers: Array(questions.length).fill(null),
-          checked: false,
-          score: 0,
-          saved: false,
-          savedScore: null,
-          payload: null,
-          saveMessage: "",
-          saveError: false
+          answers:Array(questions.length).fill(null),
+          checked:false,
+          correctCount:0,
+          rewardPoints:0,
+          rewardState:"unresolved",
+          payload:null,
+          saveMessage:"",
+          saveError:false,
+          recordedScore:null
         };
-
-        state.drafts.set(key, attempt);
+        state.drafts.set(key,attempt);
       }
 
       state.attempt = attempt;
-      $("quizTitle").textContent = MODULES[key].title;
+      state.rootTab = module.kind === "quest" ? "quests" : "study";
+      state.onlyErrors = false;
+
+      $("quizTitle").textContent = module.title;
+      $("quizMode").textContent = module.kind === "quest"
+        ? "До 20 баллов"
+        : state.studyRewarded.has(key) ? "Тренировка" : "До 50 баллов";
       $("checkButton").disabled = false;
       $("checkButton").textContent = "Проверить ответы";
+      $("quizQuestions").replaceChildren();
 
-      const container = $("quizQuestions");
-      container.replaceChildren();
-
-      attempt.questions.forEach((_, index) => {
-        container.append(buildQuestion(attempt, index));
+      attempt.questions.forEach((_,index) => {
+        $("quizQuestions").append(buildQuestion(attempt,index));
       });
 
       updateProgress();
@@ -2058,221 +2068,277 @@
       haptic();
     }
 
-    async function leaveQuiz() {
-      if (state.saving) return;
+    function buildQuestion(attempt,index,review = false) {
+      const module = MODULES[attempt.module];
+      const question = attempt.questions[index];
+      const options = answerOptions(module,question);
+      const right = correctIndex(module,question);
+      const selected = attempt.answers[index];
+      const isCorrect = selected === right;
 
-      const hasAnswers = state.attempt?.answers.some(
-        answer => answer !== null
+      const card = el("article","question glass");
+      card.dataset.index = String(index);
+      if (review) card.classList.add(isCorrect ? "is-correct" : "is-wrong");
+
+      const heading = el("div","question-heading");
+      heading.append(
+        el("span","",`Задание ${index+1} / ${attempt.questions.length}`),
+        el("span","",review
+          ? isCorrect ? "✅ Верно" : "❌ Ошибка"
+          : attempt.kind === "quest" ? "1 балл" : "5 баллов")
       );
 
-      if (
-        hasAnswers &&
-        !window.confirm(
-          "Вернуться в меню? Выбранные ответы останутся " +
-          "в памяти страницы до перезагрузки."
-        )
-      ) {
-        return;
+      const text = el("div","question-text");
+      if (module.format === "articles") text.textContent = question.word;
+      else if (module.format === "translation") text.textContent = question.de;
+      else appendSentence(text,question.sentence);
+
+      card.append(heading,text);
+      if (module.format === "articles") {
+        card.append(el("p","question-translation",question.translation));
       }
 
-      await goToMenu();
+      const answers = el(
+        "div",`answers${module.format === "articles" ? " articles" : ""}`
+      );
+
+      options.forEach((option,optionIndex) => {
+        const button = el("button","answer",option);
+        button.type = "button";
+
+        if (review) {
+          button.disabled = true;
+          if (optionIndex === right) button.classList.add("correct");
+          else if (optionIndex === selected) button.classList.add("wrong");
+        } else {
+          button.classList.toggle("selected",optionIndex === selected);
+          button.setAttribute("aria-pressed",String(optionIndex === selected));
+
+          button.addEventListener("click",() => {
+            if (attempt.checked || state.busy) return;
+            attempt.answers[index] = optionIndex;
+            card.classList.remove("missing");
+
+            Array.from(answers.children).forEach((child,i) => {
+              child.classList.toggle("selected",i === optionIndex);
+              child.setAttribute("aria-pressed",String(i === optionIndex));
+            });
+            updateProgress();
+            haptic();
+          });
+        }
+        answers.append(button);
+      });
+
+      card.append(answers);
+
+      if (review) {
+        card.append(el(
+          "div",`feedback ${isCorrect ? "good" : "bad"}`,
+          isCorrect ? "✓ Четко! Не лох"
+            : `🤡 Лох! Правильно: ${options[right]}`
+        ));
+      }
+      return card;
+    }
+
+    function updateProgress() {
+      const attempt = state.attempt;
+      if (!attempt) return;
+      const count = attempt.answers.filter(answer => answer !== null).length;
+      const total = attempt.questions.length;
+      $("progressText").textContent = `${count} / ${total}`;
+      $("progressFill").style.width = `${count/total*100}%`;
+      $("progressBar").setAttribute("aria-valuemax",String(total));
+      $("progressBar").setAttribute("aria-valuenow",String(count));
+    }
+
+    async function leaveQuiz() {
+      if (state.busy || !state.attempt) return;
+      const attempt = state.attempt;
+
+      if (
+        attempt.answers.some(answer => answer !== null) &&
+        !window.confirm(
+          "Вернуться назад? Ответы останутся в памяти страницы до перезагрузки."
+        )
+      ) return;
+
+      if (attempt.kind === "study") openTheory(attempt.module);
+      else await goRoot("quests");
     }
 
     async function checkAnswers() {
       const attempt = state.attempt;
-      if (!attempt || attempt.checked || state.saving) return;
+      if (!attempt || attempt.checked || state.busy) return;
 
-      if (attempt.date !== getTodayDate()) {
-        toast(
-          "Начался новый день. Откройте модуль заново из меню.",
-          true
-        );
+      // Смена дня касается только ежедневных квестов.
+      if (attempt.kind === "quest" && attempt.date !== getTodayDate()) {
         state.drafts.delete(attempt.module);
-        await goToMenu();
+        toast("Начался новый игровой день. Открой квест заново.",true);
+        await goRoot("quests");
         return;
       }
 
       const missing = [];
-
-      attempt.answers.forEach((answer, index) => {
+      attempt.answers.forEach((answer,index) => {
         if (answer === null) missing.push(index);
       });
 
       if (missing.length) {
         $("quizQuestions").querySelectorAll(".question").forEach(card => {
           card.classList.toggle(
-            "missing",
-            missing.includes(Number(card.dataset.index))
+            "missing",missing.includes(Number(card.dataset.index))
           );
         });
-
-        toast(
-          "Эй, ты ответил не на все вопросы! Давай доделывай.",
-          true
-        );
+        toast("Эй, ты ответил не на все вопросы! Давай доделывай.",true);
         haptic("error");
-
-        const first = $("quizQuestions").querySelector(
-          `[data-index="${missing[0]}"]`
-        );
-
-        first?.scrollIntoView({
-          behavior: window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-          ).matches ? "instant" : "smooth",
-          block: "start"
-        });
-
+        $("quizQuestions").querySelector(`[data-index="${missing[0]}"]`)
+          ?.scrollIntoView({
+            behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "instant" : "smooth",
+            block:"start"
+          });
         return;
       }
 
+      // Фиксируем до первого await — двойной клик не создаст повтор.
       attempt.checked = true;
-      attempt.score = attempt.questions.reduce(
-        (sum, question, index) => {
-          return sum + (
-            attempt.answers[index] ===
-            correctAnswerIndex(attempt.module, question)
-              ? 1
-              : 0
-          );
-        },
+      const module = MODULES[attempt.module];
+      attempt.correctCount = attempt.questions.reduce(
+        (sum,q,index) =>
+          sum+(attempt.answers[index] === correctIndex(module,q) ? 1 : 0),
         0
       );
 
+      // Для учебной темы дата — дата завершения, но не лимит.
+      if (attempt.kind === "study") attempt.date = getTodayDate();
+
+      attempt.rewardPoints = attempt.correctCount *
+        (attempt.kind === "quest" ? 1 : STUDY_POINTS_PER_CORRECT);
+
+      // Один UUID сохраняется при всех повторах отправки.
       attempt.payload = {
-        // Один record_id для всех повторов отправки:
-        // при потере ответа сервера не создаём новую попытку.
-        record_id: makeUuid(),
-        id: isDemo ? "demo" : Number(player.id),
-        name: player.name,
-        score: attempt.score,
-        date: attempt.date,
-        module: attempt.module
+        record_id:uuid(),
+        id:isDemo ? "demo" : Number(player.id),
+        name:player.name,
+        score:attempt.rewardPoints,
+        date:attempt.date,
+        module:attempt.module
       };
 
-      state.pendingResults.set(attempt.module, attempt);
       state.drafts.delete(attempt.module);
+      state.pending.set(attempt.module,attempt);
       state.onlyErrors = false;
-
-      // Подсветка находится в разборе на экране результата.
-      showScreen("result");
       renderResult();
-      haptic(attempt.score >= 10 ? "success" : "warning");
+      showScreen("result");
 
-      await saveAttempt(attempt);
+      haptic(
+        attempt.correctCount/attempt.questions.length >= .4
+          ? "success" : "warning"
+      );
+      await processAttempt(attempt);
     }
 
     // ============================================================
-    // СОХРАНЕНИЕ РЕЗУЛЬТАТА
+    // ОДНОРАЗОВОЕ НАЧИСЛЕНИЕ
     // ============================================================
 
-    function markAttemptSaved(attempt, record) {
-      attempt.saved = true;
-      attempt.savedScore = numericScore(record);
+    function resolveAttempt(attempt,record) {
+      rememberRecord(record);
+      attempt.recordedScore = scoreOf(record);
       attempt.saveError = false;
+      const sameAttempt = record.record_id === attempt.payload?.record_id;
 
-      const sameAttempt = record.record_id === attempt.payload.record_id;
-
-      attempt.saveMessage = isDemo
-        ? "Демо-результат сохранён в памяти страницы."
-        : sameAttempt
-          ? "Результат сохранён в общем рейтинге ✅"
-          : (
-              "Этот модуль уже был сохранён сегодня. " +
-              `В рейтинге учтено: ${attempt.savedScore} баллов. ` +
-              "Новые ответы не заменили сохранённый результат."
-            );
-
-      state.pendingResults.delete(attempt.module);
-
-      if (attempt.date === state.date) {
-        state.completed.add(attempt.module);
+      if (sameAttempt) {
+        attempt.rewardState = "saved";
+        attempt.saveMessage = isDemo
+          ? `Демо: +${attempt.recordedScore} баллов сохранено в памяти страницы.`
+          : `+${attempt.recordedScore} баллов в общую статистику ✅`;
+      } else {
+        attempt.rewardState = "already";
+        attempt.saveMessage = attempt.kind === "study"
+          ? TRAINING_MESSAGE
+          : `Квест уже сохранён сегодня. В рейтинге учтено ${attempt.recordedScore} баллов.`;
       }
+      state.pending.delete(attempt.module);
+    }
 
-      if (!state.records.some(
-        item => item.record_id === record.record_id
-      )) {
-        state.records.push(record);
+    async function processAttempt(attempt) {
+      if (
+        state.busy || !attempt.checked ||
+        ["saved","already"].includes(attempt.rewardState)
+      ) return;
+
+      state.busy = true;
+      attempt.saveError = false;
+      attempt.saveMessage = "Проверяем, получены ли очки…";
+      renderResult();
+
+      try {
+        // Проверка базы перед POST:
+        // квест — за день, учебная тема — за всё время.
+        const existing = await findSavedRecord(attempt);
+        if (existing) resolveAttempt(attempt,existing);
+        else await saveAttempt(attempt);
+      } catch (error) {
+        console.error("Attempt processing:",error);
+        attempt.rewardState = "unresolved";
+        attempt.saveError = true;
+        attempt.saveMessage =
+          `Результат не подтверждён: ${error.message} ` +
+          "Повтори отправку. Не закрывай страницу до подтверждения.";
+        state.pending.set(attempt.module,attempt);
+        toast("Не удалось подтвердить сохранение результата.",true);
+      } finally {
+        state.busy = false;
+        renderResult();
+        renderCards();
+        if (state.ready) {
+          renderProfile();
+          renderLeaderboard();
+        }
       }
     }
 
     async function saveAttempt(attempt) {
-      if (state.saving || attempt.saved) return;
-
-      state.saving = true;
-      attempt.saveError = false;
       attempt.saveMessage = "Отправляем результат…";
       renderResult();
 
-      try {
-        if (isDemo) {
-          const existing = state.demoRecords.find(record =>
-            record.id === player.id &&
-            record.date === attempt.date &&
-            record.module === attempt.module
-          );
-
-          const record = existing || attempt.payload;
-
-          if (!existing) state.demoRecords.push(record);
-
-          markAttemptSaved(attempt, record);
-        } else {
-          // Проверяем, не сохранилась ли предыдущая отправка,
-          // ответ на которую мог потеряться из-за сбоя сети.
-          const existing = await findSavedRecord(attempt);
-
-          if (existing) {
-            markAttemptSaved(attempt, existing);
-          } else {
-            try {
-              const rows = await apiRequest({}, {
-                method: "POST",
-                headers: {
-                  Prefer: "return=representation"
-                },
-                body: attempt.payload
-              });
-
-              const record = Array.isArray(rows) ? rows[0] : null;
-
-              if (!record) {
-                throw new Error(
-                  "Сервер не вернул сохранённую запись. Повторите отправку."
-                );
-              }
-
-              markAttemptSaved(attempt, record);
-            } catch (error) {
-              // Уникальный индекс защищает от двух устройств,
-              // двух вкладок и одновременных запросов.
-              if (error.code === "23505") {
-                const saved = await findSavedRecord(attempt);
-                if (!saved) throw error;
-                markAttemptSaved(attempt, saved);
-              } else {
-                throw error;
-              }
-            }
-          }
+      if (isDemo) {
+        const existing = await findSavedRecord(attempt);
+        if (existing) resolveAttempt(attempt,existing);
+        else {
+          state.demoRecords.push(attempt.payload);
+          resolveAttempt(attempt,attempt.payload);
         }
+        return;
+      }
+
+      try {
+        const rows = await apiRequest({},{
+          method:"POST",
+          headers:{ Prefer:"return=representation" },
+          body:attempt.payload
+        });
+        const record = Array.isArray(rows) ? rows[0] : null;
+        if (!record) {
+          throw new Error("Сервер не вернул сохранённую запись. Повтори отправку.");
+        }
+        resolveAttempt(attempt,record);
       } catch (error) {
-        console.error("Result saving:", error);
-        attempt.saveError = true;
-        attempt.saveMessage =
-          `Результат не подтверждён сервером: ${error.message} ` +
-          "Повторите отправку. Не закрывайте страницу, " +
-          "пока результат не будет сохранён.";
-        toast("Не удалось подтвердить сохранение результата.", true);
-      } finally {
-        state.saving = false;
-        renderResult();
-        renderModules();
+        // Уникальные индексы защищают от двух вкладок/устройств,
+        // сохранивших результат между SELECT и POST.
+        if (error.code === "23505") {
+          const existing = await findSavedRecord(attempt);
+          if (!existing) throw error;
+          resolveAttempt(attempt,existing);
+        } else throw error;
       }
     }
 
     // ============================================================
-    // ЭКРАН РЕЗУЛЬТАТА И ПРОСМОТР ОШИБОК
+    // РЕЗУЛЬТАТЫ
     // ============================================================
 
     function renderResult() {
@@ -2280,87 +2346,95 @@
       if (!attempt?.checked) return;
 
       const total = attempt.questions.length;
-      const percentage = attempt.score / total;
+      const percentage = attempt.correctCount/total;
+      const study = attempt.kind === "study";
+      const unresolved = attempt.rewardState === "unresolved";
 
       $("resultModule").textContent = MODULES[attempt.module].title;
-
-      $("resultEmoji").textContent =
-        percentage === 1 ? "👑" :
-        percentage >= .75 ? "😎" :
-        percentage >= .4 ? "🍺" : "💀";
-
-      $("resultTitle").textContent =
-        percentage === 1 ? "Абсолютный гений" :
-        percentage >= .75 ? "Почти немец" :
-        percentage >= .4 ? "Нормально, пойдет" :
-        "Тотальный лох";
-
+      $("resultEmoji").textContent = percentage === 1 ? "👑"
+        : percentage >= .75 ? "😎" : percentage >= .4 ? "🍺" : "💀";
+      $("resultTitle").textContent = percentage === 1 ? "Абсолютный гений"
+        : percentage >= .75 ? "Почти немец"
+        : percentage >= .4 ? "Нормально, пойдет" : "Тотальный лох";
       $("resultScore").replaceChildren(
-        document.createTextNode(String(attempt.score)),
-        createElement("span", "", ` / ${total}`)
+        document.createTextNode(String(attempt.correctCount)),
+        el("span","",` / ${total}`)
       );
+      $("resultDetails").textContent = study
+        ? `Результат попытки: ${attempt.rewardPoints} / 50 баллов.`
+        : `Результат квеста: ${attempt.correctCount} / 20 баллов.`;
 
-      $("resultMessage").textContent =
-        percentage === 1
-          ? "0% лоха. Гёте гордился бы тобой."
-          : percentage >= .75
-            ? "Очень достойно. Пару раз ошибся, но не критично."
-            : percentage >= .4
-              ? "Половину знаешь, половину угадал."
-              : `Правильно только ${Math.round(percentage * 100)}%. Тебя бы даже за пивом не отправили.`;
+      $("resultMessage").textContent = percentage === 1
+        ? "0% лоха. Гёте гордился бы тобой."
+        : percentage >= .75
+          ? "Очень достойно. Пару раз ошибся, но не критично."
+          : percentage >= .4
+            ? "Половину знаешь, половину угадал."
+            : `Правильно только ${Math.round(percentage*100)}%. Тебя бы даже за пивом не отправили.`;
 
-      $("saveStatus").textContent =
-        attempt.saveMessage || "Результат готов к отправке.";
-      $("saveStatus").classList.toggle("error", attempt.saveError);
-      $("saveStatus").classList.toggle("success", attempt.saved);
-
+      $("saveStatus").textContent = attempt.saveMessage || "Проверяем начисление.";
+      $("saveStatus").classList.toggle("error",attempt.saveError);
+      $("saveStatus").classList.toggle(
+        "success",attempt.rewardState === "saved"
+      );
       $("retrySaveButton").classList.toggle(
-        "hidden",
-        attempt.saved || state.saving
+        "hidden",!unresolved || state.busy
       );
-      $("retrySaveButton").disabled = state.saving;
-      $("resultMenuButton").disabled = state.saving;
+      $("retrySaveButton").disabled = state.busy;
 
-      $("resultMenuButton").textContent =
-        state.saving
-          ? "Сохраняем результат…"
-          : "Вернуться в Главное меню";
+      $("repeatStudyButton").classList.toggle("hidden",!study);
+      $("resultTheoryButton").classList.toggle("hidden",!study);
+      $("repeatStudyButton").disabled = state.busy || unresolved;
+      $("repeatStudyButton").textContent = unresolved
+        ? "Сначала подтверди отправку результата"
+        : "Ещё раз — тренироваться 💪";
+      $("resultTheoryButton").disabled = state.busy;
+      $("resultHomeButton").disabled = state.busy;
+      $("resultHomeButton").textContent = state.busy
+        ? "Проверяем и сохраняем…"
+        : study ? "Вернуться к учебным темам" : "Вернуться к квестам";
 
       $("errorsButton").textContent = state.onlyErrors
-        ? "Показать все ответы"
-        : "Показать только где лох 🤡";
-
-      $("errorsButton").setAttribute(
-        "aria-pressed", String(state.onlyErrors)
-      );
-
+        ? "Показать все ответы" : "Показать только где лох 🤡";
+      $("errorsButton").setAttribute("aria-pressed",String(state.onlyErrors));
       $("reviewTitle").textContent = state.onlyErrors
-        ? `Ошибки: ${total - attempt.score}`
-        : "Разбор всех ответов";
-
-      const container = $("reviewQuestions");
-      container.replaceChildren();
+        ? `Ошибки: ${total-attempt.correctCount}` : "Разбор всех ответов";
+      $("reviewQuestions").replaceChildren();
 
       let shown = 0;
-
-      attempt.questions.forEach((question, index) => {
-        const correct =
-          attempt.answers[index] ===
-          correctAnswerIndex(attempt.module, question);
-
+      const module = MODULES[attempt.module];
+      attempt.questions.forEach((q,index) => {
+        const correct = attempt.answers[index] === correctIndex(module,q);
         if (state.onlyErrors && correct) return;
-
-        container.append(buildQuestion(attempt, index, true));
+        $("reviewQuestions").append(buildQuestion(attempt,index,true));
         shown++;
       });
 
       if (!shown) {
-        container.append(
-          createElement(
-            "div", "empty glass",
-            "Ошибок нет! Все ответы правильные 🎉"
-          )
+        $("reviewQuestions").append(el(
+          "div","empty glass","Ошибок нет. Сегодня ты официально не лох 👑"
+        ));
+      }
+    }
+
+    function canLeaveResult() {
+      if (state.busy) return false;
+      if (state.attempt?.rewardState === "unresolved") {
+        return window.confirm(
+          "Результат ещё не подтверждён. Он останется только в памяти " +
+          "страницы. Можно открыть его через карточку модуля. Продолжить?"
         );
+      }
+      return true;
+    }
+
+    function handleBack() {
+      if (state.busy) return;
+      if (state.screen === "theory") goRoot("study");
+      else if (state.screen === "quiz") leaveQuiz();
+      else if (state.screen === "result" && canLeaveResult()) {
+        if (state.attempt.kind === "study") openTheory(state.attempt.module);
+        else goRoot("quests");
       }
     }
 
@@ -2368,89 +2442,91 @@
     // СОБЫТИЯ И ЗАПУСК
     // ============================================================
 
-    $("modules").addEventListener("click", event => {
+    document.querySelectorAll("[data-tab]").forEach(button => {
+      button.addEventListener("click",() => {
+        goRoot(button.dataset.tab);
+        haptic();
+      });
+    });
+
+    $("questCards").addEventListener("click",event => {
       const button = event.target.closest("[data-module]");
-      if (!button || button.disabled) return;
-      startModule(button.dataset.module);
+      if (button && !button.disabled) startModule(button.dataset.module);
     });
 
-    $("tabToday").addEventListener("click", () => {
-      state.tab = "today";
+    $("studyCards").addEventListener("click",event => {
+      const button = event.target.closest("[data-module]");
+      if (button && !button.disabled) openTheory(button.dataset.module);
+    });
+
+    $("startStudyButton").addEventListener("click",() => {
+      if (state.selectedStudy) startModule(state.selectedStudy);
+    });
+
+    $("theoryBack").addEventListener("click",() => goRoot("study"));
+    $("quizBack").addEventListener("click",leaveQuiz);
+    $("checkButton").addEventListener("click",checkAnswers);
+
+    $("reloadButton").addEventListener("click",() => {
+      if (!state.busy && !state.loading) loadData();
+    });
+
+    $("tabToday").addEventListener("click",() => {
+      state.ratingTab = "today";
       renderLeaderboard();
       haptic();
     });
 
-    $("tabAll").addEventListener("click", () => {
-      state.tab = "all";
+    $("tabAll").addEventListener("click",() => {
+      state.ratingTab = "all";
       renderLeaderboard();
       haptic();
     });
 
-    $("reloadButton").addEventListener("click", loadMenu);
-    $("quizBack").addEventListener("click", leaveQuiz);
-    $("checkButton").addEventListener("click", checkAnswers);
-
-    $("retrySaveButton").addEventListener("click", () => {
-      if (state.attempt) saveAttempt(state.attempt);
+    $("retrySaveButton").addEventListener("click",() => {
+      if (state.attempt) processAttempt(state.attempt);
     });
 
-    $("resultMenuButton").addEventListener("click", async () => {
-      if (state.saving) return;
-
-      if (
-        !state.attempt?.saved &&
-        !window.confirm(
-          "Результат ещё не подтверждён сервером. " +
-          "Он останется в памяти страницы, и отправку можно " +
-          "повторить через карточку модуля. Вернуться в меню?"
-        )
-      ) {
-        return;
-      }
-
-      await goToMenu();
-    });
-
-    $("errorsButton").addEventListener("click", () => {
+    $("errorsButton").addEventListener("click",() => {
       state.onlyErrors = !state.onlyErrors;
       renderResult();
       haptic();
     });
 
-    try {
-      tg?.BackButton?.onClick(() => {
-        if (state.screen === "quiz") leaveQuiz();
-        else if (state.screen === "result") {
-          $("resultMenuButton").click();
-        }
-      });
-    } catch (_) {}
-
-    // Обновляем дату после возвращения в приложение.
-    document.addEventListener("visibilitychange", () => {
+    $("repeatStudyButton").addEventListener("click",() => {
       if (
-        !document.hidden &&
-        state.screen === "menu" &&
-        !state.loading &&
-        state.date !== getTodayDate()
-      ) {
-        loadMenu();
+        state.attempt?.kind === "study" &&
+        state.attempt.rewardState !== "unresolved" &&
+        !state.busy
+      ) startModule(state.attempt.module,true);
+    });
+
+    $("resultTheoryButton").addEventListener("click",() => {
+      if (canLeaveResult()) openTheory(state.attempt.module);
+    });
+
+    $("resultHomeButton").addEventListener("click",() => {
+      if (canLeaveResult()) {
+        goRoot(state.attempt.kind === "study" ? "study" : "quests");
       }
     });
 
-    // Защита от незаметной смены даты, пока меню открыто.
-    setInterval(() => {
-      if (
-        state.screen === "menu" &&
-        !state.loading &&
-        state.date !== getTodayDate()
-      ) {
-        loadMenu();
-      }
-    }, 30000);
+    try { tg?.BackButton?.onClick(handleBack); } catch (_) {}
 
-    window.addEventListener("beforeunload", event => {
-      if (state.pendingResults.size || state.saving) {
+    function refreshDayIfNeeded() {
+      if (
+        !document.hidden &&
+        [...ROOT_TABS,"theory"].includes(state.screen) &&
+        !state.loading && !state.busy &&
+        state.date !== getTodayDate()
+      ) loadData();
+    }
+
+    document.addEventListener("visibilitychange",refreshDayIfNeeded);
+    setInterval(refreshDayIfNeeded,30000);
+
+    window.addEventListener("beforeunload",event => {
+      if (state.pending.size || state.busy) {
         event.preventDefault();
         event.returnValue = "";
       }
@@ -2463,19 +2539,24 @@
 
       try {
         validateData();
+        state.valid = true;
       } catch (error) {
-        $("menuErrorText").textContent = error.message;
-        $("menuError").classList.remove("hidden");
+        $("dataErrorText").textContent = error.message;
+        $("dataError").classList.remove("hidden");
         $("reloadButton").classList.add("hidden");
-        toast(error.message, true);
+        toast(error.message,true);
         return;
       }
 
-      showScreen("menu");
-      await loadMenu();
+      buildCards();
+      showScreen("quests");
+      await loadData();
     }
 
     init();
   </script>
 </body>
 </html>
+```
+
+🤖 AI-Generated | RocheChat2
