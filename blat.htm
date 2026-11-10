@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+  >
+  <meta name="theme-color" content="#0b1020">
+  <title>Deutsch Quest</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      --bg: #0b1020;
+      --panel: rgba(255, 255, 255, .065);
+      --panel-strong: rgba(255, 255, 255, .11);
+      --border: rgba(255, 255, 255, .11);
+
+      --text: #f4f6ff;
+      --muted: #a6aecb;
+
+      --primary: #9280ff;
+      --primary-2: #6654e8;
+      --green: #60dfad;
+      --red: #ff8299;
+      --yellow: #ffcf77;
+
+      --radius: 24px;
+      --safe-top: max(
+        env(safe-area-inset-top, 0px),
+        var(--tg-content-safe-area-inset-top, 0px)
+      );
+      --safe-bottom: max(
+        env(safe-area-inset-bottom, 0px),
+        var(--tg-content-safe-area-inset-bottom, 0px)
+      );
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background:
+        radial-gradient(
+          ellipse at 0% 0%,
+          rgba(116, 83, 255, .20),
+          transparent 45%
+        ),
+        radial-gradient(
+          ellipse at 100% 25%,
+          rgba(46, 173, 175, .13),
+          transparent 40%
+        ),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:disabled {
+      cursor: default;
+    }
+
+    button:focus-visible {
+      outline: 3px solid var(--yellow);
+      outline-offset: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .app {
+      width: min(100%, 720px);
+      margin: auto;
+      padding:
+        calc(20px + var(--safe-top))
+        18px
+        calc(30px + var(--safe-bottom));
+    }
+
+    .screen {
+      animation: appear .25s ease;
+    }
+
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .13);
+    }
+
+    .brand-row,
+    .section-row,
+    .quiz-top,
+    .question-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-row {
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 850;
+      letter-spacing: -.7px;
+    }
+
+    .brand span {
+      color: var(--primary);
+    }
+
+    .pill {
+      border-radius: 100px;
+      padding: 7px 11px;
+      background: rgba(146, 128, 255, .12);
+      border: 1px solid rgba(146, 128, 255, .2);
+      color: #c4baff;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(25px, 6vw, 34px);
+      letter-spacing: -.8px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      letter-spacing: -.4px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .small {
+      font-size: 13px;
+    }
+
+    .notice {
+      margin-bottom: 16px;
+      padding: 13px 15px;
+      border-radius: 16px;
+      color: var(--yellow);
+      background: rgba(255, 207, 119, .08);
+      border: 1px solid rgba(255, 207, 119, .2);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .profile {
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .profile-head {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      flex: 0 0 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #9280ff, #5143b2);
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .profile-name {
+      overflow-wrap: anywhere;
+      font-weight: 750;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .rank {
+      color: var(--yellow);
+      font-size: 13px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 12px 6px;
+      background: rgba(255, 255, 255, .04);
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .section-row {
+      margin: 22px 0 12px;
+    }
+
+    .section-row h2 {
+      margin-bottom: 0;
+    }
+
+    .modules {
+      display: grid;
+      gap: 12px;
+    }
+
+    .module-card {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 19px;
+      text-align: left;
+      transition:
+        transform .18s ease,
+        background .18s ease,
+        opacity .18s ease;
+    }
+
+    .module-card:not(:disabled):active {
+      transform: scale(.98);
+    }
+
+    .module-card:not(:disabled):hover {
+      background: var(--panel-strong);
+    }
+
+    .module-card:disabled {
+      opacity: .55;
+    }
+
+    .module-card.completed {
+      opacity: .8;
+      border-color: rgba(96, 223, 173, .25);
+      background: rgba(96, 223, 173, .065);
+    }
+
+    .module-icon {
+      flex: 0 0 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(146, 128, 255, .13);
+      font-size: 24px;
+    }
+
+    .module-copy {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .module-copy strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .module-copy span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .module-status {
+      font-size: 21px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 5px;
+      gap: 5px;
+      border-radius: 16px;
+      margin: 14px 0;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      padding: 11px 8px;
+      border-radius: 12px;
+      color: var(--muted);
+      font-weight: 650;
+      transition: background .18s ease, color .18s ease;
+    }
+
+    .tab.active {
+      background: var(--primary-2);
+      color: white;
+    }
+
+    .leaderboard {
+      overflow: hidden;
+    }
+
+    .leader-row {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 17px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .leader-row:last-child {
+      border-bottom: 0;
+    }
+
+    .leader-row.me {
+      background: rgba(146, 128, 255, .12);
+    }
+
+    .leader-place {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .leader-name {
+      overflow-wrap: anywhere;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .leader-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .leader-score {
+      font-weight: 850;
+      color: var(--green);
+    }
+
+    .empty {
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .button {
+      min-height: 49px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      font-weight: 750;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+
+    .button:not(:disabled):active {
+      transform: scale(.98);
+    }
+
+    .button:disabled {
+      opacity: .5;
+    }
+
+    .button.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, #9683ff, #6753e8);
+      box-shadow: 0 8px 24px rgba(103, 83, 232, .24);
+      color: white;
+    }
+
+    .button.full {
+      width: 100%;
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+
+    .quiz-top {
+      margin-bottom: 19px;
+    }
+
+    .quiz-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .progress-shell {
+      position: sticky;
+      top: calc(8px + var(--safe-top));
+      z-index: 5;
+      padding: 14px;
+      background: rgba(17, 22, 43, .93);
+      margin-bottom: 18px;
+      border-radius: 17px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 9px;
+    }
+
+    .progress-track {
+      height: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .09);
+      border-radius: 20px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), var(--green));
+      transition: width .25s ease;
+    }
+
+    .questions {
+      display: grid;
+      gap: 15px;
+    }
+
+    .question {
+      padding: 19px;
+      scroll-margin-top: calc(110px + var(--safe-top));
+      transition: border-color .2s ease;
+    }
+
+    .question.missing {
+      border-color: var(--yellow);
+      animation: shake .3s ease;
+    }
+
+    .question.is-correct {
+      border-color: rgba(96, 223, 173, .38);
+    }
+
+    .question.is-wrong {
+      border-color: rgba(255, 130, 153, .4);
+    }
+
+    .question-heading {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .question-text {
+      font-size: 21px;
+      font-weight: 750;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+      margin-bottom: 8px;
+    }
+
+    .question-translation {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+
+    .gap {
+      color: var(--yellow);
+      letter-spacing: 2px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .answers.articles {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .answer {
+      min-height: 48px;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .035);
+      line-height: 1.4;
+      text-align: left;
+      transition:
+        background .18s ease,
+        border-color .18s ease,
+        transform .18s ease;
+    }
+
+    .articles .answer {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .answer:not(:disabled):active {
+      transform: scale(.98);
+    }
+
+    .answer.selected {
+      background: rgba(146, 128, 255, .22);
+      border-color: var(--primary);
+    }
+
+    .answer.correct {
+      color: #a9f6d6;
+      background: rgba(96, 223, 173, .12);
+      border-color: rgba(96, 223, 173, .55);
+    }
+
+    .answer.wrong {
+      color: #ffb4c2;
+      background: rgba(255, 130, 153, .12);
+      border-color: rgba(255, 130, 153, .55);
+    }
+
+    .feedback {
+      margin-top: 13px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .feedback.good {
+      color: var(--green);
+    }
+
+    .feedback.bad {
+      color: var(--red);
+    }
+
+    #quizScreen {
+      padding-bottom: 100px;
+    }
+
+    .floating-bar {
+      position: fixed;
+      z-index: 20;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 14px 18px calc(14px + var(--safe-bottom));
+      background: linear-gradient(
+        transparent,
+        rgba(11, 16, 32, .96) 25%
+      );
+      pointer-events: none;
+    }
+
+    .floating-inner {
+      width: min(100%, 684px);
+      margin: auto;
+      pointer-events: auto;
+    }
+
+    .result-card {
+      padding: 28px 20px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .result-emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .result-score {
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: -3px;
+      color: var(--green);
+      margin: 12px 0;
+    }
+
+    .result-score span {
+      font-size: 25px;
+      letter-spacing: -1px;
+      color: var(--muted);
+    }
+
+    .result-actions {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .save-status {
+      margin: 15px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .save-status.error {
+      color: var(--red);
+    }
+
+    .save-status.success {
+      color: var(--green);
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      top: calc(18px + var(--safe-top));
+      left: 50%;
+      width: max-content;
+      max-width: calc(100% - 32px);
+      padding: 13px 18px;
+      border-radius: 16px;
+      background: #29243e;
+      border: 1px solid rgba(255, 255, 255, .16);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, .35);
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+      opacity: 0;
+      transform: translate(-50%, -15px);
+      transition: opacity .2s ease, transform .2s ease;
+      pointer-events: none;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toast.error {
+      border-color: rgba(255, 130, 153, .5);
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+
+    @media (max-width: 360px) {
+      .app { padding-left: 12px; padding-right: 12px; }
+      .question, .module-card { padding: 15px; }
+      .module-icon { flex-basis: 42px; height: 42px; }
+      .pill { font-size: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <section id="menuScreen" class="screen">
+      <header class="brand-row">
+        <div class="brand">Deutsch<span>Quest</span></div>
+        <div class="pill">Учись · Играй · Расти</div>
+      </header>
+
+      <div id="demoNotice" class="notice hidden">
+        Демо-режим: приложение открыто вне Telegram.
+        Результаты сохраняются только в памяти этой страницы
+        и не отправляются в Supabase.
+      </div>
+
+      <div id="menuError" class="notice hidden">
+        <div id="menuErrorText"></div>
+        <button
+          id="reloadButton"
+          class="button full"
+          style="margin-top: 10px"
+          type="button"
+        >
+          Повторить загрузку
+        </button>
+      </div>
+
+      <section class="profile glass">
+        <div class="profile-head">
+          <div id="avatar" class="avatar">D</div>
+          <div>
+            <div id="profileName" class="profile-name">Игрок</div>
+            <div id="profileRank" class="rank">🌱 Новичок</div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <strong id="totalScore">—</strong>
+            <span>всего баллов</span>
+          </div>
+          <div class="stat">
+            <strong id="playedDays">—</strong>
+            <span>сыграно дней</span>
+          </div>
+          <div class="stat">
+            <strong id="todayScore">—</strong>
+            <span>баллов сегодня</span>
+          </div>
+        </div>
+      </section>
+
+      <h1>Твой ежедневный квест</h1>
+      <p class="muted small">
+        Три модуля. За каждый правильный ответ — 1 балл.
+        Каждый модуль можно завершить один раз в день.
+      </p>
+
+      <div id="modules" class="modules">
+        <button
+          class="module-card glass"
+          data-module="articles"
+          type="button"
+          disabled
+        >
+          <span class="module-icon">🧩</span>
+          <span class="module-copy">
+            <strong>Артикли</strong>
+            <span class="module-description">20 слов · der / die / das</span>
+          </span>
+          <span class="module-status" aria-hidden="true">→</span>
+        </button>
+
+        <button
+          class="module-card glass"
+          data-module="translation"
+          type="button"
+          disabled
+        >
+          <span class="module-icon">💬</span>
+          <span class="module-copy">
+            <strong>Перевод</strong>
+            <span class="module-description">20 предложений · 4 варианта</span>
+          </span>
+          <span class="module-status" aria-hidden="true">→</span>
+        </button>
+
+        <button
+          class="module-card glass"
+          data-module="grammar"
+          type="button"
+          disabled
+        >
+          <span class="module-icon">⚡</span>
+          <span class="module-copy">
+            <strong>Грамматика</strong>
+            <span class="module-description">20 заданий · заполни пропуски</span>
+          </span>
+          <span class="module-status" aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <div class="section-row">
+        <h2>🏆 Таблица лидеров</h2>
+        <span id="leaderCount" class="muted small"></span>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Период рейтинга">
+        <button
+          id="tabToday"
+          class="tab active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="leaderboard"
+          type="button"
+        >Сегодня</button>
+
+        <button
+          id="tabAll"
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="leaderboard"
+          type="button"
+        >За всё время</button>
+      </div>
+
+      <div
+        id="leaderboard"
+        class="leaderboard glass"
+        role="tabpanel"
+      >
+        <div class="empty">Загружаем рейтинг…</div>
+      </div>
+
+      <div id="dayNote" class="footer-note"></div>
+    </section>
+
+    <!-- ТЕСТ -->
+    <section id="quizScreen" class="screen hidden">
+      <header class="quiz-top">
+        <button
+          id="quizBack"
+          class="icon-button"
+          aria-label="Вернуться в меню"
+          type="button"
+        >←</button>
+        <div id="quizTitle" class="quiz-title"></div>
+        <div class="pill">Ежедневный модуль</div>
+      </header>
+
+      <div class="progress-shell glass">
+        <div class="progress-label">
+          <span>Выбрано ответов</span>
+          <strong id="progressText">0 / 20</strong>
+        </div>
+        <div
+          id="progressBar"
+          class="progress-track"
+          role="progressbar"
+          aria-label="Количество выбранных ответов"
+          aria-valuemin="0"
+          aria-valuemax="20"
+          aria-valuenow="0"
+        >
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="quizQuestions" class="questions"></div>
+
+      <div class="floating-bar">
+        <div class="floating-inner">
+          <button
+            id="checkButton"
+            class="button primary full"
+            type="button"
+          >Проверить ответы</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- РЕЗУЛЬТАТ -->
+    <section id="resultScreen" class="screen hidden">
+      <div class="result-card glass">
+        <div id="resultEmoji" class="result-emoji">👑</div>
+        <div id="resultModule" class="pill" style="display: inline-block"></div>
+        <h1 id="resultTitle" style="margin-top: 18px">Модуль завершён!</h1>
+        <div id="resultScore" class="result-score"></div>
+        <p id="resultMessage" class="muted"></p>
+        <div
+          id="saveStatus"
+          class="save-status"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </div>
+
+      <div class="result-actions">
+        <button
+          id="retrySaveButton"
+          class="button primary full hidden"
+          type="button"
+        >Повторить отправку результата</button>
+
+        <button
+          id="errorsButton"
+          class="button full"
+          type="button"
+        >Показать только где лох 🤡</button>
+
+        <button
+          id="resultMenuButton"
+          class="button primary full"
+          type="button"
+        >Вернуться в Главное меню</button>
+      </div>
+
+      <div class="section-row">
+        <h2 id="reviewTitle">Разбор ответов</h2>
+      </div>
+
+      <div id="reviewQuestions" class="questions"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    // ============================================================
+    // ДАННЫЕ МОДУЛЕЙ: редактируйте эти три массива.
+    // Каждый модуль сейчас содержит ровно 20 заданий.
+    // ============================================================
+
+    const moduleArticles = [
+      { word: "Tisch", translation: "стол", article: "der" },
+      { word: "Lampe", translation: "лампа", article: "die" },
+      { word: "Buch", translation: "книга", article: "das" },
+      { word: "Stuhl", translation: "стул", article: "der" },
+      { word: "Tür", translation: "дверь", article: "die" },
+      { word: "Fenster", translation: "окно", article: "das" },
+      { word: "Apfel", translation: "яблоко", article: "der" },
+      { word: "Banane", translation: "банан", article: "die" },
+      { word: "Auto", translation: "автомобиль", article: "das" },
+      { word: "Hund", translation: "собака", article: "der" },
+      { word: "Katze", translation: "кошка", article: "die" },
+      { word: "Kind", translation: "ребёнок", article: "das" },
+      { word: "Bahnhof", translation: "вокзал", article: "der" },
+      { word: "Schule", translation: "школа", article: "die" },
+      { word: "Haus", translation: "дом", article: "das" },
+      { word: "Garten", translation: "сад", article: "der" },
+      { word: "Zeitung", translation: "газета", article: "die" },
+      { word: "Wasser", translation: "вода", article: "das" },
+      { word: "Schlüssel", translation: "ключ", article: "der" },
+      { word: "Sprache", translation: "язык", article: "die" }
+    ];
+
+    const moduleTranslation = [
+      {
+        de: "Ich gehe in die Schule.",
+        options: [
+          "Я иду в школу.",
+          "Я нахожусь в школе.",
+          "Я иду возле школы.",
+          "Я бросаю школу."
+        ],
+        correctIndex: 0
+      },
+      {
+        de: "Wir trinken jeden Morgen Kaffee.",
+        options: [
+          "Мы пьём кофе каждый вечер.",
+          "Мы пьём кофе каждое утро.",
+          "Мы покупаем кофе каждое утро.",
+          "Мы никогда не пьём кофе."
+        ],
+        correctIndex: 1
+      },
+      {
+        de: "Das Wetter ist heute schön.",
+        options: [
+          "Сегодня плохая погода.",
+          "Завтра будет хорошая погода.",
+          "Сегодня хорошая погода.",
+          "Сегодня очень холодно."
+        ],
+        correctIndex: 2
+      },
+      {
+        de: "Meine Schwester arbeitet im Krankenhaus.",
+        options: [
+          "Моя сестра учится в школе.",
+          "Мой брат работает в больнице.",
+          "Моя сестра находится дома.",
+          "Моя сестра работает в больнице."
+        ],
+        correctIndex: 3
+      },
+      {
+        de: "Ich habe meinen Schlüssel verloren.",
+        options: [
+          "Я потерял свой ключ.",
+          "Я нашёл свой ключ.",
+          "Я купил новый ключ.",
+          "Я забыл закрыть дверь."
+        ],
+        correctIndex: 0
+      },
+      {
+        de: "Kannst du mir bitte helfen?",
+        options: [
+          "Ты можешь меня подождать?",
+          "Ты можешь мне помочь, пожалуйста?",
+          "Я могу тебе помочь?",
+          "Ты можешь мне позвонить?"
+        ],
+        correctIndex: 1
+      },
+      {
+        de: "Der Zug fährt um acht Uhr ab.",
+        options: [
+          "Поезд прибывает в восемь часов.",
+          "Поезд отправляется в девять часов.",
+          "Поезд отправляется в восемь часов.",
+          "Поезд опаздывает на восемь минут."
+        ],
+        correctIndex: 2
+      },
+      {
+        de: "Wir haben gestern einen Film gesehen.",
+        options: [
+          "Мы будем смотреть фильм завтра.",
+          "Мы вчера сняли фильм.",
+          "Мы сегодня смотрим фильм.",
+          "Мы вчера посмотрели фильм."
+        ],
+        correctIndex: 3
+      },
+      {
+        de: "Ich möchte ein Glas Wasser.",
+        options: [
+          "Я хотел бы стакан воды.",
+          "Я хотел бы чашку кофе.",
+          "Мне нужна бутылка молока.",
+          "Я не хочу пить воду."
+        ],
+        correctIndex: 0
+      },
+      {
+        de: "Das Buch liegt auf dem Tisch.",
+        options: [
+          "Книга лежит под столом.",
+          "Книга лежит на столе.",
+          "Книга стоит на полке.",
+          "Стол находится возле книги."
+        ],
+        correctIndex: 1
+      },
+      {
+        de: "Am Wochenende besuchen wir unsere Eltern.",
+        options: [
+          "На выходных родители навещают нас.",
+          "В понедельник мы навещаем родителей.",
+          "На выходных мы навещаем родителей.",
+          "На выходных мы остаёмся одни."
+        ],
+        correctIndex: 2
+      },
+      {
+        de: "Sie lernt seit zwei Jahren Deutsch.",
+        options: [
+          "Она начнёт учить немецкий через два года.",
+          "Она изучает немецкий два месяца.",
+          "Она учит два иностранных языка.",
+          "Она изучает немецкий уже два года."
+        ],
+        correctIndex: 3
+      },
+      {
+        de: "Bitte schließen Sie die Tür.",
+        options: [
+          "Пожалуйста, закройте дверь.",
+          "Пожалуйста, откройте дверь.",
+          "Пожалуйста, закройте окно.",
+          "Пожалуйста, подойдите к двери."
+        ],
+        correctIndex: 0
+      },
+      {
+        de: "Ich bin müde, aber ich muss arbeiten.",
+        options: [
+          "Я устал, поэтому не буду работать.",
+          "Я устал, но должен работать.",
+          "Я не устал и хочу работать.",
+          "Я работал и теперь отдыхаю."
+        ],
+        correctIndex: 1
+      },
+      {
+        de: "Wie viel kostet dieses Brot?",
+        options: [
+          "Где можно купить этот хлеб?",
+          "Сколько стоит это молоко?",
+          "Сколько стоит этот хлеб?",
+          "Когда испекли этот хлеб?"
+        ],
+        correctIndex: 2
+      },
+      {
+        de: "Die Kinder spielen im Garten.",
+        options: [
+          "Дети работают в саду.",
+          "Родители играют в саду.",
+          "Дети играют в доме.",
+          "Дети играют в саду."
+        ],
+        correctIndex: 3
+      },
+      {
+        de: "Ich freue mich auf den Urlaub.",
+        options: [
+          "Я с нетерпением жду отпуска.",
+          "Я боюсь предстоящего отпуска.",
+          "Я уже вернулся из отпуска.",
+          "Я работаю во время отпуска."
+        ],
+        correctIndex: 0
+      },
+      {
+        de: "Er hat heute keine Zeit.",
+        options: [
+          "У него сегодня много времени.",
+          "У него сегодня нет времени.",
+          "У него завтра нет времени.",
+          "Он сегодня не знает время."
+        ],
+        correctIndex: 1
+      },
+      {
+        de: "Wenn es regnet, bleiben wir zu Hause.",
+        options: [
+          "Если будет солнечно, мы останемся дома.",
+          "Когда идёт дождь, мы идём гулять.",
+          "Если идёт дождь, мы остаёмся дома.",
+          "Мы остаёмся дома, потому что холодно."
+        ],
+        correctIndex: 2
+      },
+      {
+        de: "Ich habe vergessen, Milch zu kaufen.",
+        options: [
+          "Я решил купить молоко.",
+          "Я забыл выпить молоко.",
+          "Я не смог найти молоко.",
+          "Я забыл купить молоко."
+        ],
+        correctIndex: 3
+      }
+    ];
+
+    const moduleGrammar = [
+      { sentence: "Ich ___ aus Deutschland.", options: ["komme", "kommst", "kommt", "kommen"], correctIndex: 0 },
+      { sentence: "Wir ___ Deutsch.", options: ["lerne", "lernen", "lernt", "lernst"], correctIndex: 1 },
+      { sentence: "Das ___ mein Freund.", options: ["ist", "bist", "sind", "seid"], correctIndex: 0 },
+      { sentence: "Woher ___ du?", options: ["komme", "kommst", "kommt", "kommen"], correctIndex: 1 },
+      { sentence: "Ich ___ 20 Jahre alt.", options: ["habe", "bin", "ist", "bist"], correctIndex: 1 },
+      { sentence: "Er ___ einen Bruder.", options: ["habe", "hast", "hat", "haben"], correctIndex: 2 },
+      { sentence: "Wir ___ heute ins Kino.", options: ["gehen", "gehst", "geht", "gehe"], correctIndex: 0 },
+      { sentence: "Wie ___ du?", options: ["heißt", "heiße", "heißen", "heißet"], correctIndex: 0 },
+      { sentence: "Sie (она) ___ Musik.", options: ["hören", "hört", "hörst", "höre"], correctIndex: 1 },
+      { sentence: "Das Buch liegt ___ dem Tisch.", options: ["auf", "in", "aus", "bei"], correctIndex: 0 },
+      { sentence: "Ich trinke Kaffee ___ Milch.", options: ["mit", "ohne", "aus", "für"], correctIndex: 0 },
+      { sentence: "Ich wohne ___ Berlin.", options: ["in", "aus", "auf", "zu"], correctIndex: 0 },
+      { sentence: "Was machst ___ heute?", options: ["er", "wir", "du", "ich"], correctIndex: 2 },
+      { sentence: "Der Hund ___ sehr groß.", options: ["ist", "sind", "bin", "seid"], correctIndex: 0 },
+      { sentence: "Wir ___ ein neues Auto.", options: ["haben", "hat", "hast", "habe"], correctIndex: 0 },
+      { sentence: "Die Blume ist ___ dich.", options: ["für", "mit", "aus", "bei"], correctIndex: 0 },
+      { sentence: "Ich gehe ___ Hause.", options: ["nach", "in", "auf", "aus"], correctIndex: 0 },
+      { sentence: "Ich bin ___ Hause.", options: ["zu", "in", "nach", "auf"], correctIndex: 0 },
+      { sentence: "Er hat ___ Hunger.", options: ["keinen", "nicht", "nein", "nichts"], correctIndex: 0 },
+      { sentence: "Ich fahre mit ___ Bus.", options: ["dem", "den", "der", "das"], correctIndex: 0 }
+    ];
+
+    // ============================================================
+    // НАСТРОЙКИ
+    // ============================================================
+
+    const SUPABASE_URL =
+      "https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
+
+    // Publishable-ключ допустим в клиентском приложении.
+    // НИКОГДА не размещайте здесь service_role / secret key.
+    const SUPABASE_KEY =
+      "sb_publishable_bTmaC-ZOR2dpN9OzerfWdg_CTcujMY1";
+
+    const GAME_TIME_ZONE = "Europe/Moscow";
+    const PAGE_SIZE = 1000;
+    const REQUEST_TIMEOUT = 15000;
+
+    const MODULES = {
+      articles: {
+        title: "Артикли",
+        data: moduleArticles,
+        description: "20 слов · der / die / das"
+      },
+      translation: {
+        title: "Перевод",
+        data: moduleTranslation,
+        description: "20 предложений · 4 варианта"
+      },
+      grammar: {
+        title: "Грамматика",
+        data: moduleGrammar,
+        description: "20 заданий · заполни пропуски"
+      }
+    };
+
+    // ============================================================
+    // TELEGRAM
+    // ============================================================
+
+    const tg = window.Telegram?.WebApp;
+
+    try {
+      tg?.ready();
+      tg?.expand();
+
+      if (
+        typeof tg?.requestFullscreen === "function" &&
+        tg.isVersionAtLeast?.("8.0")
+      ) {
+        tg.requestFullscreen();
+      }
+
+      tg?.setHeaderColor?.("#0b1020");
+      tg?.setBackgroundColor?.("#0b1020");
+    } catch (error) {
+      console.warn("Telegram UI initialization:", error);
+    }
+
+    // Эти данные удобны для интерфейса, но НЕ являются
+    // серверно подтверждённой идентификацией пользователя.
+    const telegramUser = tg?.initDataUnsafe?.user;
+
+    const isDemo = !(
+      telegramUser &&
+      Number.isSafeInteger(telegramUser.id) &&
+      telegramUser.id > 0
+    );
+
+    const player = {
+      id: isDemo ? "demo" : String(telegramUser.id),
+      name: isDemo
+        ? "Демо-игрок"
+        : (
+            [telegramUser.first_name, telegramUser.last_name]
+              .filter(Boolean)
+              .join(" ")
+            || telegramUser.username
+            || "Игрок"
+          ).slice(0, 120)
+    };
+
+    // ============================================================
+    // СОСТОЯНИЕ
+    // ============================================================
+
+    const state = {
+      screen: "menu",
+      date: getTodayDate(),
+      tab: "today",
+      records: [],
+      demoRecords: [],
+      completed: new Set(),
+      pendingResults: new Map(),
+      drafts: new Map(),
+      menuReady: false,
+      loading: false,
+      menuRequestId: 0,
+      attempt: null,
+      saving: false,
+      onlyErrors: false,
+      toastTimer: null
+    };
+
+    const $ = id => document.getElementById(id);
+
+    function createElement(tag, className = "", text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = String(text);
+      return element;
+    }
+
+    function getTodayDate() {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: GAME_TIME_ZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(new Date());
+
+      const values = Object.fromEntries(
+        parts.map(part => [part.type, part.value])
+      );
+
+      return `${values.year}-${values.month}-${values.day}`;
+    }
+
+    function numericScore(record) {
+      const score = Number(record.score);
+      return Number.isFinite(score) ? score : 0;
+    }
+
+    function getRank(score) {
+      if (score >= 1500) return "👑 Легенда Deutsch";
+      if (score >= 700) return "💎 Мастер";
+      if (score >= 300) return "🔥 Знаток";
+      if (score >= 100) return "🚀 Исследователь";
+      return "🌱 Новичок";
+    }
+
+    function haptic(type = "selection") {
+      try {
+        if (type === "selection") {
+          tg?.HapticFeedback?.selectionChanged();
+        } else {
+          tg?.HapticFeedback?.notificationOccurred(type);
+        }
+      } catch (_) {}
+    }
+
+    function toast(message, error = false) {
+      const element = $("toast");
+      clearTimeout(state.toastTimer);
+      element.textContent = message;
+      element.classList.toggle("error", error);
+      element.classList.add("visible");
+
+      state.toastTimer = setTimeout(() => {
+        element.classList.remove("visible");
+      }, 3500);
+    }
+
+    function showScreen(name) {
+      state.screen = name;
+
+      for (const screen of ["menu", "quiz", "result"]) {
+        $(`${screen}Screen`).classList.toggle("hidden", screen !== name);
+      }
+
+      window.scrollTo({ top: 0, behavior: "instant" });
+
+      try {
+        if (name === "menu") tg?.BackButton?.hide();
+        else tg?.BackButton?.show();
+      } catch (_) {}
+    }
+
+    function validateData() {
+      for (const [key, module] of Object.entries(MODULES)) {
+        if (module.data.length !== 20) {
+          throw new Error(`Модуль "${module.title}" должен содержать 20 заданий.`);
+        }
+
+        module.data.forEach((question, index) => {
+          if (key === "articles") {
+            if (
+              !question.word ||
+              !question.translation ||
+              !["der", "die", "das"].includes(question.article)
+            ) {
+              throw new Error(
+                `Некорректное задание ${index + 1}: ${module.title}.`
+              );
+            }
+          } else if (
+            !Array.isArray(question.options) ||
+            question.options.length !== 4 ||
+            !question.options.every(option => typeof option === "string") ||
+            !Number.isInteger(question.correctIndex) ||
+            question.correctIndex < 0 ||
+            question.correctIndex > 3 ||
+            !(key === "grammar" ? question.sentence : question.de) ||
+            (key === "grammar" && !question.sentence.includes("___"))
+          ) {
+            throw new Error(
+              `Некорректное задание ${index + 1}: ${module.title}.`
+            );
+          }
+        });
+      }
+    }
+
+    // ============================================================
+    // SUPABASE REST API
+    // ============================================================
+
+    async function apiRequest(query = {}, options = {}) {
+      const url = new URL(SUPABASE_URL);
+
+      for (const [key, value] of Object.entries(query)) {
+        url.searchParams.set(key, String(value));
+      }
+
+      const controller = new AbortController();
+      const timer = setTimeout(
+        () => controller.abort(),
+        REQUEST_TIMEOUT
+      );
+
+      try {
+        const response = await fetch(url.toString(), {
+          method: options.method || "GET",
+          headers: {
+            // sb_publishable_* передаётся в apikey, не как Bearer JWT.
+            apikey: SUPABASE_KEY,
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+          },
+          body: options.body
+            ? JSON.stringify(options.body)
+            : undefined,
+          signal: controller.signal,
+          cache: "no-store"
+        });
+
+        const text = await response.text();
+        let data = null;
+
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (_) {
+            data = { message: text };
+          }
+        }
+
+        if (!response.ok) {
+          const error = new Error(
+            data?.message || `Ошибка API: HTTP ${response.status}`
+          );
+          error.code = data?.code;
+          error.status = response.status;
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        if (error.name === "AbortError") {
+          throw new Error(
+            "Сервер не ответил вовремя. Проверьте подключение и повторите."
+          );
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function fetchAllRecords(filters = {}) {
+      const records = [];
+      let offset = 0;
+
+      // Постраничная загрузка: рейтинг не обрывается на первой
+      // странице стандартного лимита Supabase.
+      while (true) {
+        const page = await apiRequest({
+          select: "record_id,id,name,score,date,module",
+          order: "record_id.asc",
+          limit: PAGE_SIZE,
+          offset,
+          ...filters
+        });
+
+        if (!Array.isArray(page)) {
+          throw new Error("Сервер вернул неожиданный формат данных.");
+        }
+
+        if (page.length === 0) break;
+
+        records.push(...page);
+        offset += page.length;
+
+        // Продолжаем до пустой страницы: это работает и если
+        // серверный лимит меньше PAGE_SIZE.
+      }
+
+      return records;
+    }
+
+    function makeUuid() {
+      if (typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+      }
+
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 15) | 64;
+      bytes[8] = (bytes[8] & 63) | 128;
+
+      const hex = Array.from(
+        bytes,
+        byte => byte.toString(16).padStart(2, "0")
+      ).join("");
+
+      return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        hex.slice(12, 16),
+        hex.slice(16, 20),
+        hex.slice(20)
+      ].join("-");
+    }
+
+    async function findSavedRecord(attempt) {
+      const rows = await apiRequest({
+        select: "record_id,id,name,score,date,module",
+        id: `eq.${player.id}`,
+        date: `eq.${attempt.date}`,
+        module: `eq.${attempt.module}`,
+        limit: 1
+      });
+
+      return Array.isArray(rows) ? rows[0] || null : null;
+    }
+
+    // ============================================================
+    // МЕНЮ, ПРОФИЛЬ И ОБЩИЙ РЕЙТИНГ
+    // ============================================================
+
+    function renderModules() {
+      document.querySelectorAll("[data-module]").forEach(button => {
+        const key = button.dataset.module;
+        const completed = state.completed.has(key);
+        const pending = state.pendingResults.has(key);
+
+        button.disabled =
+          state.loading ||
+          !state.menuReady ||
+          completed;
+
+        button.classList.toggle("completed", completed);
+
+        button.querySelector(".module-status").textContent =
+          completed ? "✅" : pending ? "↻" : "→";
+
+        button.querySelector(".module-description").textContent =
+          completed
+            ? "Сегодня пройдено · до встречи завтра"
+            : pending
+              ? "Результат не отправлен · нажмите для повтора"
+              : MODULES[key].description;
+      });
+    }
+
+    function renderProfile() {
+      const ownRecords = state.records.filter(
+        record => String(record.id) === player.id
+      );
+
+      const total = ownRecords.reduce(
+        (sum, record) => sum + numericScore(record), 0
+      );
+
+      const days = new Set(
+        ownRecords.map(record => record.date).filter(Boolean)
+      ).size;
+
+      const todayTotal = ownRecords
+        .filter(record => record.date === state.date)
+        .reduce((sum, record) => sum + numericScore(record), 0);
+
+      $("profileName").textContent = player.name;
+      $("avatar").textContent =
+        Array.from(player.name.trim())[0]?.toUpperCase() || "D";
+      $("profileRank").textContent = getRank(total);
+      $("totalScore").textContent = total;
+      $("playedDays").textContent = days;
+      $("todayScore").textContent = todayTotal;
+    }
+
+    function renderLeaderboard() {
+      $("tabToday").classList.toggle("active", state.tab === "today");
+      $("tabAll").classList.toggle("active", state.tab === "all");
+      $("tabToday").setAttribute(
+        "aria-selected", String(state.tab === "today")
+      );
+      $("tabAll").setAttribute(
+        "aria-selected", String(state.tab === "all")
+      );
+
+      const container = $("leaderboard");
+      container.replaceChildren();
+
+      if (state.loading) {
+        container.append(
+          createElement("div", "empty", "Загружаем рейтинг…")
+        );
+        $("leaderCount").textContent = "";
+        return;
+      }
+
+      if (!state.menuReady) {
+        container.append(
+          createElement(
+            "div", "empty",
+            "Рейтинг недоступен. Повторите загрузку."
+          )
+        );
+        $("leaderCount").textContent = "";
+        return;
+      }
+
+      const relevant = state.tab === "today"
+        ? state.records.filter(record => record.date === state.date)
+        : state.records;
+
+      const grouped = new Map();
+
+      for (const record of relevant) {
+        const id = String(record.id);
+        if (!id || id === "undefined" || id === "null") continue;
+
+        if (!grouped.has(id)) {
+          grouped.set(id, {
+            id,
+            name: record.name || "Игрок",
+            score: 0,
+            days: new Set(),
+            latestDate: ""
+          });
+        }
+
+        const entry = grouped.get(id);
+        entry.score += numericScore(record);
+        if (record.date) entry.days.add(record.date);
+
+        if ((record.date || "") >= entry.latestDate) {
+          entry.latestDate = record.date || "";
+          entry.name = record.name || "Игрок";
+        }
+      }
+
+      const entries = Array.from(grouped.values()).sort((a, b) => {
+        if (a.score !== b.score) return b.score - a.score;
+        const nameOrder = a.name.localeCompare(b.name, "ru");
+        return nameOrder || a.id.localeCompare(b.id);
+      });
+
+      $("leaderCount").textContent = `Игроков: ${entries.length}`;
+
+      if (!entries.length) {
+        container.append(
+          createElement(
+            "div",
+            "empty",
+            "Пока нет результатов. Стань первым! 🚀"
+          )
+        );
+        return;
+      }
+
+      // Показываем топ-50 и свою позицию, если она ниже.
+      // Суммы при этом рассчитаны по всем загруженным записям.
+      const ownIndex = entries.findIndex(entry => entry.id === player.id);
+      const visible = entries.slice(0, 50).map((entry, index) => ({
+        entry,
+        index
+      }));
+
+      if (ownIndex >= 50) {
+        visible.push({ entry: entries[ownIndex], index: ownIndex });
+      }
+
+      const medals = ["🥇", "🥈", "🥉"];
+
+      for (const { entry, index } of visible) {
+        const row = createElement("div", "leader-row");
+        row.classList.toggle("me", entry.id === player.id);
+
+        row.append(
+          createElement(
+            "div",
+            "leader-place",
+            medals[index] || String(index + 1)
+          )
+        );
+
+        const info = createElement("div");
+
+        info.append(
+          createElement(
+            "div",
+            "leader-name",
+            entry.name + (entry.id === player.id ? " · ты" : "")
+          ),
+          createElement(
+            "div",
+            "leader-meta",
+            state.tab === "today"
+              ? "Баллы за все модули сегодня"
+              : `Сыграно дней: ${entry.days.size}`
+          )
+        );
+
+        row.append(
+          info,
+          createElement("div", "leader-score", entry.score)
+        );
+
+        container.append(row);
+      }
+
+      if (entries.length > 50) {
+        container.append(
+          createElement(
+            "div", "empty",
+            "Показаны первые 50 игроков и ваша позиция."
+          )
+        );
+      }
+    }
+
+    async function loadMenu() {
+      const requestId = ++state.menuRequestId;
+      const dateAtStart = getTodayDate();
+
+      state.date = dateAtStart;
+      state.loading = true;
+      state.menuReady = false;
+
+      $("menuError").classList.add("hidden");
+      $("demoNotice").classList.toggle("hidden", !isDemo);
+      $("dayNote").textContent =
+        `Игровой день: ${state.date} · ${GAME_TIME_ZONE}`;
+
+      renderModules();
+      renderLeaderboard();
+
+      try {
+        let records;
+        let ownToday;
+
+        if (isDemo) {
+          records = [...state.demoRecords];
+          ownToday = records.filter(
+            record => record.date === state.date
+          );
+        } else {
+          // Отдельный запрос для проверки сегодняшних
+          // прохождений игрока.
+          [records, ownToday] = await Promise.all([
+            fetchAllRecords(),
+            fetchAllRecords({
+              id: `eq.${player.id}`,
+              date: `eq.${dateAtStart}`
+            })
+          ]);
+        }
+
+        if (requestId !== state.menuRequestId) return;
+
+        // Если во время загрузки наступил новый игровой день,
+        // повторяем проверку уже для новой даты.
+        if (dateAtStart !== getTodayDate()) {
+          return loadMenu();
+        }
+
+        state.records = records;
+        state.completed = new Set(
+          ownToday
+            .map(record => record.module)
+            .filter(module => Object.hasOwn(MODULES, module))
+        );
+
+        for (const key of state.completed) {
+          state.pendingResults.delete(key);
+          state.drafts.delete(key);
+        }
+
+        state.menuReady = true;
+        renderProfile();
+      } catch (error) {
+        if (requestId !== state.menuRequestId) return;
+
+        console.error("Menu loading:", error);
+        $("menuErrorText").textContent =
+          `Не удалось загрузить данные: ${error.message}`;
+        $("menuError").classList.remove("hidden");
+      } finally {
+        if (requestId === state.menuRequestId) {
+          state.loading = false;
+          renderModules();
+          renderLeaderboard();
+        }
+      }
+    }
+
+    async function goToMenu() {
+      if (state.saving) return;
+      showScreen("menu");
+      await loadMenu();
+    }
+
+    // ============================================================
+    // РЕНДЕР ЗАДАНИЙ
+    // ============================================================
+
+    function optionsFor(module, question) {
+      return module === "articles"
+        ? ["der", "die", "das"]
+        : question.options;
+    }
+
+    function correctAnswerIndex(module, question) {
+      return module === "articles"
+        ? ["der", "die", "das"].indexOf(question.article)
+        : question.correctIndex;
+    }
+
+    function appendSentence(element, sentence) {
+      // Без innerHTML: данные и имена безопасно выводятся текстом.
+      const parts = sentence.split("___");
+
+      parts.forEach((part, index) => {
+        element.append(document.createTextNode(part));
+        if (index < parts.length - 1) {
+          element.append(createElement("span", "gap", "_____"));
+        }
+      });
+    }
+
+    function buildQuestion(attempt, index, review = false) {
+      const question = attempt.questions[index];
+      const options = optionsFor(attempt.module, question);
+      const correctIndex = correctAnswerIndex(attempt.module, question);
+      const selected = attempt.answers[index];
+      const isCorrect = selected === correctIndex;
+
+      const card = createElement("article", "question glass");
+      card.dataset.index = String(index);
+
+      if (review) {
+        card.classList.add(isCorrect ? "is-correct" : "is-wrong");
+      }
+
+      const heading = createElement("div", "question-heading");
+      heading.append(
+        createElement(
+          "span", "", `Задание ${index + 1} / ${attempt.questions.length}`
+        ),
+        createElement(
+          "span", "",
+          review ? (isCorrect ? "✅ Верно" : "❌ Ошибка") : "1 балл"
+        )
+      );
+
+      const text = createElement("div", "question-text");
+
+      if (attempt.module === "articles") {
+        text.textContent = question.word;
+      } else if (attempt.module === "grammar") {
+        appendSentence(text, question.sentence);
+      } else {
+        text.textContent = question.de;
+      }
+
+      card.append(heading, text);
+
+      if (attempt.module === "articles") {
+        card.append(
+          createElement(
+            "p", "question-translation", question.translation
+          )
+        );
+      }
+
+      const answerList = createElement(
+        "div",
+        `answers${attempt.module === "articles" ? " articles" : ""}`
+      );
+
+      options.forEach((option, optionIndex) => {
+        const button = createElement("button", "answer", option);
+        button.type = "button";
+
+        if (review) {
+          button.disabled = true;
+
+          if (optionIndex === correctIndex) {
+            button.classList.add("correct");
+          } else if (optionIndex === selected) {
+            button.classList.add("wrong");
+          }
+        } else {
+          button.classList.toggle("selected", optionIndex === selected);
+          button.setAttribute(
+            "aria-pressed", String(optionIndex === selected)
+          );
+
+          button.addEventListener("click", () => {
+            if (attempt.checked || state.saving) return;
+
+            attempt.answers[index] = optionIndex;
+            card.classList.remove("missing");
+
+            Array.from(answerList.children).forEach((child, childIndex) => {
+              const active = childIndex === optionIndex;
+              child.classList.toggle("selected", active);
+              child.setAttribute("aria-pressed", String(active));
+            });
+
+            updateProgress();
+            haptic();
+          });
+        }
+
+        answerList.append(button);
+      });
+
+      card.append(answerList);
+
+      if (review) {
+        card.append(
+          createElement(
+            "div",
+            `feedback ${isCorrect ? "good" : "bad"}`,
+            isCorrect
+              ? "✓ Четко! Не лох"
+              : `🤡 Лох! Правильно: ${options[correctIndex]}`
+          )
+        );
+      }
+
+      return card;
+    }
+
+    function updateProgress() {
+      const attempt = state.attempt;
+      if (!attempt) return;
+
+      const answered = attempt.answers.filter(
+        answer => answer !== null
+      ).length;
+
+      const total = attempt.questions.length;
+
+      $("progressText").textContent = `${answered} / ${total}`;
+      $("progressFill").style.width = `${answered / total * 100}%`;
+      $("progressBar").setAttribute("aria-valuemax", String(total));
+      $("progressBar").setAttribute("aria-valuenow", String(answered));
+    }
+
+    // ============================================================
+    // ПРОХОЖДЕНИЕ МОДУЛЯ
+    // ============================================================
+
+    async function startModule(key) {
+      if (!Object.hasOwn(MODULES, key)) return;
+
+      if (state.date !== getTodayDate()) {
+        toast("Начался новый игровой день. Обновляем меню.");
+        await loadMenu();
+        return;
+      }
+
+      if (state.loading || !state.menuReady) return;
+
+      if (state.completed.has(key)) {
+        toast("Этот модуль уже пройден сегодня.");
+        return;
+      }
+
+      const pending = state.pendingResults.get(key);
+
+      if (pending) {
+        state.attempt = pending;
+        state.onlyErrors = false;
+        showScreen("result");
+        renderResult();
+        return;
+      }
+
+      let attempt = state.drafts.get(key);
+
+      if (!attempt || attempt.date !== state.date) {
+        // Снимок заданий: ответы соответствуют именно этим данным.
+        const questions = JSON.parse(JSON.stringify(MODULES[key].data));
+
+        attempt = {
+          module: key,
+          date: state.date,
+          questions,
+          answers: Array(questions.length).fill(null),
+          checked: false,
+          score: 0,
+          saved: false,
+          savedScore: null,
+          payload: null,
+          saveMessage: "",
+          saveError: false
+        };
+
+        state.drafts.set(key, attempt);
+      }
+
+      state.attempt = attempt;
+      $("quizTitle").textContent = MODULES[key].title;
+      $("checkButton").disabled = false;
+      $("checkButton").textContent = "Проверить ответы";
+
+      const container = $("quizQuestions");
+      container.replaceChildren();
+
+      attempt.questions.forEach((_, index) => {
+        container.append(buildQuestion(attempt, index));
+      });
+
+      updateProgress();
+      showScreen("quiz");
+      haptic();
+    }
+
+    async function leaveQuiz() {
+      if (state.saving) return;
+
+      const hasAnswers = state.attempt?.answers.some(
+        answer => answer !== null
+      );
+
+      if (
+        hasAnswers &&
+        !window.confirm(
+          "Вернуться в меню? Выбранные ответы останутся " +
+          "в памяти страницы до перезагрузки."
+        )
+      ) {
+        return;
+      }
+
+      await goToMenu();
+    }
+
+    async function checkAnswers() {
+      const attempt = state.attempt;
+      if (!attempt || attempt.checked || state.saving) return;
+
+      if (attempt.date !== getTodayDate()) {
+        toast(
+          "Начался новый день. Откройте модуль заново из меню.",
+          true
+        );
+        state.drafts.delete(attempt.module);
+        await goToMenu();
+        return;
+      }
+
+      const missing = [];
+
+      attempt.answers.forEach((answer, index) => {
+        if (answer === null) missing.push(index);
+      });
+
+      if (missing.length) {
+        $("quizQuestions").querySelectorAll(".question").forEach(card => {
+          card.classList.toggle(
+            "missing",
+            missing.includes(Number(card.dataset.index))
+          );
+        });
+
+        toast(
+          "Эй, ты ответил не на все вопросы! Давай доделывай.",
+          true
+        );
+        haptic("error");
+
+        const first = $("quizQuestions").querySelector(
+          `[data-index="${missing[0]}"]`
+        );
+
+        first?.scrollIntoView({
+          behavior: window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches ? "instant" : "smooth",
+          block: "start"
+        });
+
+        return;
+      }
+
+      attempt.checked = true;
+      attempt.score = attempt.questions.reduce(
+        (sum, question, index) => {
+          return sum + (
+            attempt.answers[index] ===
+            correctAnswerIndex(attempt.module, question)
+              ? 1
+              : 0
+          );
+        },
+        0
+      );
+
+      attempt.payload = {
+        // Один record_id для всех повторов отправки:
+        // при потере ответа сервера не создаём новую попытку.
+        record_id: makeUuid(),
+        id: isDemo ? "demo" : Number(player.id),
+        name: player.name,
+        score: attempt.score,
+        date: attempt.date,
+        module: attempt.module
+      };
+
+      state.pendingResults.set(attempt.module, attempt);
+      state.drafts.delete(attempt.module);
+      state.onlyErrors = false;
+
+      // Подсветка находится в разборе на экране результата.
+      showScreen("result");
+      renderResult();
+      haptic(attempt.score >= 10 ? "success" : "warning");
+
+      await saveAttempt(attempt);
+    }
+
+    // ============================================================
+    // СОХРАНЕНИЕ РЕЗУЛЬТАТА
+    // ============================================================
+
+    function markAttemptSaved(attempt, record) {
+      attempt.saved = true;
+      attempt.savedScore = numericScore(record);
+      attempt.saveError = false;
+
+      const sameAttempt = record.record_id === attempt.payload.record_id;
+
+      attempt.saveMessage = isDemo
+        ? "Демо-результат сохранён в памяти страницы."
+        : sameAttempt
+          ? "Результат сохранён в общем рейтинге ✅"
+          : (
+              "Этот модуль уже был сохранён сегодня. " +
+              `В рейтинге учтено: ${attempt.savedScore} баллов. ` +
+              "Новые ответы не заменили сохранённый результат."
+            );
+
+      state.pendingResults.delete(attempt.module);
+
+      if (attempt.date === state.date) {
+        state.completed.add(attempt.module);
+      }
+
+      if (!state.records.some(
+        item => item.record_id === record.record_id
+      )) {
+        state.records.push(record);
+      }
+    }
+
+    async function saveAttempt(attempt) {
+      if (state.saving || attempt.saved) return;
+
+      state.saving = true;
+      attempt.saveError = false;
+      attempt.saveMessage = "Отправляем результат…";
+      renderResult();
+
+      try {
+        if (isDemo) {
+          const existing = state.demoRecords.find(record =>
+            record.id === player.id &&
+            record.date === attempt.date &&
+            record.module === attempt.module
+          );
+
+          const record = existing || attempt.payload;
+
+          if (!existing) state.demoRecords.push(record);
+
+          markAttemptSaved(attempt, record);
+        } else {
+          // Проверяем, не сохранилась ли предыдущая отправка,
+          // ответ на которую мог потеряться из-за сбоя сети.
+          const existing = await findSavedRecord(attempt);
+
+          if (existing) {
+            markAttemptSaved(attempt, existing);
+          } else {
+            try {
+              const rows = await apiRequest({}, {
+                method: "POST",
+                headers: {
+                  Prefer: "return=representation"
+                },
+                body: attempt.payload
+              });
+
+              const record = Array.isArray(rows) ? rows[0] : null;
+
+              if (!record) {
+                throw new Error(
+                  "Сервер не вернул сохранённую запись. Повторите отправку."
+                );
+              }
+
+              markAttemptSaved(attempt, record);
+            } catch (error) {
+              // Уникальный индекс защищает от двух устройств,
+              // двух вкладок и одновременных запросов.
+              if (error.code === "23505") {
+                const saved = await findSavedRecord(attempt);
+                if (!saved) throw error;
+                markAttemptSaved(attempt, saved);
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Result saving:", error);
+        attempt.saveError = true;
+        attempt.saveMessage =
+          `Результат не подтверждён сервером: ${error.message} ` +
+          "Повторите отправку. Не закрывайте страницу, " +
+          "пока результат не будет сохранён.";
+        toast("Не удалось подтвердить сохранение результата.", true);
+      } finally {
+        state.saving = false;
+        renderResult();
+        renderModules();
+      }
+    }
+
+    // ============================================================
+    // ЭКРАН РЕЗУЛЬТАТА И ПРОСМОТР ОШИБОК
+    // ============================================================
+
+    function renderResult() {
+      const attempt = state.attempt;
+      if (!attempt?.checked) return;
+
+      const total = attempt.questions.length;
+      const percentage = attempt.score / total;
+
+      $("resultModule").textContent = MODULES[attempt.module].title;
+
+      $("resultEmoji").textContent =
+        percentage === 1 ? "👑" :
+        percentage >= .75 ? "😎" :
+        percentage >= .4 ? "🍺" : "💀";
+
+      $("resultTitle").textContent =
+        percentage === 1 ? "Абсолютный гений" :
+        percentage >= .75 ? "Почти немец" :
+        percentage >= .4 ? "Нормально, пойдет" :
+        "Тотальный лох";
+
+      $("resultScore").replaceChildren(
+        document.createTextNode(String(attempt.score)),
+        createElement("span", "", ` / ${total}`)
+      );
+
+      $("resultMessage").textContent =
+        percentage === 1
+          ? "0% лоха. Гёте гордился бы тобой."
+          : percentage >= .75
+            ? "Очень достойно. Пару раз ошибся, но не критично."
+            : percentage >= .4
+              ? "Половину знаешь, половину угадал."
+              : `Правильно только ${Math.round(percentage * 100)}%. Тебя бы даже за пивом не отправили.`;
+
+      $("saveStatus").textContent =
+        attempt.saveMessage || "Результат готов к отправке.";
+      $("saveStatus").classList.toggle("error", attempt.saveError);
+      $("saveStatus").classList.toggle("success", attempt.saved);
+
+      $("retrySaveButton").classList.toggle(
+        "hidden",
+        attempt.saved || state.saving
+      );
+      $("retrySaveButton").disabled = state.saving;
+      $("resultMenuButton").disabled = state.saving;
+
+      $("resultMenuButton").textContent =
+        state.saving
+          ? "Сохраняем результат…"
+          : "Вернуться в Главное меню";
+
+      $("errorsButton").textContent = state.onlyErrors
+        ? "Показать все ответы"
+        : "Показать только где лох 🤡";
+
+      $("errorsButton").setAttribute(
+        "aria-pressed", String(state.onlyErrors)
+      );
+
+      $("reviewTitle").textContent = state.onlyErrors
+        ? `Ошибки: ${total - attempt.score}`
+        : "Разбор всех ответов";
+
+      const container = $("reviewQuestions");
+      container.replaceChildren();
+
+      let shown = 0;
+
+      attempt.questions.forEach((question, index) => {
+        const correct =
+          attempt.answers[index] ===
+          correctAnswerIndex(attempt.module, question);
+
+        if (state.onlyErrors && correct) return;
+
+        container.append(buildQuestion(attempt, index, true));
+        shown++;
+      });
+
+      if (!shown) {
+        container.append(
+          createElement(
+            "div", "empty glass",
+            "Ошибок нет! Все ответы правильные 🎉"
+          )
+        );
+      }
+    }
+
+    // ============================================================
+    // СОБЫТИЯ И ЗАПУСК
+    // ============================================================
+
+    $("modules").addEventListener("click", event => {
+      const button = event.target.closest("[data-module]");
+      if (!button || button.disabled) return;
+      startModule(button.dataset.module);
+    });
+
+    $("tabToday").addEventListener("click", () => {
+      state.tab = "today";
+      renderLeaderboard();
+      haptic();
+    });
+
+    $("tabAll").addEventListener("click", () => {
+      state.tab = "all";
+      renderLeaderboard();
+      haptic();
+    });
+
+    $("reloadButton").addEventListener("click", loadMenu);
+    $("quizBack").addEventListener("click", leaveQuiz);
+    $("checkButton").addEventListener("click", checkAnswers);
+
+    $("retrySaveButton").addEventListener("click", () => {
+      if (state.attempt) saveAttempt(state.attempt);
+    });
+
+    $("resultMenuButton").addEventListener("click", async () => {
+      if (state.saving) return;
+
+      if (
+        !state.attempt?.saved &&
+        !window.confirm(
+          "Результат ещё не подтверждён сервером. " +
+          "Он останется в памяти страницы, и отправку можно " +
+          "повторить через карточку модуля. Вернуться в меню?"
+        )
+      ) {
+        return;
+      }
+
+      await goToMenu();
+    });
+
+    $("errorsButton").addEventListener("click", () => {
+      state.onlyErrors = !state.onlyErrors;
+      renderResult();
+      haptic();
+    });
+
+    try {
+      tg?.BackButton?.onClick(() => {
+        if (state.screen === "quiz") leaveQuiz();
+        else if (state.screen === "result") {
+          $("resultMenuButton").click();
+        }
+      });
+    } catch (_) {}
+
+    // Обновляем дату после возвращения в приложение.
+    document.addEventListener("visibilitychange", () => {
+      if (
+        !document.hidden &&
+        state.screen === "menu" &&
+        !state.loading &&
+        state.date !== getTodayDate()
+      ) {
+        loadMenu();
+      }
+    });
+
+    // Защита от незаметной смены даты, пока меню открыто.
+    setInterval(() => {
+      if (
+        state.screen === "menu" &&
+        !state.loading &&
+        state.date !== getTodayDate()
+      ) {
+        loadMenu();
+      }
+    }, 30000);
+
+    window.addEventListener("beforeunload", event => {
+      if (state.pendingResults.size || state.saving) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    });
+
+    async function init() {
+      $("profileName").textContent = player.name;
+      $("avatar").textContent =
+        Array.from(player.name)[0]?.toUpperCase() || "D";
+
+      try {
+        validateData();
+      } catch (error) {
+        $("menuErrorText").textContent = error.message;
+        $("menuError").classList.remove("hidden");
+        $("reloadButton").classList.add("hidden");
+        toast(error.message, true);
+        return;
+      }
+
+      showScreen("menu");
+      await loadMenu();
+    }
+
+    init();
+  </script>
+</body>
+</html>
