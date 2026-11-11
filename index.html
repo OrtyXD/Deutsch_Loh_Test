@@ -623,10 +623,6 @@
       Старые записи и баллы не переписываются.
     */
 
-    // ============================================================
-    // БАЗЫ ЕЖЕДНЕВНЫХ КВЕСТОВ
-    // ============================================================
-
     const moduleArticles = [
       {word:"Bruder",translation:"брат",article:"der"},
       {word:"Schwester",translation:"сестра",article:"die"},
@@ -696,10 +692,6 @@
       {sentence:"Ich möchte einen Kaffee ___.",options:["bestellt","bestellst","bestellen","bestelle"],correctIndex:2}
     ];
 
-    // ============================================================
-    // HARD: АРТИКЛИ/ПАДЕЖИ И ГРАММАТИКА
-    // ============================================================
-
     const moduleArticlesHard = [
       {sentence:"Ich sehe ___ kleinen Hund.",options:["der","den","dem","des"],correctIndex:1},
       {sentence:"Sie hilft ___ alten Nachbarin.",options:["die","den","der","das"],correctIndex:2},
@@ -746,10 +738,6 @@
       {sentence:"Kannst du mir sagen, ___ der nächste Bus kommt?",options:["dass","weil","denn","wann"],correctIndex:3}
     ];
 
-    // ============================================================
-    // HARD: КОНСТРУКТОР — 10 DE→RU + 10 RU→DE
-    // ============================================================
-
     const moduleTranslationHard = [
       {direction:"de-ru",question:"Meine Schwester kauft frisches Brot.",correctWords:["Моя","сестра","покупает","свежий","хлеб"],decoyWords:["брат","старый","продаёт"]},
       {direction:"de-ru",question:"Wir treffen uns morgen vor dem Kino.",correctWords:["Мы","встречаемся","завтра","перед","кинотеатром"],decoyWords:["вчера","за","работаем"]},
@@ -773,10 +761,6 @@
       {direction:"ru-de",question:"Когда ты мне позвонишь?",correctWords:["Wann","rufst","du","mich","an"],decoyWords:["ruft","mir","auf"]},
       {direction:"ru-de",question:"Я хотел бы заказать чай без сахара.",correctWords:["Ich","möchte","einen","Tee","ohne","Zucker","bestellen"],decoyWords:["möchtest","ein","mit"]}
     ];
-
-    // ============================================================
-    // УЧЁБА: КНИЖНЫЕ БЛОКИ
-    // ============================================================
 
     const studyPersonalpronomen = {
       choice:[
@@ -903,10 +887,6 @@
         {line:"B: Ja. Danach muss ich ___. (einkaufen)",options:["kaufe ein","einkauft","eingekauft","einkaufen"],correctIndex:3}
       ]
     };
-
-    // ============================================================
-    // ТЕОРИЯ И КАТАЛОГ
-    // ============================================================
 
     const MODULES = {
       articles:{
@@ -1184,10 +1164,6 @@
       }
     };
 
-    // ============================================================
-    // НАСТРОЙКИ И TELEGRAM
-    // ============================================================
-
     const SUPABASE_URL =
       "https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
     const SUPABASE_KEY =
@@ -1331,11 +1307,6 @@
 
     function draftKey(key,level) {return `${key}:${level}`;}
 
-    // ============================================================
-    // НОРМАЛИЗАЦИЯ ДАННЫХ
-    // Каждый оцениваемый ответ — unit с собственным индексом.
-    // ============================================================
-
     function prepareUnits(key,level) {
       const module=MODULES[key];
       if(module.kind==="study") {
@@ -1402,10 +1373,6 @@
         });
       });
     }
-
-    // ============================================================
-    // ЭКРАНЫ И MODAL
-    // ============================================================
 
     function showScreen(name) {
       state.screen=name;
@@ -1504,10 +1471,6 @@
       }
     });
 
-    // ============================================================
-    // SUPABASE
-    // ============================================================
-
     async function apiRequest(query={},options={}) {
       const url=new URL(SUPABASE_URL);
       Object.entries(query).forEach(([key,value])=>url.searchParams.set(key,String(value)));
@@ -1594,10 +1557,6 @@
       else if(record.date===state.date) state.dailyCompleted.add(record.module);
     }
 
-    // ============================================================
-    // МЕНЮ, ПРОФИЛЬ, РЕЙТИНГ
-    // ============================================================
-
     function buildCards() {
       $("questCards").replaceChildren();
       $("studyCards").replaceChildren();
@@ -1665,59 +1624,112 @@
       $("rankProgressBar").setAttribute("aria-valuetext",$("nextRankText").textContent);
     }
 
-    function renderLeaderboard() {
-      $("tabToday").classList.toggle("active",state.ratingTab==="today");
-      $("tabAll").classList.toggle("active",state.ratingTab==="all");
-      $("tabToday").setAttribute("aria-selected",String(state.ratingTab==="today"));
-      $("tabAll").setAttribute("aria-selected",String(state.ratingTab==="all"));
-      const container=$("leaderboard");
-      container.replaceChildren();
-      $("leaderCount").textContent="";
-      if(state.loading||!state.ready) {
-        container.append(el("div","empty",state.loading?"Загружаем рейтинг…":"Рейтинг недоступен. Повтори загрузку."));
-        return;
-      }
-      const rows=state.ratingTab==="today"
-        ?state.records.filter(r=>r.date===state.date):state.records;
-      const grouped=new Map();
-      rows.forEach(record=>{
-        if(record.id==null) return;
-        const id=String(record.id);
-        if(!grouped.has(id)) grouped.set(id,{
-          id,name:record.name||"Игрок",score:0,days:new Set(),latest:""
-        });
-        const entry=grouped.get(id);
-        entry.score+=scoreOf(record);
-        if(record.date) entry.days.add(record.date);
-        if((record.date||"")>=entry.latest) {
-          entry.latest=record.date||"";
-          entry.name=record.name||"Игрок";
-        }
+function renderLeaderboard() {
+  $("tabToday").classList.toggle("active", state.ratingTab === "today");
+  $("tabAll").classList.toggle("active", state.ratingTab === "all");
+  $("tabToday").setAttribute("aria-selected", String(state.ratingTab === "today"));
+  $("tabAll").setAttribute("aria-selected", String(state.ratingTab === "all"));
+
+  const container = $("leaderboard");
+  container.replaceChildren();
+  $("leaderCount").textContent = "";
+
+  if (state.loading || !state.ready) {
+    container.append(el(
+      "div",
+      "empty",
+      state.loading
+        ? "Загружаем рейтинг…"
+        : "Рейтинг недоступен. Повтори загрузку."
+    ));
+    return;
+  }
+
+  const rows = state.ratingTab === "today"
+    ? state.records.filter(r => r.date === state.date)
+    : state.records;
+
+  const grouped = new Map();
+
+  rows.forEach(record => {
+    if (record.id == null) return;
+
+    const id = String(record.id);
+
+    if (!grouped.has(id)) {
+      grouped.set(id, {
+        id,
+        name: record.name || "Игрок",
+        score: 0,
+        days: new Set(),
+        latest: ""
       });
-      const entries=Array.from(grouped.values()).sort((a,b)=>
-        b.score-a.score||a.name.localeCompare(b.name,"ru")||a.id.localeCompare(b.id));
-      $("leaderCount").textContent=`Игроков: ${entries.length}`;
-      if(!entries.length) {
-        container.append(el("div","empty","Пока пусто. Стань первым гением 🚀"));return;
-      }
-      const ownIndex=entries.findIndex(r=>r.id===player.id);
-      const visible=entries.slice(0,50).map((entry,index)=>({entry,index}));
-      if(ownIndex>=50) visible.push({entry:entries[ownIndex],index:ownIndex});
-      const medals=["🥇","🥈","🥉"];
-      visible.forEach(({entry,index})=>{
-        const row=el("div","leader-row");
-        row.classList.toggle("me",entry.id===player.id);
-        const info=el("div");
-        info.append(
-          el("div","leader-name",entry.name+(entry.id===player.id?" · ты":"")),
-          el("div","leader-meta",state.ratingTab==="today"
-            ?"Квесты + учебные награды сегодня":`Сыграно дней: ${entry.days.size}`)
-        );
-        row.append(el("div","muted",medals[index]||String(index+1)),info,el("div","leader-score",entry.score));
-        container.append(row);
-      });
-      if(entries.length>50) container.append(el("div","empty","Топ-50 и твоя позиция."));
     }
+
+    const entry = grouped.get(id);
+    entry.score += scoreOf(record);
+
+    if (record.date) entry.days.add(record.date);
+
+    if ((record.date || "") >= entry.latest) {
+      entry.latest = record.date || "";
+      entry.name = record.name || "Игрок";
+    }
+  });
+
+  const entries = Array.from(grouped.values()).sort((a, b) =>
+    b.score - a.score ||
+    a.name.localeCompare(b.name, "ru") ||
+    a.id.localeCompare(b.id)
+  );
+
+  $("leaderCount").textContent = `Игроков: ${entries.length}`;
+
+  if (!entries.length) {
+    container.append(el("div", "empty", "Пока пусто. Стань первым гением 🚀"));
+    return;
+  }
+
+  const ownIndex = entries.findIndex(r => r.id === player.id);
+  const visible = entries.slice(0, 50).map((entry, index) => ({ entry, index }));
+
+  if (ownIndex >= 50) {
+    visible.push({ entry: entries[ownIndex], index: ownIndex });
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+
+  visible.forEach(({ entry, index }) => {
+    const row = el("div", "leader-row");
+    row.classList.toggle("me", entry.id === player.id);
+
+    const info = el("div");
+    info.append(
+      el("div", "leader-name", entry.name + (entry.id === player.id ? " · ты" : "")),
+      el(
+        "div",
+        "leader-meta",
+        `${getRank(entry.score)} • ${
+          state.ratingTab === "today"
+            ? "Баллы за сегодня"
+            : `Сыграно дней: ${entry.days.size}`
+        }`
+      )
+    );
+
+    row.append(
+      el("div", "muted", medals[index] || String(index + 1)),
+      info,
+      el("div", "leader-score", entry.score)
+    );
+
+    container.append(row);
+  });
+
+  if (entries.length > 50) {
+    container.append(el("div", "empty", "Топ-50 и твоя позиция."));
+  }
+}
 
     async function loadData() {
       const requestId=++state.loadId,dateAtStart=getTodayDate();
@@ -1775,10 +1787,6 @@
       if(!state.loading) await loadData();
     }
 
-    // ============================================================
-    // ТЕОРИЯ
-    // ============================================================
-
     function openTheory(key) {
       const module=MODULES[key];
       if(state.busy||state.starting||!state.valid||module?.kind!=="study") return;
@@ -1788,7 +1796,6 @@
       $("theoryTitle").textContent=module.title;
       $("theorySubtitle").textContent=module.subtitle;
       $("theoryContent").innerHTML=module.theoryHTML;
-
       renderTheoryStatus();
       showScreen("theory");
       haptic();
@@ -1808,10 +1815,6 @@
           ?"✅ Награда уже получена. Тренируйся сколько угодно."
           :`${count} оцениваемых ответов в трёх блоках. Минимум 80% → 50 баллов один раз за всё время.`;
     }
-
-    // ============================================================
-    // ЗАПУСК ТЕСТА
-    // ============================================================
 
     async function startModule(key,level="medium",fresh=false) {
       const module=MODULES[key];
@@ -1977,6 +1980,18 @@
       if(q.type==="builder") {
         if(review) {
           const correctSentence=q.correctWords.join(" ");
+
+          // Показываем собранную пользователем фразу перед вердиктом.
+          const userAnswer=el(
+            "div",
+            "user-answer",
+            "Твой ответ: " +
+              (selectedWords(attempt,index).join(" ") || "Ничего не выбрано")
+          );
+          userAnswer.style.marginBottom="10px";
+          userAnswer.style.color="var(--muted)";
+          card.append(userAnswer);
+
           card.append(el("div",`feedback ${correct?"good":"bad"}`,
             correct?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${correctSentence}`));
         } else card.append(buildBuilder(attempt,index,card));
@@ -2015,10 +2030,6 @@
         correct?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${q.options[q.correctIndex]}`));
       return card;
     }
-
-    // ============================================================
-    // ДИАЛОГ
-    // ============================================================
 
     function buildDialogueLine(attempt,index,review=false) {
       const q=attempt.units[index];
@@ -2061,10 +2072,6 @@
       }
       return node;
     }
-
-    // ============================================================
-    // КОНСТРУКТОР
-    // ============================================================
 
     function buildBuilder(attempt,index,card) {
       const root=el("div","builder");
@@ -2173,10 +2180,6 @@
       else await goRoot("quests");
     }
 
-    // ============================================================
-    // ПРОВЕРКА И ОЧКИ
-    // ============================================================
-
     async function checkAnswers() {
       const attempt=state.attempt;
       if(!attempt||attempt.checked||state.busy) return;
@@ -2247,10 +2250,6 @@
       haptic(attempt.correctCount/attempt.units.length>=.4?"success":"warning");
       await processAttempt(attempt);
     }
-
-    // ============================================================
-    // СОХРАНЕНИЕ
-    // ============================================================
 
     function resolveAttempt(attempt,record) {
       rememberRecord(record);
@@ -2331,10 +2330,6 @@
       }
     }
 
-    // ============================================================
-    // РЕЗУЛЬТАТЫ
-    // ============================================================
-
     function renderResult() {
       const attempt=state.attempt;
       if(!attempt?.checked) return;
@@ -2411,10 +2406,6 @@
         else goRoot("quests");
       }
     }
-
-    // ============================================================
-    // СОБЫТИЯ И ЗАПУСК
-    // ============================================================
 
     document.querySelectorAll("[data-tab]").forEach(button=>{
       button.addEventListener("click",()=>{
