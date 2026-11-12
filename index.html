@@ -1,3 +1,6 @@
+Готовый `index.html`: флип-карточки показывают русский перевод, тренажёр артиклей использует только **`der / die / das`**, а перенесённые падежные задания загружаются из `quiz_grammar`.
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,232 +9,633 @@
         content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1020">
   <title>Deutsch Quest</title>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     :root {
-      color-scheme:dark;
-      --bg:#0b1020;
-      --panel:rgba(255,255,255,.065);
-      --panel-strong:rgba(255,255,255,.11);
-      --border:rgba(255,255,255,.11);
-      --text:#f4f6ff;
-      --muted:#a6aecb;
-      --primary:#9280ff;
-      --green:#60dfad;
-      --red:#ff8299;
-      --yellow:#ffcf77;
-      --safe-top:max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px));
-      --safe-bottom:max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px));
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,.065);
+      --panel-strong: rgba(255,255,255,.11);
+      --border: rgba(255,255,255,.11);
+      --text: #f4f6ff;
+      --muted: #a6aecb;
+      --primary: #9280ff;
+      --green: #60dfad;
+      --red: #ff8299;
+      --yellow: #ffcf77;
+      --safe-top: max(
+        env(safe-area-inset-top,0px),
+        var(--tg-content-safe-area-inset-top,0px)
+      );
+      --safe-bottom: max(
+        env(safe-area-inset-bottom,0px),
+        var(--tg-content-safe-area-inset-bottom,0px)
+      );
     }
-    *{box-sizing:border-box}
-    html{min-height:100%;background:var(--bg)}
-    body{
-      margin:0;min-height:100vh;min-height:100dvh;
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(ellipse at 0% 0%,rgba(116,83,255,.2),transparent 45%),
-        radial-gradient(ellipse at 100% 25%,rgba(46,173,175,.13),transparent 40%),
-        var(--bg);
-      overflow-x:hidden;-webkit-tap-highlight-color:transparent;
-    }
-    button,select{font:inherit;color:inherit}
-    button{cursor:pointer;touch-action:manipulation}
-    button:disabled{cursor:default;opacity:.5}
-    button:focus-visible,select:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
-    .hidden{display:none!important}
-    .app{width:min(100%,720px);margin:auto;padding:calc(20px + var(--safe-top)) 18px calc(115px + var(--safe-bottom))}
-    .glass{
-      background:var(--panel);border:1px solid var(--border);border-radius:24px;
-      -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
-      box-shadow:0 16px 40px rgba(0,0,0,.13);
-    }
-    .screen{animation:appear .22s ease}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand-row{margin-bottom:22px}
-    .brand{font-size:22px;font-weight:850;letter-spacing:-.7px}
-    .brand span{color:var(--primary)}
-    h1,h2,h3,p{margin-top:0}
-    h1{font-size:clamp(25px,6vw,34px);letter-spacing:-.8px;margin-bottom:10px}
-    h2{font-size:20px}
-    .muted{color:var(--muted);line-height:1.6}
-    .small{font-size:13px}
-    .pill{display:inline-block;padding:7px 11px;border-radius:100px;background:rgba(146,128,255,.12);border:1px solid rgba(146,128,255,.2);color:#c4baff;font-size:12px}
-    .notice{padding:13px 15px;margin-bottom:16px;border-radius:16px;background:rgba(255,207,119,.08);border:1px solid rgba(255,207,119,.2);color:var(--yellow);font-size:13px;line-height:1.6}
-    .cards{display:grid;gap:13px}
-    .module-card{width:100%;display:flex;align-items:center;gap:15px;padding:20px;text-align:left;transition:transform .18s ease,background .18s ease}
-    .module-card:not(:disabled):active{transform:scale(.98)}
-    .module-card:not(:disabled):hover{background:var(--panel-strong)}
-    .module-icon{flex:0 0 48px;width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:rgba(146,128,255,.13);font-size:25px}
-    .module-copy{flex:1;min-width:0}
-    .module-copy strong{display:block;margin-bottom:5px;font-size:18px;overflow-wrap:anywhere}
-    .subtitle{display:block;color:var(--muted);font-size:13px;line-height:1.5}
-    .card-meta{display:block;margin-top:6px;color:#b9b0e8;font-size:11px;line-height:1.5}
-    .module-status{font-size:21px}
-    .completed{border-color:rgba(96,223,173,.3);background:rgba(96,223,173,.065)}
-    .gym{padding:20px;margin-top:18px}
-    .gym-buttons{display:grid;gap:10px}
-    .gym-button{width:100%;display:flex;align-items:center;gap:12px;padding:15px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.04);text-align:left}
-    .gym-button .emoji{font-size:25px}
-    .gym-button strong{display:block;margin-bottom:4px}
-    .gym-button small{color:var(--muted);line-height:1.4}
-    .button{min-height:49px;padding:14px 18px;border-radius:16px;border:1px solid var(--border);background:var(--panel-strong);font-weight:750;transition:transform .18s ease}
-    .button:not(:disabled):active{transform:scale(.98)}
-    .primary{border-color:transparent;background:linear-gradient(135deg,#9683ff,#6753e8);box-shadow:0 8px 24px rgba(103,83,232,.24);color:white}
-    .full{width:100%}
-    .icon-button{flex:0 0 42px;width:42px;height:42px;border:1px solid var(--border);border-radius:13px;background:var(--panel);font-size:20px}
-    .quiz-top{margin-bottom:18px}
-    .quiz-title{flex:1;font-size:19px;font-weight:800;overflow-wrap:anywhere}
-    .progress-shell{position:sticky;top:calc(8px + var(--safe-top));z-index:5;padding:14px;margin-bottom:18px;border-radius:17px;background:rgba(17,22,43,.96)}
-    .progress-label{font-size:12px;color:var(--muted);margin-bottom:9px}
-    .progress-track{height:6px;overflow:hidden;border-radius:20px;background:rgba(255,255,255,.09)}
-    .progress-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--primary),var(--green));transition:width .25s ease}
-    .boss-hud{padding-bottom:12px;margin-bottom:13px;border-bottom:1px solid rgba(255,130,153,.2)}
-    .hearts{display:flex;gap:5px;font-size:24px}
-    .heart.lost{filter:grayscale(1);opacity:.3}
-    .boss-label{color:var(--red);font-size:11px;letter-spacing:1px;font-weight:800}
-    .boss-hero{padding:25px 20px}
-    .boss-portrait{font-size:65px;text-align:center;margin:15px 0}
-    .questions{display:grid;gap:15px}
-    .question{padding:19px;scroll-margin-top:calc(155px + var(--safe-top));transition:border-color .2s ease}
-    .question-heading{color:var(--muted);font-size:12px;margin-bottom:14px}
-    .question-text{font-size:21px;font-weight:750;line-height:1.45;overflow-wrap:anywhere;margin-bottom:8px}
-    .gap{color:var(--yellow);letter-spacing:2px}
-    .answers{display:grid;gap:9px;margin-top:18px}
-    .answer{min-height:48px;padding:12px 13px;border:1px solid var(--border);border-radius:13px;background:rgba(255,255,255,.035);text-align:left;line-height:1.4}
-    .selected{background:rgba(146,128,255,.22);border-color:var(--primary)}
-    .correct{color:#a9f6d6;background:rgba(96,223,173,.12);border-color:rgba(96,223,173,.55)}
-    .wrong{color:#ffb4c2;background:rgba(255,130,153,.12);border-color:rgba(255,130,153,.55)}
-    .answer:disabled{opacity:1}
-    .is-correct{border-color:rgba(96,223,173,.4)!important}
-    .is-wrong{border-color:rgba(255,130,153,.45)!important}
-    .missing{border-color:var(--yellow)!important;animation:shake .3s ease}
-    .hit{animation:shake .3s ease}
-    .feedback{margin-top:13px;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
-    .good{color:var(--green)}
-    .bad{color:var(--red)}
-    .builder{margin-top:18px}
-    .builder-answer,.builder-bank{display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px}
-    .builder-answer{min-height:100px;padding:13px;border:1px dashed rgba(146,128,255,.45);border-radius:16px;background:rgba(146,128,255,.055)}
-    .builder-bank{margin-top:12px;min-height:90px;padding:12px;border-radius:16px;background:rgba(255,255,255,.025)}
-    .builder-placeholder{margin:auto 0;color:var(--muted);font-size:13px;line-height:1.5}
-    .word-token{min-height:44px;padding:10px 13px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.085);font-size:15px;line-height:1.3;user-select:none;-webkit-user-select:none}
-    .builder-answer .word-token{background:rgba(146,128,255,.2);border-color:rgba(146,128,255,.4)}
-    .word-token.used{visibility:hidden;pointer-events:none}
-    .builder-tools{margin-top:12px}
-    .builder-tools .button{min-height:44px;padding:10px 14px;font-size:13px}
-    .block-heading{margin-top:12px;padding:7px 2px}
-    .block-heading h2{margin-bottom:5px;color:#c4baff}
-    .block-heading p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
-    .dialogue-line{padding:14px 0;border-bottom:1px solid var(--border);line-height:2;scroll-margin-top:calc(155px + var(--safe-top))}
-    .dialogue-line:last-child{border-bottom:0}
-    .gap-select{max-width:100%;min-height:44px;padding:9px 30px 9px 12px;margin:0 5px;background:#222642;color:var(--text);border:1px solid rgba(146,128,255,.4);border-radius:11px;font-size:16px}
-    .gap-select option{background:#222642}
-    .gap-review{display:inline-block;padding:2px 10px;margin:0 4px;border-radius:9px}
 
-    .flash-stage{width:100%;perspective:1200px;-webkit-perspective:1200px;margin:22px 0}
-    .flash-card{display:block;width:100%;min-height:clamp(280px,45vh,400px);padding:0;border:0;border-radius:24px;background:transparent;text-align:center}
-    .flash-inner{position:relative;display:grid;width:100%;min-height:inherit;border-radius:inherit;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transform:rotateY(0deg);transition:transform .55s cubic-bezier(.2,.7,.2,1);will-change:transform}
-    .flash-card.flipped .flash-inner{transform:rotateY(180deg)}
-    .flash-card.resetting .flash-inner{transition:none!important}
-    .flash-face{grid-area:1 / 1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;min-height:inherit;padding:30px 22px;border:1px solid rgba(146,128,255,.25);border-radius:24px;background:radial-gradient(circle at 15% 15%,rgba(146,128,255,.14),transparent 65%),#151a30;box-shadow:0 18px 45px rgba(0,0,0,.22);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-    .flash-front{transform:rotateY(0deg) translateZ(1px)}
-    .flash-back{transform:rotateY(180deg) translateZ(1px);border-color:rgba(96,223,173,.25);background:radial-gradient(circle at 85% 15%,rgba(96,223,173,.12),transparent 65%),#131f2d}
-    .flash-text{font-size:clamp(23px,6vw,32px);font-weight:750;line-height:1.5;overflow-wrap:anywhere}
-    .flash-hint{color:var(--muted);font-size:12px;line-height:1.5}
-    .flash-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .remember{border-color:rgba(96,223,173,.35);background:rgba(96,223,173,.1)}
-    .unknown{border-color:rgba(255,130,153,.3);background:rgba(255,130,153,.08)}
-    .floating-bar{position:fixed;z-index:20;bottom:0;left:0;width:100%;padding:14px 18px calc(14px + var(--safe-bottom));background:linear-gradient(transparent,rgba(11,16,32,.97) 25%);pointer-events:none}
-    .floating-inner{width:min(100%,684px);margin:auto;pointer-events:auto}
-    .result-card{padding:28px 20px;text-align:center;margin-bottom:18px}
-    .result-emoji{font-size:48px;margin-bottom:12px}
-    .result-score{font-size:64px;font-weight:900;letter-spacing:-3px;color:var(--green);margin:12px 0}
-    .result-score span{font-size:25px;letter-spacing:-1px;color:var(--muted)}
-    .result-actions{display:grid;gap:10px;margin-bottom:24px}
-    .save-status{margin-top:15px;font-size:13px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
-    .save-status.error{color:var(--red)}
-    .save-status.success{color:var(--green)}
-    .theory-hero{padding:24px 20px;margin-bottom:16px}
-    .theory-hero .module-icon{margin-bottom:16px}
-    .theory-content{padding:22px 20px;line-height:1.7;overflow-wrap:anywhere}
-    .theory-content h2{margin-top:25px;margin-bottom:12px}
-    .theory-content h2:first-child{margin-top:0}
-    .theory-content p,.theory-content li{color:var(--muted);font-size:15px}
-    .theory-content strong{color:var(--text)}
-    .theory-content ul{padding-left:21px}
-    .table-scroll{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:16px}
-    .theory-table{width:100%;border-collapse:collapse;font-size:14px}
-    .theory-table th,.theory-table td{padding:12px 13px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
-    .theory-table th{color:#c4baff;background:rgba(146,128,255,.1)}
-    .theory-table tr:last-child td{border-bottom:0}
-    .rule-box,.example-box{padding:15px;margin:16px 0;border-radius:16px;background:rgba(146,128,255,.08);border:1px solid rgba(146,128,255,.2)}
-    .example-box{background:rgba(96,223,173,.06);border-color:rgba(96,223,173,.18)}
-    .rule-box p:last-child,.example-box p:last-child{margin-bottom:0}
-    .theory-actions{margin-top:20px}
-    .profile{position:relative;isolation:isolate;overflow:hidden;padding:20px;margin-bottom:16px;background:repeating-linear-gradient(125deg,transparent 0 18px,rgba(146,128,255,.025) 18px 19px),linear-gradient(140deg,rgba(146,128,255,.12),rgba(255,255,255,.035))}
-    .profile::before{content:"DE";position:absolute;right:-5px;top:45px;z-index:-1;font-size:135px;font-weight:950;color:rgba(146,128,255,.055);transform:rotate(-13deg);pointer-events:none}
-    .id-header{padding-bottom:13px;margin-bottom:17px;border-bottom:1px solid var(--border);font-family:ui-monospace,monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-    .id-header strong{color:#c4baff}
-    .profile-head{display:flex;align-items:center;gap:13px;margin-bottom:20px}
-    .avatar{flex:0 0 62px;height:72px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(146,128,255,.35);background:linear-gradient(135deg,#9280ff,#5143b2);font-size:28px;font-weight:800}
-    .profile-name{overflow-wrap:anywhere;font-family:ui-monospace,monospace;font-size:18px;font-weight:750;margin-bottom:10px}
-    .id-label{font-size:9px;color:var(--muted);letter-spacing:1.4px;margin-bottom:5px}
-    .rank{display:inline-block;padding:6px 10px;border:2px solid rgba(255,207,119,.65);border-radius:7px;color:var(--yellow);background:rgba(255,207,119,.035);font-family:ui-monospace,monospace;font-size:12px;font-weight:800;transform:rotate(-3deg)}
-    .citizenship-stamp{position:absolute;top:77px;right:9px;z-index:2;width:min(75%,330px);padding:9px 6px;border:3px double var(--green);border-radius:8px;color:var(--green);background:rgba(11,16,32,.9);font-family:ui-monospace,monospace;font-size:clamp(10px,2.8vw,15px);font-weight:900;text-align:center;transform:rotate(-17deg);pointer-events:none}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .stat{padding:12px 6px;text-align:center;border-radius:12px;background:rgba(255,255,255,.04)}
-    .stat strong{display:block;font-family:ui-monospace,monospace;font-size:21px;margin-bottom:4px}
-    .stat span{color:var(--muted);font-size:11px}
-    .rank-progress{margin-top:17px}
-    .rank-progress p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:9px}
-    .id-footer{margin-top:15px;padding-top:10px;border-top:1px solid var(--border);color:var(--muted);font-family:ui-monospace,monospace;font-size:9px;overflow-wrap:anywhere}
-    .inventory{padding:18px;margin-bottom:24px}
-    .inventory h2{margin-bottom:5px;font-size:18px}
-    .inventory-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
-    .inventory-slot{min-width:0;padding:10px 2px;border:1px solid var(--border);border-radius:13px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;gap:7px}
-    .inventory-slot.unlocked{border-color:rgba(255,207,119,.3);background:rgba(255,207,119,.055)}
-    .inventory-slot.locked{opacity:.45;filter:grayscale(1)}
-    .inventory-emoji{font-size:26px}
-    .inventory-cost{font-size:9px;color:var(--muted)}
-    .tabs{display:grid;grid-template-columns:1fr 1fr;padding:5px;gap:5px;border-radius:16px;margin:14px 0;background:rgba(255,255,255,.05)}
-    .tab{border:0;background:transparent;padding:11px 8px;border-radius:12px;color:var(--muted);font-weight:650}
-    .tab.active{background:#6654e8;color:white}
-    .leaderboard{overflow:hidden}
-    .leader-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:10px;padding:15px 17px;border-bottom:1px solid var(--border)}
-    .leader-row:last-child{border-bottom:0}
-    .leader-row.me{background:rgba(146,128,255,.12)}
-    .leader-name{font-size:14px;font-weight:600;overflow-wrap:anywhere}
-    .leader-meta{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
-    .leader-score{color:var(--green);font-weight:850}
-    .empty{padding:28px 18px;text-align:center;color:var(--muted);line-height:1.5;font-size:14px}
-    .bottom-nav{position:fixed;z-index:30;left:50%;bottom:calc(10px + var(--safe-bottom));transform:translateX(-50%);width:min(calc(100% - 28px),684px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px;background:rgba(19,24,45,.93);border-radius:23px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
-    .nav-button{min-height:58px;min-width:0;border:0;border-radius:17px;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:750}
-    .nav-icon{font-size:21px}
-    .nav-button.active{color:var(--primary);background:rgba(146,128,255,.13)}
-    .modal-overlay{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,7,17,.8);backdrop-filter:blur(8px)}
-    .modal-panel{width:min(100%,440px);max-height:calc(100dvh - 70px);overflow:auto;padding:22px;background:rgba(24,28,51,.98);animation:appear .2s ease}
-    .difficulty-list{display:grid;gap:10px;margin-top:18px}
-    .difficulty-button{padding:16px;text-align:left;border-radius:16px;border:1px solid var(--border);background:var(--panel)}
-    .difficulty-button strong{display:block;margin-bottom:5px}
-    .difficulty-button span{color:var(--muted);font-size:12px}
-    .toast{position:fixed;z-index:100;top:calc(18px + var(--safe-top));left:50%;width:max-content;max-width:calc(100% - 32px);padding:13px 18px;border-radius:16px;background:#29243e;border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 35px rgba(0,0,0,.35);text-align:center;font-size:14px;line-height:1.4;opacity:0;transform:translate(-50%,-15px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
-    .toast.visible{opacity:1;transform:translate(-50%,0)}
-    .toast.error{border-color:rgba(255,130,153,.5)}
-    .footer-note{margin-top:14px;color:var(--muted);text-align:center;font-size:11px;line-height:1.5}
-    @keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-    @media(max-width:360px){
-      .app{padding-left:12px;padding-right:12px}
-      .question,.module-card{padding:15px}
-      .module-icon{flex-basis:42px;width:42px;height:42px}
-      .inventory-grid{gap:4px}
-      .inventory-emoji{font-size:22px}
-      .pill{font-size:10px}
+    * { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
     }
-    @media(prefers-reduced-motion:reduce){
-      *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(
+          ellipse at 0% 0%,
+          rgba(116,83,255,.2),
+          transparent 45%
+        ),
+        radial-gradient(
+          ellipse at 100% 25%,
+          rgba(46,173,175,.13),
+          transparent 40%
+        ),
+        var(--bg);
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, select { font: inherit; color: inherit; }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:disabled { cursor: default; opacity: .5; }
+
+    button:focus-visible, select:focus-visible {
+      outline: 3px solid var(--yellow);
+      outline-offset: 3px;
+    }
+
+    .hidden { display: none !important; }
+
+    .app {
+      width: min(100%,720px);
+      margin: auto;
+      padding:
+        calc(20px + var(--safe-top))
+        18px
+        calc(115px + var(--safe-bottom));
+    }
+
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.13);
+    }
+
+    .screen { animation: appear .22s ease; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-row { margin-bottom: 22px; }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 850;
+      letter-spacing: -.7px;
+    }
+
+    .brand span { color: var(--primary); }
+
+    h1,h2,h3,p { margin-top: 0; }
+
+    h1 {
+      font-size: clamp(25px,6vw,34px);
+      letter-spacing: -.8px;
+      margin-bottom: 10px;
+    }
+
+    h2 { font-size: 20px; }
+
+    .muted { color: var(--muted); line-height: 1.6; }
+    .small { font-size: 13px; }
+
+    .pill {
+      display: inline-block;
+      padding: 7px 11px;
+      border-radius: 100px;
+      background: rgba(146,128,255,.12);
+      border: 1px solid rgba(146,128,255,.2);
+      color: #c4baff;
+      font-size: 12px;
+    }
+
+    .notice {
+      padding: 13px 15px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      background: rgba(255,207,119,.08);
+      border: 1px solid rgba(255,207,119,.2);
+      color: var(--yellow);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .cards { display: grid; gap: 13px; }
+
+    .module-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      text-align: left;
+      transition: transform .18s ease,background .18s ease;
+    }
+
+    .module-card:not(:disabled):active { transform: scale(.98); }
+    .module-card:not(:disabled):hover { background: var(--panel-strong); }
+
+    .module-icon {
+      flex: 0 0 48px;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(146,128,255,.13);
+      font-size: 25px;
+    }
+
+    .module-copy { flex: 1; min-width: 0; }
+
+    .module-copy strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 18px;
+      overflow-wrap: anywhere;
+    }
+
+    .subtitle {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: block;
+      margin-top: 6px;
+      color: #b9b0e8;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .module-status { font-size: 21px; }
+
+    .completed {
+      border-color: rgba(96,223,173,.3);
+      background: rgba(96,223,173,.065);
+    }
+
+    .gym { padding: 20px; margin-top: 18px; }
+    .gym-buttons { display: grid; gap: 10px; }
+
+    .gym-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      text-align: left;
+    }
+
+    .gym-button .emoji { font-size: 25px; }
+    .gym-button strong { display: block; margin-bottom: 4px; }
+    .gym-button small { color: var(--muted); line-height: 1.4; }
+
+    .button {
+      min-height: 49px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      font-weight: 750;
+      transition: transform .18s ease;
+    }
+
+    .button:not(:disabled):active { transform: scale(.98); }
+
+    .primary {
+      border-color: transparent;
+      background: linear-gradient(135deg,#9683ff,#6753e8);
+      box-shadow: 0 8px 24px rgba(103,83,232,.24);
+      color: white;
+    }
+
+    .full { width: 100%; }
+
+    .icon-button {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--panel);
+      font-size: 20px;
+    }
+
+    .quiz-top { margin-bottom: 18px; }
+    .quiz-title { flex: 1; font-size: 19px; font-weight: 800; overflow-wrap: anywhere; }
+
+    .progress-shell {
+      position: sticky;
+      top: calc(8px + var(--safe-top));
+      z-index: 5;
+      padding: 14px;
+      margin-bottom: 18px;
+      border-radius: 17px;
+      background: rgba(17,22,43,.96);
+    }
+
+    .progress-label { font-size: 12px; color: var(--muted); margin-bottom: 9px; }
+
+    .progress-track {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: rgba(255,255,255,.09);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg,var(--primary),var(--green));
+      transition: width .25s ease;
+    }
+
+    .boss-hud {
+      padding-bottom: 12px;
+      margin-bottom: 13px;
+      border-bottom: 1px solid rgba(255,130,153,.2);
+    }
+
+    .hearts { display: flex; gap: 5px; font-size: 24px; }
+    .heart.lost { filter: grayscale(1); opacity: .3; }
+    .boss-label { color: var(--red); font-size: 11px; letter-spacing: 1px; font-weight: 800; }
+    .boss-hero { padding: 25px 20px; }
+    .boss-portrait { font-size: 65px; text-align: center; margin: 15px 0; }
+
+    .questions { display: grid; gap: 15px; }
+
+    .question {
+      padding: 19px;
+      scroll-margin-top: calc(155px + var(--safe-top));
+      transition: border-color .2s ease;
+    }
+
+    .question-heading { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+
+    .question-text {
+      font-size: 21px;
+      font-weight: 750;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      margin-bottom: 8px;
+    }
+
+    .gap { color: var(--yellow); letter-spacing: 2px; }
+    .answers { display: grid; gap: 9px; margin-top: 18px; }
+
+    .answer {
+      min-height: 48px;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(255,255,255,.035);
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .selected { background: rgba(146,128,255,.22); border-color: var(--primary); }
+    .correct { color: #a9f6d6; background: rgba(96,223,173,.12); border-color: rgba(96,223,173,.55); }
+    .wrong { color: #ffb4c2; background: rgba(255,130,153,.12); border-color: rgba(255,130,153,.55); }
+    .answer:disabled { opacity: 1; }
+    .is-correct { border-color: rgba(96,223,173,.4) !important; }
+    .is-wrong { border-color: rgba(255,130,153,.45) !important; }
+    .missing { border-color: var(--yellow) !important; animation: shake .3s ease; }
+    .hit { animation: shake .3s ease; }
+    .feedback { margin-top: 13px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+    .good { color: var(--green); }
+    .bad { color: var(--red); }
+
+    .builder { margin-top: 18px; }
+
+    .builder-answer,.builder-bank {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 8px;
+    }
+
+    .builder-answer {
+      min-height: 100px;
+      padding: 13px;
+      border: 1px dashed rgba(146,128,255,.45);
+      border-radius: 16px;
+      background: rgba(146,128,255,.055);
+    }
+
+    .builder-bank {
+      margin-top: 12px;
+      min-height: 90px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .builder-placeholder { margin: auto 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .word-token {
+      min-height: 44px;
+      padding: 10px 13px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.085);
+      font-size: 15px;
+      line-height: 1.3;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .builder-answer .word-token { background: rgba(146,128,255,.2); border-color: rgba(146,128,255,.4); }
+    .word-token.used { visibility: hidden; pointer-events: none; }
+    .builder-tools { margin-top: 12px; }
+    .builder-tools .button { min-height: 44px; padding: 10px 14px; font-size: 13px; }
+    .block-heading { margin-top: 12px; padding: 7px 2px; }
+    .block-heading h2 { margin-bottom: 5px; color: #c4baff; }
+    .block-heading p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .dialogue-line {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 2;
+      scroll-margin-top: calc(155px + var(--safe-top));
+    }
+
+    .dialogue-line:last-child { border-bottom: 0; }
+
+    .gap-select {
+      max-width: 100%;
+      min-height: 44px;
+      padding: 9px 30px 9px 12px;
+      margin: 0 5px;
+      background: #222642;
+      color: var(--text);
+      border: 1px solid rgba(146,128,255,.4);
+      border-radius: 11px;
+      font-size: 16px;
+    }
+
+    .gap-select option { background: #222642; }
+    .gap-review { display: inline-block; padding: 2px 10px; margin: 0 4px; border-radius: 9px; }
+
+    .flash-stage {
+      width: 100%;
+      perspective: 1200px;
+      -webkit-perspective: 1200px;
+      margin: 22px 0;
+    }
+
+    .flash-card {
+      display: block;
+      width: 100%;
+      min-height: clamp(280px,45vh,400px);
+      padding: 0;
+      border: 0;
+      border-radius: 24px;
+      background: transparent;
+      text-align: center;
+    }
+
+    .flash-inner {
+      position: relative;
+      display: grid;
+      width: 100%;
+      min-height: inherit;
+      border-radius: inherit;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transform: rotateY(0deg);
+      transition: transform .55s cubic-bezier(.2,.7,.2,1);
+      will-change: transform;
+    }
+
+    .flash-card.flipped .flash-inner { transform: rotateY(180deg); }
+    .flash-card.resetting .flash-inner { transition: none !important; }
+
+    .flash-face {
+      grid-area: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      min-height: inherit;
+      padding: 30px 22px;
+      border: 1px solid rgba(146,128,255,.25);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 15% 15%,rgba(146,128,255,.14),transparent 65%),
+        #151a30;
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .flash-front { transform: rotateY(0deg) translateZ(1px); }
+
+    .flash-back {
+      transform: rotateY(180deg) translateZ(1px);
+      border-color: rgba(96,223,173,.25);
+      background:
+        radial-gradient(circle at 85% 15%,rgba(96,223,173,.12),transparent 65%),
+        #131f2d;
+    }
+
+    .flash-text {
+      font-size: clamp(23px,6vw,32px);
+      font-weight: 750;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .flash-hint { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .flash-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .remember { border-color: rgba(96,223,173,.35); background: rgba(96,223,173,.1); }
+    .unknown { border-color: rgba(255,130,153,.3); background: rgba(255,130,153,.08); }
+
+    .floating-bar {
+      position: fixed;
+      z-index: 20;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 14px 18px calc(14px + var(--safe-bottom));
+      background: linear-gradient(transparent,rgba(11,16,32,.97) 25%);
+      pointer-events: none;
+    }
+
+    .floating-inner { width: min(100%,684px); margin: auto; pointer-events: auto; }
+    .result-card { padding: 28px 20px; text-align: center; margin-bottom: 18px; }
+    .result-emoji { font-size: 48px; margin-bottom: 12px; }
+    .result-score { font-size: 64px; font-weight: 900; letter-spacing: -3px; color: var(--green); margin: 12px 0; }
+    .result-score span { font-size: 25px; letter-spacing: -1px; color: var(--muted); }
+    .result-actions { display: grid; gap: 10px; margin-bottom: 24px; }
+    .save-status { margin-top: 15px; font-size: 13px; color: var(--muted); line-height: 1.6; overflow-wrap: anywhere; }
+    .save-status.error { color: var(--red); }
+    .save-status.success { color: var(--green); }
+
+    .theory-hero { padding: 24px 20px; margin-bottom: 16px; }
+    .theory-hero .module-icon { margin-bottom: 16px; }
+    .theory-content { padding: 22px 20px; line-height: 1.7; overflow-wrap: anywhere; }
+    .theory-content h2 { margin-top: 25px; margin-bottom: 12px; }
+    .theory-content h2:first-child { margin-top: 0; }
+    .theory-content p,.theory-content li { color: var(--muted); font-size: 15px; }
+    .theory-content strong { color: var(--text); }
+    .theory-content ul { padding-left: 21px; }
+    .table-scroll { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 16px; }
+    .theory-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .theory-table th,.theory-table td { padding: 12px 13px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .theory-table th { color: #c4baff; background: rgba(146,128,255,.1); }
+    .theory-table tr:last-child td { border-bottom: 0; }
+    .rule-box,.example-box { padding: 15px; margin: 16px 0; border-radius: 16px; background: rgba(146,128,255,.08); border: 1px solid rgba(146,128,255,.2); }
+    .example-box { background: rgba(96,223,173,.06); border-color: rgba(96,223,173,.18); }
+    .rule-box p:last-child,.example-box p:last-child { margin-bottom: 0; }
+    .theory-actions { margin-top: 20px; }
+
+    .profile {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 20px;
+      margin-bottom: 16px;
+      background:
+        repeating-linear-gradient(125deg,transparent 0 18px,rgba(146,128,255,.025) 18px 19px),
+        linear-gradient(140deg,rgba(146,128,255,.12),rgba(255,255,255,.035));
+    }
+
+    .profile::before {
+      content: "DE";
+      position: absolute;
+      right: -5px;
+      top: 45px;
+      z-index: -1;
+      font-size: 135px;
+      font-weight: 950;
+      color: rgba(146,128,255,.055);
+      transform: rotate(-13deg);
+      pointer-events: none;
+    }
+
+    .id-header { padding-bottom: 13px; margin-bottom: 17px; border-bottom: 1px solid var(--border); font-family: ui-monospace,monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+    .id-header strong { color: #c4baff; }
+    .profile-head { display: flex; align-items: center; gap: 13px; margin-bottom: 20px; }
+    .avatar { flex: 0 0 62px; height: 72px; display: grid; place-items: center; border-radius: 12px; border: 1px solid rgba(146,128,255,.35); background: linear-gradient(135deg,#9280ff,#5143b2); font-size: 28px; font-weight: 800; }
+    .profile-name { overflow-wrap: anywhere; font-family: ui-monospace,monospace; font-size: 18px; font-weight: 750; margin-bottom: 10px; }
+    .id-label { font-size: 9px; color: var(--muted); letter-spacing: 1.4px; margin-bottom: 5px; }
+    .rank { display: inline-block; padding: 6px 10px; border: 2px solid rgba(255,207,119,.65); border-radius: 7px; color: var(--yellow); background: rgba(255,207,119,.035); font-family: ui-monospace,monospace; font-size: 12px; font-weight: 800; transform: rotate(-3deg); }
+    .citizenship-stamp { position: absolute; top: 77px; right: 9px; z-index: 2; width: min(75%,330px); padding: 9px 6px; border: 3px double var(--green); border-radius: 8px; color: var(--green); background: rgba(11,16,32,.9); font-family: ui-monospace,monospace; font-size: clamp(10px,2.8vw,15px); font-weight: 900; text-align: center; transform: rotate(-17deg); pointer-events: none; }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .stat { padding: 12px 6px; text-align: center; border-radius: 12px; background: rgba(255,255,255,.04); }
+    .stat strong { display: block; font-family: ui-monospace,monospace; font-size: 21px; margin-bottom: 4px; }
+    .stat span { color: var(--muted); font-size: 11px; }
+    .rank-progress { margin-top: 17px; }
+    .rank-progress p { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 9px; }
+    .id-footer { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--muted); font-family: ui-monospace,monospace; font-size: 9px; overflow-wrap: anywhere; }
+    .inventory { padding: 18px; margin-bottom: 24px; }
+    .inventory h2 { margin-bottom: 5px; font-size: 18px; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 7px; }
+    .inventory-slot { min-width: 0; padding: 10px 2px; border: 1px solid var(--border); border-radius: 13px; background: rgba(255,255,255,.04); display: flex; flex-direction: column; align-items: center; gap: 7px; }
+    .inventory-slot.unlocked { border-color: rgba(255,207,119,.3); background: rgba(255,207,119,.055); }
+    .inventory-slot.locked { opacity: .45; filter: grayscale(1); }
+    .inventory-emoji { font-size: 26px; }
+    .inventory-cost { font-size: 9px; color: var(--muted); }
+
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 5px; gap: 5px; border-radius: 16px; margin: 14px 0; background: rgba(255,255,255,.05); }
+    .tab { border: 0; background: transparent; padding: 11px 8px; border-radius: 12px; color: var(--muted); font-weight: 650; }
+    .tab.active { background: #6654e8; color: white; }
+    .leaderboard { overflow: hidden; }
+    .leader-row { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 15px 17px; border-bottom: 1px solid var(--border); }
+    .leader-row:last-child { border-bottom: 0; }
+    .leader-row.me { background: rgba(146,128,255,.12); }
+    .leader-name { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+    .leader-meta { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .leader-score { color: var(--green); font-weight: 850; }
+    .empty { padding: 28px 18px; text-align: center; color: var(--muted); line-height: 1.5; font-size: 14px; }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 30;
+      left: 50%;
+      bottom: calc(10px + var(--safe-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100% - 28px),684px);
+      display: grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: 4px;
+      padding: 7px;
+      background: rgba(19,24,45,.93);
+      border-radius: 23px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+    }
+
+    .nav-button { min-height: 58px; min-width: 0; border: 0; border-radius: 17px; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 750; }
+    .nav-icon { font-size: 21px; }
+    .nav-button.active { color: var(--primary); background: rgba(146,128,255,.13); }
+    .modal-overlay { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(4,7,17,.8); backdrop-filter: blur(8px); }
+    .modal-panel { width: min(100%,440px); max-height: calc(100dvh - 70px); overflow: auto; padding: 22px; background: rgba(24,28,51,.98); animation: appear .2s ease; }
+    .difficulty-list { display: grid; gap: 10px; margin-top: 18px; }
+    .difficulty-button { padding: 16px; text-align: left; border-radius: 16px; border: 1px solid var(--border); background: var(--panel); }
+    .difficulty-button strong { display: block; margin-bottom: 5px; }
+    .difficulty-button span { color: var(--muted); font-size: 12px; }
+    .toast { position: fixed; z-index: 100; top: calc(18px + var(--safe-top)); left: 50%; width: max-content; max-width: calc(100% - 32px); padding: 13px 18px; border-radius: 16px; background: #29243e; border: 1px solid rgba(255,255,255,.16); box-shadow: 0 10px 35px rgba(0,0,0,.35); text-align: center; font-size: 14px; line-height: 1.4; opacity: 0; transform: translate(-50%,-15px); transition: opacity .2s ease,transform .2s ease; pointer-events: none; }
+    .toast.visible { opacity: 1; transform: translate(-50%,0); }
+    .toast.error { border-color: rgba(255,130,153,.5); }
+    .footer-note { margin-top: 14px; color: var(--muted); text-align: center; font-size: 11px; line-height: 1.5; }
+
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+    @media(max-width:360px) {
+      .app { padding-left: 12px; padding-right: 12px; }
+      .question,.module-card { padding: 15px; }
+      .module-icon { flex-basis: 42px; width: 42px; height: 42px; }
+      .inventory-grid { gap: 4px; }
+      .inventory-emoji { font-size: 22px; }
+      .pill { font-size: 10px; }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      *,*::before,*::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
@@ -251,15 +655,19 @@
     <div id="questionsNotice" class="notice" role="status">
       Загружаем вопросы. Бюрократия качает базу…
     </div>
+
     <div id="questionsError" class="notice hidden">
       <div id="questionsErrorText"></div>
-      <button id="reloadQuestionsButton" class="button full" style="margin-top:10px" type="button">
+      <button id="reloadQuestionsButton" class="button full"
+              style="margin-top:10px" type="button">
         Повторить загрузку вопросов
       </button>
     </div>
+
     <div id="dataError" class="notice hidden">
       <div id="dataErrorText"></div>
-      <button id="reloadButton" class="button full" style="margin-top:10px" type="button">
+      <button id="reloadButton" class="button full"
+              style="margin-top:10px" type="button">
         Повторить загрузку статистики
       </button>
     </div>
@@ -280,11 +688,13 @@
 
       <section class="gym glass">
         <h2>🏋️ Тренажёрный зал</h2>
-        <p class="muted small">Без баллов в рейтинг. Без дневных лимитов. Без оправданий.</p>
+        <p class="muted small">
+          Без баллов в рейтинг. Без дневных лимитов. Без оправданий.
+        </p>
         <div class="gym-buttons">
           <button class="gym-button" data-trainer="articles" type="button" disabled>
             <span class="emoji" aria-hidden="true">🧩</span>
-            <span><strong>Artikel</strong><small>Артикли · бесконечная практика</small></span>
+            <span><strong>Artikel</strong><small>Артикли · der / die / das</small></span>
           </button>
           <button class="gym-button" data-trainer="grammar" type="button" disabled>
             <span class="emoji" aria-hidden="true">⚡</span>
@@ -322,16 +732,23 @@
           Проиграл — запрашивай новый. Выжил — 100 баллов.
           Победная награда выдаётся один раз в день.
         </div>
-        <button id="startBossButton" class="button primary full" type="button" disabled>Зайти в кабинет</button>
-        <p id="bossStatus" class="muted small" style="margin:14px 0 0" aria-live="polite"></p>
+        <button id="startBossButton" class="button primary full" type="button" disabled>
+          Зайти в кабинет
+        </button>
+        <p id="bossStatus" class="muted small"
+           style="margin:14px 0 0" aria-live="polite"></p>
       </div>
       <p class="footer-note">Игровая пародия, не реальные миграционные решения.</p>
     </section>
 
     <section id="ratingScreen" class="screen hidden">
       <section class="profile glass" aria-label="Игровой аусвайс">
-        <div class="row id-header"><strong>DeutschQuest · Ausweis</strong><span>Spieler-ID</span></div>
-        <div id="citizenshipStamp" class="citizenship-stamp hidden">Niederlassungserlaubnis</div>
+        <div class="row id-header">
+          <strong>DeutschQuest · Ausweis</strong><span>Spieler-ID</span>
+        </div>
+        <div id="citizenshipStamp" class="citizenship-stamp hidden">
+          Niederlassungserlaubnis
+        </div>
         <div class="profile-head">
           <div id="avatar" class="avatar">D</div>
           <div>
@@ -348,7 +765,8 @@
         <div class="rank-progress">
           <p id="nextRankText" aria-live="polite"></p>
           <div id="rankProgressBar" class="progress-track" role="progressbar"
-               aria-label="Прогресс звания" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+               aria-label="Прогресс звания"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div id="rankProgressFill" class="progress-fill"></div>
           </div>
         </div>
@@ -405,9 +823,12 @@
           </div>
           <div id="bossHealthText" class="muted small" style="margin-top:5px"></div>
         </div>
-        <div class="row progress-label"><span id="progressLabel">Заполнено</span><strong id="progressText"></strong></div>
+        <div class="row progress-label">
+          <span id="progressLabel">Заполнено</span><strong id="progressText"></strong>
+        </div>
         <div id="progressBar" class="progress-track" role="progressbar"
-             aria-label="Прогресс ответов" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+             aria-label="Прогресс ответов"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progressFill" class="progress-fill"></div>
         </div>
       </div>
@@ -421,7 +842,8 @@
 
     <section id="flashScreen" class="screen hidden">
       <header class="row quiz-top">
-        <button id="flashBack" class="icon-button" aria-label="Вернуться к практике" type="button">←</button>
+        <button id="flashBack" class="icon-button"
+                aria-label="Вернуться к практике" type="button">←</button>
         <div class="quiz-title">Karteikarten</div><div class="pill">Без очков</div>
       </header>
       <p class="muted small">
@@ -462,7 +884,9 @@
         <div id="saveStatus" class="save-status" role="status" aria-live="polite"></div>
       </div>
       <div class="result-actions">
-        <button id="retrySaveButton" class="button primary full hidden" type="button">Повторить отправку результата</button>
+        <button id="retrySaveButton" class="button primary full hidden" type="button">
+          Повторить отправку результата
+        </button>
         <button id="errorsButton" class="button full" type="button">Показать только где лох 🤡</button>
         <button id="repeatButton" class="button full" type="button">Попробовать снова 💪</button>
         <button id="resultTheoryButton" class="button full hidden" type="button">Идти учить теорию</button>
@@ -474,10 +898,18 @@
   </main>
 
   <nav id="bottomNav" class="bottom-nav glass" aria-label="Главная навигация">
-    <button class="nav-button active" data-tab="practice" aria-current="page" type="button"><span class="nav-icon" aria-hidden="true">🎯</span><span>Практика</span></button>
-    <button class="nav-button" data-tab="study" type="button"><span class="nav-icon" aria-hidden="true">📚</span><span>Учёба</span></button>
-    <button class="nav-button" data-tab="boss" type="button"><span class="nav-icon" aria-hidden="true">🏢</span><span>Термин</span></button>
-    <button class="nav-button" data-tab="rating" type="button"><span class="nav-icon" aria-hidden="true">🏆</span><span>Рейтинг</span></button>
+    <button class="nav-button active" data-tab="practice" aria-current="page" type="button">
+      <span class="nav-icon" aria-hidden="true">🎯</span><span>Практика</span>
+    </button>
+    <button class="nav-button" data-tab="study" type="button">
+      <span class="nav-icon" aria-hidden="true">📚</span><span>Учёба</span>
+    </button>
+    <button class="nav-button" data-tab="boss" type="button">
+      <span class="nav-icon" aria-hidden="true">🏢</span><span>Термин</span>
+    </button>
+    <button class="nav-button" data-tab="rating" type="button">
+      <span class="nav-icon" aria-hidden="true">🏆</span><span>Рейтинг</span>
+    </button>
   </nav>
 
   <div id="difficultyModal" class="modal-overlay hidden">
@@ -485,11 +917,19 @@
              aria-labelledby="difficultyTitle" aria-describedby="difficultyDescription" tabindex="-1">
       <div class="pill">Выбери свою боль</div>
       <h2 id="difficultyTitle" style="margin-top:15px">Ежедневный квест</h2>
-      <p id="difficultyDescription" class="muted small">Один результат в день. Средний и тяжёлый уровни делят лимит.</p>
+      <p id="difficultyDescription" class="muted small">
+        Один результат в день. Средний и тяжёлый уровни делят лимит.
+      </p>
       <div class="difficulty-list">
-        <button class="difficulty-button" data-level="easy" type="button"><strong>🤡 Уровень 1: Для дибилов</strong><span>Заглушка для особо любопытных.</span></button>
-        <button class="difficulty-button" data-level="medium" type="button"><strong>😎 Уровень 2: Средний</strong><span>20 вопросов · 1 балл за ответ.</span></button>
-        <button class="difficulty-button" data-level="hard" type="button"><strong>💀 Уровень 3: Тяжелый</strong><span>20 вопросов · 2 балла за ответ.</span></button>
+        <button class="difficulty-button" data-level="easy" type="button">
+          <strong>🤡 Уровень 1: Для дибилов</strong><span>Заглушка для особо любопытных.</span>
+        </button>
+        <button class="difficulty-button" data-level="medium" type="button">
+          <strong>😎 Уровень 2: Средний</strong><span>20 вопросов · 1 балл за ответ.</span>
+        </button>
+        <button class="difficulty-button" data-level="hard" type="button">
+          <strong>💀 Уровень 3: Тяжелый</strong><span>20 вопросов · 2 балла за ответ.</span>
+        </button>
       </div>
       <button id="closeDifficulty" class="button full" style="margin-top:14px" type="button">Не сегодня</button>
     </section>
@@ -500,33 +940,30 @@
     "use strict";
 
     /*
-      Вопросы практики теперь загружаются из:
-      quiz_articles, quiz_grammar, quiz_translation.
+      Источники практики:
+      quiz_articles — базовый род слов der / die / das.
+      quiz_grammar — грамматика, включая перенесённые падежные задания.
+      quiz_translation — options и constructor.
 
-      Учебные MODULES.study_* остаются локальными.
+      Учебная теория и её упражнения пока остаются локальными.
 
-      Leaderboard не меняется:
+      Leaderboard:
       daily_quest — фактический результат раз в день;
       boss_fight — 100 за победу раз в день;
       study_* — 50 за первое прохождение >=80%.
 
-      Нужны ранее настроенные уникальные индексы Leaderboard.
-      RLS/проверка Telegram initData на сервере остаются необходимыми
-      для production. Ответы в публичной базе доступны клиенту,
-      поэтому это не защита от подмены результатов.
+      Существующие уникальные индексы Leaderboard должны оставаться.
+      Для production нужны серверная проверка Telegram initData,
+      результатов и корректные RLS. Публичные ответы не защищены
+      от просмотра или подмены клиентского результата.
     */
-
-    // ============================================================
-    // НАСТРОЙКИ
-    // ============================================================
 
     const SUPABASE_URL =
       "https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
     const SUPABASE_KEY =
       "sb_publishable_bTmaC-ZOR2dpN9OzerfWdg_CTcujMY1";
-
-    // Получаем базовый REST URL из прежнего адреса Leaderboard.
     const SUPABASE_REST_URL = SUPABASE_URL.replace(/\/Leaderboard\/?$/, "");
+
     const GAME_TIME_ZONE = "Europe/Kyiv";
     const DAILY_ID = "daily_quest";
     const BOSS_ID = "boss_fight";
@@ -545,17 +982,20 @@
     const BOSS_CLOSED = "Frau Müller сегодня больше не принимает";
     const BOSS_WIN =
       "Frau Müller тяжело вздохнула и шлепнула печать. Ты выжил и получил ВНЖ (на год). +100 баллов.";
+
     const BOSS_HIT_PHRASES = [
       "Frau Müller: Где ваша справка? Минус жизнь, лох.",
       "Frau Müller: Ваш немецкий оскорбляет мои уши.",
       "Frau Müller: Вы не заполнили Формуляр А-38!",
       "Frau Müller: Schneller, bitte! Очередь задерживаешь!"
     ];
+
     const BOSS_DEATH_PHRASES = [
       "Термин отменен. Frau Müller вызвала полицию, тебя депортируют.",
       "Охрана выкинула тебя из здания. Иди учи алфавит.",
       "Отказано в ВНЖ. Твой уровень — шваброй полы мыть."
     ];
+
     const RANKS = [
       {min:0,name:"Новичок",emoji:"🌱"},
       {min:50,name:"Турист",emoji:"🎒"},
@@ -569,8 +1009,8 @@
       {min:3600,name:"Гёте",emoji:"📜"},
       {min:5000,name:"Немецкий гений",emoji:"🧠"},
       {min:7000,name:"Легенда Deutsch",emoji:"👑"}
-      {min:-1000,name:"Вне гонки",emoji:"🐹"}
     ];
+
     const INVENTORY = [
       {min:100,emoji:"🥨",name:"Брецель"},
       {min:300,emoji:"🍺",name:"Пиво"},
@@ -580,8 +1020,7 @@
       {min:3000,emoji:"🏰",name:"Замок"}
     ];
 
-    // Только переменные загруженного контента.
-    // Жёстко зашитых массивов практики больше нет.
+    // Загружаемые переменные. Вопросы практики не зашиты в HTML.
     let moduleArticles = [];
     let moduleArticlesHard = [];
     let moduleGrammar = [];
@@ -652,12 +1091,9 @@
         {line:"A: Ich ___ neu hier.",options:["bin","habe","ist","hat"],correctIndex:0},
         {line:"B: ___ du einen Stift?",options:["Bist","Hast","Hat","Habt"],correctIndex:1},
         {line:"A: Wo ___ der Kursraum?",options:["hat","bin","ist","sind"],correctIndex:2},
-        {line:"B: Wir ___ сегодня einen Kurs.",options:["sind","hat","habt","haben"],correctIndex:3}
+        {line:"B: Wir ___ heute einen Kurs.",options:["sind","hat","habt","haben"],correctIndex:3}
       ]
     };
-
-    // Исправляем только язык локальной строки, не её механику.
-    studySeinHaben.dialogue[3].line = "B: Wir ___ heute einen Kurs.";
 
     const studyVokalwechsel = {
       choice:[
@@ -722,6 +1158,7 @@
       ]
     };
 
+    // Только доверенный локальный HTML разработчика.
     function table(headers,rows) {
       return `<div class="table-scroll"><table class="theory-table">
         <thead><tr>${headers.map(v=>`<th>${v}</th>`).join("")}</tr></thead>
@@ -787,12 +1224,14 @@
             ["ihr","seid","habt"],["sie / Sie","sind","haben"]
           ])}
           <h2>Когда sein?</h2><ul>
-          <li>Имя: Ich bin Olena.</li><li>Профессия: Er ist Arzt.</li>
-          <li>Состояние: Ich bin müde.</li><li>Место: Wir sind zu Hause.</li>
-          <li>Возраст: Sie ist zwanzig Jahre alt.</li></ul>
+            <li>Имя: Ich bin Olena.</li><li>Профессия: Er ist Arzt.</li>
+            <li>Состояние: Ich bin müde.</li><li>Место: Wir sind zu Hause.</li>
+            <li>Возраст: Sie ist zwanzig Jahre alt.</li>
+          </ul>
           <h2>Когда haben?</h2><ul>
-          <li>Вещи: Wir haben ein Auto.</li><li>Семья: Du hast einen Bruder.</li>
-          <li>Время: Ich habe Zeit.</li><li>Голод/жажда: Ich habe Hunger / Durst.</li></ul>
+            <li>Вещи: Wir haben ein Auto.</li><li>Семья: Du hast einen Bruder.</li>
+            <li>Время: Ich habe Zeit.</li><li>Голод/жажда: Ich habe Hunger / Durst.</li>
+          </ul>
           <div class="rule-box"><p>«Я дома» → Ich bin zu Hause.
           Глагол не исчезает. Возраст — с sein, не с haben.</p></div>`
       },
@@ -874,16 +1313,22 @@
     };
 
     // ============================================================
-    // TELEGRAM
+    // TELEGRAM — ПРЕЖНЯЯ ИНИЦИАЛИЗАЦИЯ
     // ============================================================
 
     const tg = window.Telegram?.WebApp;
+
     try {
       tg?.ready();
       tg?.expand();
-      if(typeof tg?.requestFullscreen==="function"&&tg.isVersionAtLeast?.("8.0")) {
+
+      if(
+        typeof tg?.requestFullscreen==="function" &&
+        tg.isVersionAtLeast?.("8.0")
+      ) {
         tg.requestFullscreen();
       }
+
       tg?.setHeaderColor?.("#0b1020");
       tg?.setBackgroundColor?.("#0b1020");
     } catch(error) {
@@ -892,107 +1337,201 @@
 
     const telegramUser = tg?.initDataUnsafe?.user;
     const isDemo = !(
-      telegramUser&&Number.isSafeInteger(telegramUser.id)&&telegramUser.id>0
+      telegramUser &&
+      Number.isSafeInteger(telegramUser.id) &&
+      telegramUser.id>0
     );
+
     const player = {
       id:isDemo?"demo":String(telegramUser.id),
       name:isDemo?"Демо-игрок":(
-        [telegramUser.first_name,telegramUser.last_name].filter(Boolean).join(" ")||
-        telegramUser.username||"Игрок"
+        [telegramUser.first_name,telegramUser.last_name]
+          .filter(Boolean).join(" ") ||
+        telegramUser.username || "Игрок"
       ).slice(0,120)
     };
 
     const ROOTS = ["practice","study","boss","rating"];
     const SCREENS = [...ROOTS,"theory","quiz","flash","result"];
     const $ = id=>document.getElementById(id);
+
     const state = {
-      screen:"practice",root:"practice",date:today(),ratingTab:"today",
-      ready:false,loading:false,valid:false,starting:false,busy:false,
-      questionsReady:false,questionsLoading:false,questionsLoadId:0,
-      records:[],demoRecords:[],dailyDone:false,bossDone:false,
-      studyDone:new Set(),pending:new Map(),drafts:new Map(),attempt:null,
-      selectedStudy:null,onlyErrors:false,totalScore:null,loadId:0,
-      modal:false,modalOpener:null,modalY:0,toastTimer:null,stepTimer:null,
+      screen:"practice",
+      root:"practice",
+      date:today(),
+      ratingTab:"today",
+      ready:false,
+      loading:false,
+      valid:false,
+      starting:false,
+      busy:false,
+      questionsReady:false,
+      questionsLoading:false,
+      questionsLoadId:0,
+      records:[],
+      demoRecords:[],
+      dailyDone:false,
+      bossDone:false,
+      studyDone:new Set(),
+      pending:new Map(),
+      drafts:new Map(),
+      attempt:null,
+      selectedStudy:null,
+      onlyErrors:false,
+      totalScore:null,
+      loadId:0,
+      modal:false,
+      modalOpener:null,
+      modalY:0,
+      toastTimer:null,
+      stepTimer:null,
       dailyPools:{medium:[],hard:[]},
-      fullPool:[],trainerPools:{articles:[],grammar:[]},
-      flashPool:[],flashBag:[],flashCurrent:null,flashLast:"",
-      flashBusy:false,flashRequest:0
+      fullPool:[],
+      trainerPools:{articles:[],grammar:[]},
+      flashPool:[],
+      flashBag:[],
+      flashCurrent:null,
+      flashLast:"",
+      flashBusy:false,
+      flashRequest:0
     };
 
     function el(tag,cls="",text) {
-      const n=document.createElement(tag);
-      if(cls)n.className=cls;
-      if(text!==undefined)n.textContent=String(text);
-      return n;
+      const node=document.createElement(tag);
+      if(cls) node.className=cls;
+      if(text!==undefined) node.textContent=String(text);
+      return node;
     }
+
     function today() {
       const parts=new Intl.DateTimeFormat("en-US",{
-        timeZone:GAME_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"
+        timeZone:GAME_TIME_ZONE,
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit"
       }).formatToParts(new Date());
-      const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));
-      return `${v.year}-${v.month}-${v.day}`;
+
+      const values=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+      return `${values.year}-${values.month}-${values.day}`;
     }
-    function scoreOf(r) {const n=Number(r.score);return Number.isFinite(n)?n:0;}
-    function copy(v) {return JSON.parse(JSON.stringify(v));}
+
+    function scoreOf(record) {
+      const value=Number(record.score);
+      return Number.isFinite(value)?value:0;
+    }
+
+    function copy(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
     function shuffle(items,random=Math.random) {
-      const a=items.slice();
-      for(let i=a.length-1;i>0;i--) {
+      const result=items.slice();
+
+      for(let i=result.length-1;i>0;i--) {
         const j=Math.floor(random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
+        [result[i],result[j]]=[result[j],result[i]];
       }
-      return a;
+
+      return result;
     }
-    function pick(a) {return a[Math.floor(Math.random()*a.length)];}
+
+    function pick(items) {
+      return items[Math.floor(Math.random()*items.length)];
+    }
+
     function uuid() {
-      if(typeof crypto.randomUUID==="function")return crypto.randomUUID();
-      const b=crypto.getRandomValues(new Uint8Array(16));
-      b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
-      const h=Array.from(b,x=>x.toString(16).padStart(2,"0")).join("");
-      return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join("-");
+      if(typeof crypto.randomUUID==="function") return crypto.randomUUID();
+
+      const bytes=crypto.getRandomValues(new Uint8Array(16));
+      bytes[6]=(bytes[6]&15)|64;
+      bytes[8]=(bytes[8]&63)|128;
+
+      const hex=Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+
+      return [
+        hex.slice(0,8),
+        hex.slice(8,12),
+        hex.slice(12,16),
+        hex.slice(16,20),
+        hex.slice(20)
+      ].join("-");
     }
+
     function haptic(type="selection") {
       try {
-        if(type==="selection")tg?.HapticFeedback?.selectionChanged();
+        if(type==="selection") tg?.HapticFeedback?.selectionChanged();
         else tg?.HapticFeedback?.notificationOccurred(type);
       } catch(_) {}
     }
-    function toast(text,error=false) {
+
+    function toast(message,error=false) {
       clearTimeout(state.toastTimer);
-      $("toast").textContent=text;
+      $("toast").textContent=message;
       $("toast").classList.toggle("error",error);
       $("toast").classList.add("visible");
-      state.toastTimer=setTimeout(()=>$("toast").classList.remove("visible"),3500);
+
+      state.toastTimer=setTimeout(
+        ()=>$("toast").classList.remove("visible"),
+        3500
+      );
     }
+
     function rankInfo(score) {
       let index=0;
-      RANKS.forEach((r,i)=>{if(score>=r.min)index=i;});
-      const current=RANKS[index],next=RANKS[index+1]||null;
-      const progress=next?Math.max(0,Math.min(100,(score-current.min)/(next.min-current.min)*100)):100;
+
+      RANKS.forEach((rank,i)=>{
+        if(score>=rank.min) index=i;
+      });
+
+      const current=RANKS[index];
+      const next=RANKS[index+1]||null;
+
+      const progress=next
+        ?Math.max(
+          0,
+          Math.min(100,(score-current.min)/(next.min-current.min)*100)
+        )
+        :100;
+
       return {current,next,progress};
     }
+
     function getRank(score) {
       const {current}=rankInfo(score);
       return `${current.emoji} ${current.name}`;
     }
-    function isStream(a) {return a.kind==="boss"||a.kind==="trainer";}
-    function address(id,level) {return `${id}:${level}`;}
-    function stopTimer() {clearTimeout(state.stepTimer);state.stepTimer=null;}
+
+    function isStream(attempt) {
+      return attempt.kind==="boss"||attempt.kind==="trainer";
+    }
+
+    function address(id,level) {
+      return `${id}:${level}`;
+    }
+
+    function stopTimer() {
+      clearTimeout(state.stepTimer);
+      state.stepTimer=null;
+    }
 
     // ============================================================
-    // SEEDED RANDOM ДЛЯ ДЕЙЛИКА
+    // SEEDED RANDOM — НАБОР ДЕЙЛИКА ПО ДАТЕ
     // ============================================================
 
     function hashString(text) {
       let hash=2166136261;
+
       for(let i=0;i<text.length;i++) {
         hash^=text.charCodeAt(i);
         hash=Math.imul(hash,16777619);
       }
+
       return hash>>>0;
     }
 
     function seededRandom(seedText) {
       let seed=hashString(seedText);
+
       return function() {
         seed=(seed+0x6D2B79F5)>>>0;
         let t=seed;
@@ -1003,28 +1542,36 @@
     }
 
     function compareStableKey(a,b) {
-      const x=a.key,y=b.key;
-      return x<y?-1:x>y?1:0;
+      return a.key<b.key?-1:a.key>b.key?1:0;
     }
 
     function dailySelection(date,level) {
       const pool=state.dailyPools[level].slice().sort(compareStableKey);
+
       if(pool.length<DAILY_COUNT) {
-        throw new Error(`В базе ${level} нужно минимум ${DAILY_COUNT} вопросов.`);
+        throw new Error(
+          `В базе ${level} нужно минимум ${DAILY_COUNT} вопросов.`
+        );
       }
+
       const random=seededRandom(`DeutschQuest:daily:v1:${date}:${level}`);
       return copy(shuffle(pool,random).slice(0,DAILY_COUNT));
     }
 
     // ============================================================
-    // REST API: ОБЩИЙ ДЛЯ КОНТЕНТА И LEADERBOARD
+    // REST API
     // ============================================================
 
     async function rest(tableName,query={},options={}) {
       const url=new URL(`${SUPABASE_REST_URL}/${tableName}`);
-      Object.entries(query).forEach(([k,v])=>url.searchParams.set(k,String(v)));
+
+      Object.entries(query).forEach(([key,value])=>{
+        url.searchParams.set(key,String(value));
+      });
+
       const controller=new AbortController();
       const timer=setTimeout(()=>controller.abort(),REQUEST_TIMEOUT);
+
       try {
         const response=await fetch(url.toString(),{
           method:options.method||"GET",
@@ -1037,25 +1584,32 @@
           signal:controller.signal,
           cache:"no-store"
         });
+
         const text=await response.text();
         let data=null;
+
         if(text) {
           try {data=JSON.parse(text);}
           catch(_) {data={message:text};}
         }
+
         if(!response.ok) {
           const error=new Error(data?.message||`HTTP ${response.status}`);
           error.code=data?.code;
           throw error;
         }
+
         return data;
       } catch(error) {
-        if(error.name==="AbortError")throw new Error("Сервер не ответил вовремя. Проверь сеть.");
+        if(error.name==="AbortError") {
+          throw new Error("Сервер не ответил вовремя. Проверь сеть.");
+        }
         throw error;
-      } finally {clearTimeout(timer);}
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
-    // Прежний интерфейс API Leaderboard.
     function api(query={},options={}) {
       return rest("Leaderboard",query,options);
     }
@@ -1063,134 +1617,243 @@
     async function fetchTable(tableName,filters={},order="id.asc",select="*") {
       const records=[];
       let offset=0;
+
       while(true) {
         const page=await rest(tableName,{
-          select,order,limit:PAGE_SIZE,offset,...filters
+          select,
+          order,
+          limit:PAGE_SIZE,
+          offset,
+          ...filters
         });
-        if(!Array.isArray(page))throw new Error(`Неверный ответ таблицы ${tableName}.`);
-        if(!page.length)break;
+
+        if(!Array.isArray(page)) {
+          throw new Error(`Неверный ответ таблицы ${tableName}.`);
+        }
+
+        if(!page.length) break;
+
         records.push(...page);
         offset+=page.length;
       }
+
       return records;
     }
 
     function fetchAll(filters={}) {
       return fetchTable(
-        "Leaderboard",filters,"record_id.asc",
+        "Leaderboard",
+        filters,
+        "record_id.asc",
         "record_id,id,name,score,date,module"
       );
     }
 
     // ============================================================
-    // АДАПТЕРЫ SUPABASE → ПРЕЖНИЙ ФОРМАТ UI
+    // АДАПТЕРЫ КОНТЕНТА
     // ============================================================
 
     function requireStrings(value,label,min=1,max=Infinity) {
-      if(!Array.isArray(value)||value.length<min||value.length>max||
-        !value.every(v=>typeof v==="string"&&v.trim())) {
+      if(
+        !Array.isArray(value) ||
+        value.length<min ||
+        value.length>max ||
+        !value.every(v=>typeof v==="string"&&v.trim())
+      ) {
         throw new Error(`Некорректный массив: ${label}`);
       }
+
       return value.slice();
     }
 
     function requireIndex(value,options,label) {
-      if(!Number.isInteger(value)||value<0||value>=options.length) {
+      if(
+        !Number.isInteger(value) ||
+        value<0 ||
+        value>=options.length
+      ) {
         throw new Error(`Некорректный correct_index: ${label}`);
       }
+
       return value;
     }
 
     function requireText(value,label) {
-      if(typeof value!=="string"||!value.trim())throw new Error(`Пустой текст: ${label}`);
+      if(typeof value!=="string"||!value.trim()) {
+        throw new Error(`Пустой текст: ${label}`);
+      }
+
       return value;
     }
 
     function rowKey(tableName,row) {
-      if(row.id===null||row.id===undefined)throw new Error(`Нет ID: ${tableName}`);
+      if(row.id===null||row.id===undefined) {
+        throw new Error(`Нет ID: ${tableName}`);
+      }
+
       return `${tableName}:${String(row.id)}`;
+    }
+
+    function isBasicArticle(question) {
+      return (
+        question.category==="articles" &&
+        question.type==="choice" &&
+        Array.isArray(question.options) &&
+        question.options.length===3 &&
+        new Set(question.options).size===3 &&
+        question.options.every(option=>
+          ["der","die","das"].includes(option)
+        )
+      );
     }
 
     function adaptArticle(row) {
       const key=rowKey("quiz_articles",row);
-      const level=row.is_hard?"hard":"medium";
-      if(!row.is_hard) {
-        if(!["der","die","das"].includes(row.article))throw new Error(`Неверный артикль: ${key}`);
+      const hasSentence=typeof row.sentence==="string"&&row.sentence.trim();
+      const hasOptions=Array.isArray(row.options);
+
+      // Если до SQL-переноса остались старые падежные предложения,
+      // они классифицируются как грамматика, а не род слова.
+      if(hasSentence&&hasOptions) {
+        const options=requireStrings(row.options,key,4,6);
+
         return {
-          key,type:"choice",block:0,topic:"Artikel",category:"articles",level,
-          sentence:requireText(row.word,key),
-          translation:requireText(row.translation,key),
-          options:["der","die","das","kein"],
-          correctIndex:["der","die","das","kein"].indexOf(row.article)
+          key,
+          type:"choice",
+          block:0,
+          topic:"Grammatik · Kasus",
+          category:"grammar",
+          level:row.is_hard?"hard":"medium",
+          sentence:requireText(row.sentence,key),
+          options,
+          correctIndex:requireIndex(row.correct_index,options,key)
         };
       }
-      const options=requireStrings(row.options,key,4,6);
+
+      if(!["der","die","das"].includes(row.article)) {
+        throw new Error(`Неверный базовый артикль: ${key}`);
+      }
+
       return {
-        key,type:"choice",block:0,topic:"Artikel · Kasus",category:"articles",level,
-        sentence:requireText(row.sentence,key),
-        options,correctIndex:requireIndex(row.correct_index,options,key)
+        key,
+        type:"choice",
+        block:0,
+        topic:"Artikel",
+        category:"articles",
+        level:row.is_hard?"hard":"medium",
+        word:requireText(row.word,key),
+        sentence:requireText(row.word,key),
+        translation:requireText(row.translation,key),
+        options:["der","die","das"],
+        correctIndex:["der","die","das"].indexOf(row.article)
       };
     }
 
     function adaptGrammar(row) {
       const key=rowKey("quiz_grammar",row);
       const options=requireStrings(row.options,key,4,6);
+
       return {
-        key,type:"choice",block:0,topic:"Grammatik",category:"grammar",
+        key,
+        type:"choice",
+        block:0,
+        topic:"Grammatik",
+        category:"grammar",
         level:row.is_hard?"hard":"medium",
         sentence:requireText(row.sentence,key),
-        options,correctIndex:requireIndex(row.correct_index,options,key)
+        options,
+        correctIndex:requireIndex(row.correct_index,options,key)
       };
     }
 
     function adaptTranslation(row) {
       const key=rowKey("quiz_translation",row);
-      if(!["de-ru","ru-de"].includes(row.direction))throw new Error(`Неверное direction: ${key}`);
+
+      // При отсутствии direction старые option-записи считаем DE→RU.
+      const direction=row.direction||"de-ru";
+
+      if(!["de-ru","ru-de"].includes(direction)) {
+        throw new Error(`Неверное direction: ${key}`);
+      }
+
       const base={
-        key,block:0,topic:"Übersetzung",category:"translation",
-        level:row.is_hard?"hard":"medium",direction:row.direction
+        key,
+        block:0,
+        topic:"Übersetzung",
+        category:"translation",
+        level:row.is_hard?"hard":"medium",
+        direction
       };
+
       if(row.format==="options") {
         const options=requireStrings(row.options,key,4,6);
+
         return {
-          ...base,type:"choice",sentence:requireText(row.text,key),
-          options,correctIndex:requireIndex(row.correct_index,options,key)
+          ...base,
+          type:"choice",
+          sentence:requireText(row.text,key),
+          options,
+          correctIndex:requireIndex(row.correct_index,options,key)
         };
       }
-      if(row.format==="constructor")return {
-        ...base,type:"builder",question:requireText(row.text,key),
-        correctWords:requireStrings(row.correct_words,key),
-        decoyWords:requireStrings(row.decoy_words,key,2)
-      };
+
+      if(row.format==="constructor") {
+        return {
+          ...base,
+          type:"builder",
+          question:requireText(row.text,key),
+          correctWords:requireStrings(row.correct_words,key),
+          decoyWords:requireStrings(row.decoy_words,key,2)
+        };
+      }
+
       throw new Error(`Неверный format: ${key}`);
     }
 
     function studyUnits(id) {
-      const m=MODULES[id],b=m.exercises;
+      const m=MODULES[id];
+      const b=m.exercises;
+
       return [
-        ...b.choice.map((q,i)=>({...q,key:`${id}:choice:${i}`,type:"choice",block:1,topic:m.title,category:m.category})),
-        ...b.builder.map((q,i)=>({...q,key:`${id}:builder:${i}`,type:"builder",block:2,topic:m.title,category:m.category})),
-        ...b.dialogue.map((q,i)=>({...q,key:`${id}:gap:${i}`,sentence:q.line,type:"gap",block:3,topic:m.title,category:m.category}))
+        ...b.choice.map((q,i)=>({
+          ...q,key:`${id}:choice:${i}`,type:"choice",block:1,
+          topic:m.title,category:m.category
+        })),
+        ...b.builder.map((q,i)=>({
+          ...q,key:`${id}:builder:${i}`,type:"builder",block:2,
+          topic:m.title,category:m.category
+        })),
+        ...b.dialogue.map((q,i)=>({
+          ...q,key:`${id}:gap:${i}`,sentence:q.line,type:"gap",block:3,
+          topic:m.title,category:m.category
+        }))
       ];
     }
 
-    function builderToChoice(q) {
-      const correctSentence=q.correctWords.join(" ");
+    function builderToChoice(question) {
+      const correctSentence=question.correctWords.join(" ");
       const wrong=new Set();
-      for(let i=0;i<q.correctWords.length&&wrong.size<3;i++) {
-        for(const decoy of q.decoyWords) {
-          const words=q.correctWords.slice();
+
+      for(let i=0;i<question.correctWords.length&&wrong.size<3;i++) {
+        for(const decoy of question.decoyWords) {
+          const words=question.correctWords.slice();
           words[i]=decoy;
           const candidate=words.join(" ");
-          if(candidate!==correctSentence)wrong.add(candidate);
-          if(wrong.size===3)break;
+
+          if(candidate!==correctSentence) wrong.add(candidate);
+          if(wrong.size===3) break;
         }
       }
-      if(wrong.size<3)throw new Error(`Не хватает обманок: ${q.key}`);
-      // Порядок здесь стабильный. Для босса/тренажёра он
-      // перемешивается при запуске с Math.random().
+
+      if(wrong.size<3) {
+        throw new Error(`Не хватает обманок: ${question.key}`);
+      }
+
       return {
-        ...q,type:"choice",block:0,sentence:q.question,
+        ...question,
+        type:"choice",
+        block:0,
+        sentence:question.question,
         options:[correctSentence,...Array.from(wrong).slice(0,3)],
         correctIndex:0
       };
@@ -1198,58 +1861,167 @@
 
     function uniqueChoices(units) {
       const unique=new Map();
-      units.forEach(q=>{
-        const item=q.type==="builder"
-          ?builderToChoice(q)
-          :{...q,type:"choice",block:0,options:q.options.slice()};
+
+      units.forEach(question=>{
+        const item=question.type==="builder"
+          ?builderToChoice(question)
+          :{
+            ...question,
+            type:"choice",
+            block:0,
+            options:question.options.slice()
+          };
+
         const signature=JSON.stringify([
-          item.sentence,item.options[item.correctIndex],item.options.slice().sort()
+          item.sentence,
+          item.options[item.correctIndex],
+          item.options.slice().sort()
         ]);
-        if(!unique.has(signature))unique.set(signature,item);
+
+        if(!unique.has(signature)) unique.set(signature,item);
       });
+
       return Array.from(unique.values());
     }
 
-    function shuffledOptions(q,random=Math.random) {
-      if(q.type!=="choice")return q;
-      const options=shuffle(q.options.map((text,i)=>({
-        text,right:i===q.correctIndex
-      })),random);
+    function shuffledOptions(question,random=Math.random) {
+      if(question.type!=="choice") return question;
+
+      const options=shuffle(
+        question.options.map((text,i)=>({
+          text,
+          right:i===question.correctIndex
+        })),
+        random
+      );
+
       return {
-        ...q,
+        ...question,
         options:options.map(v=>v.text),
         correctIndex:options.findIndex(v=>v.right)
       };
     }
 
-    function flashPairs(translations) {
+    // ============================================================
+    // FLASH PAIRS: НЕМЕЦКИЙ СПЕРЕДИ, РУССКИЙ СЗАДИ
+    // ============================================================
+
+    function flashPairs(translations,articles=[]) {
       const unique=new Map();
-      translations.forEach(q=>{
-        const translated=q.type==="builder"
-          ?q.correctWords.join(" ")
-          :q.options[q.correctIndex];
-        const source=q.type==="builder"?q.question:q.sentence;
-        const pair=q.direction==="de-ru"
-          ?{de:source,ru:translated}
-          :{de:translated,ru:source};
+
+      function addPair(de,ru) {
+        if(
+          typeof de!=="string" ||
+          typeof ru!=="string" ||
+          !de.trim() ||
+          !ru.trim()
+        ) {
+          return;
+        }
+
+        const pair={
+          de:de.trim(),
+          ru:ru.trim()
+        };
+
         const key=JSON.stringify([pair.de,pair.ru]);
-        if(!unique.has(key))unique.set(key,pair);
+
+        if(!unique.has(key)) unique.set(key,pair);
+      }
+
+      translations.forEach(question=>{
+        const constructor=
+          question.type==="builder" ||
+          question.format==="constructor";
+
+        const source=constructor
+          ?question.question??question.text
+          :question.sentence??question.text??question.de;
+
+        let translated;
+
+        if(constructor) {
+          const correctWords=
+            question.correctWords??question.correct_words;
+
+          if(!Array.isArray(correctWords)) return;
+
+          translated=correctWords.join(" ");
+        } else {
+          const rawIndex=
+            question.correctIndex??question.correct_index;
+
+          if(rawIndex===null||rawIndex===undefined) return;
+
+          const index=Number(rawIndex);
+
+          if(
+            !Array.isArray(question.options) ||
+            !Number.isInteger(index) ||
+            index<0 ||
+            index>=question.options.length
+          ) {
+            return;
+          }
+
+          // quiz_translation format='options':
+          // русский ответ находится в options[correct_index].
+          translated=question.options[index];
+        }
+
+        if(question.direction==="ru-de") {
+          addPair(translated,source);
+        } else {
+          addPair(source,translated);
+        }
       });
+
+      articles.forEach(question=>{
+        // quiz_articles: русский текст — колонка translation.
+        // Предложения с падежами без word сюда не добавляем.
+        if(question.category&&question.category!=="articles") return;
+
+        addPair(
+          question.word??question.sentence,
+          question.translation
+        );
+      });
+
       return Array.from(unique.values());
     }
 
-    function validateUnits(units,label) {
-      if(!units.length)throw new Error(`Пустая база: ${label}`);
-      units.forEach((q,i)=>{
-        if(q.type==="builder") {
-          requireText(q.question,label);
-          requireStrings(q.correctWords,label);
-          requireStrings(q.decoyWords,label,2);
+    function validateUnits(units,label,allowEmpty=false) {
+      if(!Array.isArray(units)) {
+        throw new Error(`Некорректная база: ${label}`);
+      }
+
+      if(!units.length&&!allowEmpty) {
+        throw new Error(`Пустая база: ${label}`);
+      }
+
+      units.forEach((question,i)=>{
+        if(question.type==="builder") {
+          requireText(question.question,label);
+          requireStrings(question.correctWords,label);
+          requireStrings(question.decoyWords,label,2);
         } else {
-          requireText(q.sentence,label);
-          const options=requireStrings(q.options,label,4,6);
-          requireIndex(q.correctIndex,options,label);
-          if(q.type==="gap"&&q.sentence.split("___").length!==2) {
+          requireText(question.sentence,label);
+
+          // Три варианта разрешены только для базового рода.
+          const basicArticles=isBasicArticle(question);
+          const options=requireStrings(
+            question.options,
+            label,
+            basicArticles?3:4,
+            6
+          );
+
+          requireIndex(question.correctIndex,options,label);
+
+          if(
+            question.type==="gap" &&
+            question.sentence.split("___").length!==2
+          ) {
             throw new Error(`Неверный пропуск ${i+1}: ${label}`);
           }
         }
@@ -1257,14 +2029,18 @@
     }
 
     function validateTheory() {
-      Object.entries(MODULES).forEach(([id,m])=>{
-        if(!m.theoryHTML?.trim())throw new Error(`Нет теории: ${m.title}`);
-        validateUnits(studyUnits(id),m.title);
+      Object.entries(MODULES).forEach(([id,module])=>{
+        if(!module.theoryHTML?.trim()) {
+          throw new Error(`Нет теории: ${module.title}`);
+        }
+
+        validateUnits(studyUnits(id),module.title);
       });
     }
 
     async function loadQuestions() {
-      if(state.questionsLoading)return;
+      if(state.questionsLoading) return;
+
       const requestId=++state.questionsLoadId;
       state.questionsLoading=true;
       $("questionsError").classList.add("hidden");
@@ -1273,39 +2049,70 @@
       renderUI();
 
       try {
-        const [articlesRows,grammarRows,translationRows]=await Promise.all([
+        const [articleRows,grammarRows,translationRows]=await Promise.all([
           fetchTable("quiz_articles"),
           fetchTable("quiz_grammar"),
           fetchTable("quiz_translation")
         ]);
-        if(requestId!==state.questionsLoadId)return;
 
-        // Атомарное обновление: сначала проверяем весь комплект.
-        const articles=articlesRows.map(adaptArticle).sort(compareStableKey);
-        const grammar=grammarRows.map(adaptGrammar).sort(compareStableKey);
+        if(requestId!==state.questionsLoadId) return;
+
+        const loadedArticles=articleRows.map(adaptArticle).sort(compareStableKey);
+        const loadedGrammar=grammarRows.map(adaptGrammar).sort(compareStableKey);
         const translations=translationRows.map(adaptTranslation).sort(compareStableKey);
-        validateUnits(articles,"quiz_articles");
-        validateUnits(grammar,"quiz_grammar");
-        validateUnits(translations,"quiz_translation");
+
+        validateUnits(loadedArticles,"quiz_articles",true);
+        validateUnits(loadedGrammar,"quiz_grammar",true);
+        validateUnits(translations,"quiz_translation",true);
+
+        // Падежные строки, если остались в старой таблице до миграции,
+        // направляем в грамматику на уровне клиента.
+        const articles=loadedArticles.filter(q=>isBasicArticle(q));
+        const legacyCaseQuestions=loadedArticles.filter(q=>q.category==="grammar");
+        const grammar=[...loadedGrammar,...legacyCaseQuestions].sort(compareStableKey);
 
         const practice=[...articles,...grammar,...translations];
         const medium=practice.filter(q=>q.level==="medium").sort(compareStableKey);
         const hard=practice.filter(q=>q.level==="hard").sort(compareStableKey);
 
+        // Нет требования иметь hard-строки именно в quiz_articles:
+        // после переноса эта часть таблицы закономерно пуста.
         if(medium.length<DAILY_COUNT||hard.length<DAILY_COUNT) {
           throw new Error(
-            `Нужно минимум ${DAILY_COUNT} вопросов на сложность. Сейчас: средний ${medium.length}, тяжёлый ${hard.length}.`
+            `Нужно минимум ${DAILY_COUNT} вопросов на сложность. `+
+            `Сейчас: средний ${medium.length}, тяжёлый ${hard.length}.`
           );
         }
 
         const localStudy=Object.keys(MODULES).flatMap(studyUnits);
         const fullPool=uniqueChoices([...practice,...localStudy]);
-        const articlePool=uniqueChoices(articles);
-        const grammarPool=uniqueChoices([...grammar,...localStudy]);
-        const pairs=flashPairs(translations);
 
-        if(fullPool.length<BOSS_COUNT)throw new Error("Недостаточно вопросов для босса.");
-        if(!articlePool.length||!grammarPool.length||!pairs.length)throw new Error("Пустой тренировочный режим.");
+        // Строго базовые der / die / das — никаких падежных форм.
+        const articlePool=uniqueChoices(
+          articles.filter(isBasicArticle)
+        ).filter(isBasicArticle);
+
+        const grammarPool=uniqueChoices([...grammar,...localStudy]);
+
+        // Русские переводы формируются из верных вариантов,
+        // а для слов — из translation.
+        const pairs=flashPairs(translations,articles);
+
+        if(fullPool.length<BOSS_COUNT) {
+          throw new Error("Недостаточно вопросов для босса.");
+        }
+
+        if(!articlePool.length) {
+          throw new Error("Нет базовых слов der / die / das для тренажёра артиклей.");
+        }
+
+        if(!grammarPool.length) {
+          throw new Error("Нет вопросов для тренажёра грамматики.");
+        }
+
+        if(!pairs.length) {
+          throw new Error("Нет корректных пар немецкий/русский для карточек.");
+        }
 
         moduleArticles=articles.filter(q=>q.level==="medium");
         moduleArticlesHard=articles.filter(q=>q.level==="hard");
@@ -1316,14 +2123,16 @@
 
         state.dailyPools={medium,hard};
         state.fullPool=fullPool;
-        state.trainerPools={articles:articlePool,grammar:grammarPool};
-        state.flashPool=pairs;
+        state.trainerPools={
+          articles:articlePool,
+          grammar:grammarPool
+        };
 
-        // При ручной перезагрузке новый контент используют только новые
-        // попытки. Активные тесты содержат собственный snapshot.
+        state.flashPool=pairs;
         state.flashBag=[];
         state.flashCurrent=null;
         state.flashLast="";
+
         state.drafts.delete("trainer:articles");
         state.drafts.delete("trainer:grammar");
 
@@ -1345,7 +2154,7 @@
     }
 
     // ============================================================
-    // ЭКРАНЫ И MODAL
+    // ЭКРАНЫ И МОДАЛЬНОЕ ОКНО
     // ============================================================
 
     function setFlashButtons(disabled) {
@@ -1360,319 +2169,580 @@
         state.flashBusy=false;
         setFlashButtons(false);
       }
+
       state.screen=name;
-      if(ROOTS.includes(name))state.root=name;
-      SCREENS.forEach(s=>$(`${s}Screen`).classList.toggle("hidden",s!==name));
+
+      if(ROOTS.includes(name)) state.root=name;
+
+      SCREENS.forEach(screen=>{
+        $(`${screen}Screen`).classList.toggle("hidden",screen!==name);
+      });
+
       const root=ROOTS.includes(name);
       $("bottomNav").classList.toggle("hidden",!root);
-      document.querySelectorAll("[data-tab]").forEach(b=>{
-        const active=b.dataset.tab===state.root;
-        b.classList.toggle("active",active);
-        if(active)b.setAttribute("aria-current","page");
-        else b.removeAttribute("aria-current");
+
+      document.querySelectorAll("[data-tab]").forEach(button=>{
+        const active=button.dataset.tab===state.root;
+        button.classList.toggle("active",active);
+
+        if(active) button.setAttribute("aria-current","page");
+        else button.removeAttribute("aria-current");
       });
+
       window.scrollTo({top:0,behavior:"instant"});
-      try {if(root)tg?.BackButton?.hide();else tg?.BackButton?.show();}catch(_){}
+
+      try {
+        if(root) tg?.BackButton?.hide();
+        else tg?.BackButton?.show();
+      } catch(_) {}
     }
 
     async function goRoot(root) {
-      if(state.busy||state.starting)return;
+      if(state.busy||state.starting) return;
       showScreen(root);
-      if(!state.loading)await loadData();
+      if(!state.loading) await loadData();
     }
 
     function showPending(id) {
-      const a=state.pending.get(id);
-      if(!a)return false;
-      state.attempt=a;
-      state.root=a.kind==="boss"?"boss":a.kind==="study"?"study":"practice";
+      const attempt=state.pending.get(id);
+
+      if(!attempt) return false;
+
+      state.attempt=attempt;
+      state.root=attempt.kind==="boss"
+        ?"boss"
+        :attempt.kind==="study"?"study":"practice";
       state.onlyErrors=false;
+
       renderResult();
       showScreen("result");
       return true;
     }
 
     function openDifficulty() {
-      if(state.busy||state.starting||!state.valid)return;
-      if(showPending(DAILY_ID))return;
+      if(state.busy||state.starting||!state.valid) return;
+      if(showPending(DAILY_ID)) return;
+
       if(!state.questionsReady) {
-        toast("Сначала загрузи вопросы из базы.",true);return;
+        toast("Сначала загрузи вопросы из базы.",true);
+        return;
       }
+
       if(!state.ready||state.loading) {
-        toast("Дождись загрузки статистики.",true);return;
+        toast("Дождись загрузки статистики.",true);
+        return;
       }
+
       if(state.dailyDone) {
-        toast("Сегодня квест уже закрыт. Приходи завтра.");return;
+        toast("Сегодня квест уже закрыт. Приходи завтра.");
+        return;
       }
+
       state.modal=true;
       state.modalOpener=document.activeElement;
       state.modalY=window.scrollY;
+
       $("difficultyModal").classList.remove("hidden");
       document.body.style.position="fixed";
       document.body.style.top=`-${state.modalY}px`;
       document.body.style.width="100%";
       $("appMain").inert=true;
       $("bottomNav").inert=true;
+
       $("difficultyModal").querySelector("[data-level='medium']").focus();
     }
 
     function closeDifficulty(focus=true) {
-      if(!state.modal)return;
+      if(!state.modal) return;
+
       $("difficultyModal").classList.add("hidden");
       document.body.style.position="";
       document.body.style.top="";
       document.body.style.width="";
       $("appMain").inert=false;
       $("bottomNav").inert=false;
+
       window.scrollTo({top:state.modalY,behavior:"instant"});
-      if(focus)state.modalOpener?.focus({preventScroll:true});
+
+      if(focus) state.modalOpener?.focus({preventScroll:true});
+
       state.modal=false;
     }
 
-    $("difficultyModal").addEventListener("click",e=>{
-      if(e.target===$("difficultyModal")){closeDifficulty();return;}
-      const b=e.target.closest("[data-level]");
-      if(!b)return;
-      if(b.dataset.level==="easy") {
-        toast("Пошел нахуй, лох, выбери другой уровень",true);
-        haptic("error");return;
+    $("difficultyModal").addEventListener("click",event=>{
+      if(event.target===$("difficultyModal")) {
+        closeDifficulty();
+        return;
       }
-      const level=b.dataset.level;
+
+      const button=event.target.closest("[data-level]");
+      if(!button) return;
+
+      if(button.dataset.level==="easy") {
+        toast("Пошел нахуй, лох, выбери другой уровень",true);
+        haptic("error");
+        return;
+      }
+
+      const level=button.dataset.level;
       closeDifficulty(false);
       startDaily(level);
     });
+
     $("closeDifficulty").addEventListener("click",()=>closeDifficulty());
-    document.addEventListener("keydown",e=>{
-      if(!state.modal)return;
-      if(e.key==="Escape"){e.preventDefault();closeDifficulty();return;}
-      if(e.key!=="Tab")return;
+
+    document.addEventListener("keydown",event=>{
+      if(!state.modal) return;
+
+      if(event.key==="Escape") {
+        event.preventDefault();
+        closeDifficulty();
+        return;
+      }
+
+      if(event.key!=="Tab") return;
+
       const buttons=Array.from($("difficultyModal").querySelectorAll("button"));
-      const first=buttons[0],last=buttons[buttons.length-1];
-      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
-      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      const first=buttons[0];
+      const last=buttons[buttons.length-1];
+
+      if(event.shiftKey&&document.activeElement===first) {
+        event.preventDefault();
+        last.focus();
+      } else if(!event.shiftKey&&document.activeElement===last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
 
     // ============================================================
-    // LEADERBOARD: ПРЕЖНИЕ ПРАВИЛА
+    // LEADERBOARD — ПРЕЖНИЕ ПРАВИЛА
     // ============================================================
 
-    function dailyRecord(r,date) {
-      return String(r.id)===player.id&&r.date===date&&
-        [DAILY_ID,...LEGACY_DAILY_IDS].includes(r.module);
+    function dailyRecord(record,date) {
+      return (
+        String(record.id)===player.id &&
+        record.date===date &&
+        [DAILY_ID,...LEGACY_DAILY_IDS].includes(record.module)
+      );
     }
-    function bossRecord(r,date) {
-      return String(r.id)===player.id&&r.date===date&&scoreOf(r)>0&&
-        [BOSS_ID,LEGACY_BOSS_ID].includes(r.module);
+
+    function bossRecord(record,date) {
+      return (
+        String(record.id)===player.id &&
+        record.date===date &&
+        scoreOf(record)>0 &&
+        [BOSS_ID,LEGACY_BOSS_ID].includes(record.module)
+      );
     }
-    function matches(r,a) {
-      if(a.kind==="daily")return dailyRecord(r,a.date);
-      if(a.kind==="boss")return bossRecord(r,a.date);
-      return String(r.id)===player.id&&r.module===a.module;
+
+    function matches(record,attempt) {
+      if(attempt.kind==="daily") return dailyRecord(record,attempt.date);
+      if(attempt.kind==="boss") return bossRecord(record,attempt.date);
+
+      return String(record.id)===player.id&&record.module===attempt.module;
     }
-    async function findSaved(a) {
-      if(isDemo)return state.demoRecords.find(r=>matches(r,a))||null;
+
+    async function findSaved(attempt) {
+      if(isDemo) {
+        return state.demoRecords.find(record=>matches(record,attempt))||null;
+      }
+
       const query={
         select:"record_id,id,name,score,date,module",
-        id:`eq.${player.id}`,limit:1
+        id:`eq.${player.id}`,
+        limit:1
       };
-      if(a.kind==="daily") {
+
+      if(attempt.kind==="daily") {
         query.module=`in.(${[DAILY_ID,...LEGACY_DAILY_IDS].join(",")})`;
-        query.date=`eq.${a.date}`;
-      } else if(a.kind==="boss") {
+        query.date=`eq.${attempt.date}`;
+      } else if(attempt.kind==="boss") {
         query.module=`in.(${BOSS_ID},${LEGACY_BOSS_ID})`;
-        query.date=`eq.${a.date}`;
+        query.date=`eq.${attempt.date}`;
         query.score="gt.0";
-      } else query.module=`eq.${a.module}`;
+      } else {
+        query.module=`eq.${attempt.module}`;
+      }
+
       const rows=await api(query);
-      if(!Array.isArray(rows))throw new Error("Не удалось проверить результат.");
+
+      if(!Array.isArray(rows)) {
+        throw new Error("Не удалось проверить результат.");
+      }
+
       return rows[0]||null;
     }
-    function rememberRecord(r) {
-      const i=state.records.findIndex(x=>x.record_id===r.record_id);
-      if(i<0)state.records.push(r);else state.records[i]=r;
-      if(dailyRecord(r,state.date))state.dailyDone=true;
-      if(bossRecord(r,state.date))state.bossDone=true;
-      if(String(r.id)===player.id&&MODULES[r.module])state.studyDone.add(r.module);
+
+    function rememberRecord(record) {
+      const index=state.records.findIndex(
+        item=>item.record_id===record.record_id
+      );
+
+      if(index<0) state.records.push(record);
+      else state.records[index]=record;
+
+      if(dailyRecord(record,state.date)) state.dailyDone=true;
+      if(bossRecord(record,state.date)) state.bossDone=true;
+
+      if(String(record.id)===player.id&&MODULES[record.module]) {
+        state.studyDone.add(record.module);
+      }
     }
+
     async function loadData() {
-      const id=++state.loadId,date=today();
-      state.date=date;state.loading=true;state.ready=false;
+      const id=++state.loadId;
+      const date=today();
+
+      state.date=date;
+      state.loading=true;
+      state.ready=false;
+
       $("dataError").classList.add("hidden");
       $("demoNotice").classList.toggle("hidden",!isDemo);
       $("dayNote").textContent=`🇺🇦 ${date} · По киевскому времени`;
+
       renderUI();
+
       try {
         let records,ownToday;
+
         if(isDemo) {
           records=state.demoRecords.slice();
-          ownToday=records.filter(r=>String(r.id)===player.id&&r.date===date);
-        } else [records,ownToday]=await Promise.all([
-          fetchAll(),fetchAll({id:`eq.${player.id}`,date:`eq.${date}`})
-        ]);
-        if(id!==state.loadId)return;
-        if(date!==today())return loadData();
+          ownToday=records.filter(
+            record=>String(record.id)===player.id&&record.date===date
+          );
+        } else {
+          [records,ownToday]=await Promise.all([
+            fetchAll(),
+            fetchAll({id:`eq.${player.id}`,date:`eq.${date}`})
+          ]);
+        }
+
+        if(id!==state.loadId) return;
+        if(date!==today()) return loadData();
 
         state.records=records;
-        state.dailyDone=ownToday.some(r=>dailyRecord(r,date));
-        state.bossDone=ownToday.some(r=>bossRecord(r,date));
+        state.dailyDone=ownToday.some(record=>dailyRecord(record,date));
+        state.bossDone=ownToday.some(record=>bossRecord(record,date));
         state.studyDone=new Set(
-          records.filter(r=>String(r.id)===player.id&&MODULES[r.module]).map(r=>r.module)
+          records
+            .filter(record=>String(record.id)===player.id&&MODULES[record.module])
+            .map(record=>record.module)
         );
-        for(const a of Array.from(state.pending.values())) {
-          const saved=records.find(r=>matches(r,a));
-          if(saved)resolveSaved(a,saved);
+
+        for(const attempt of Array.from(state.pending.values())) {
+          const saved=records.find(record=>matches(record,attempt));
+          if(saved) resolveSaved(attempt,saved);
         }
+
         state.ready=true;
       } catch(error) {
-        if(id!==state.loadId)return;
+        if(id!==state.loadId) return;
+
         console.error(error);
-        $("dataErrorText").textContent=`Не удалось загрузить данные: ${error.message}`;
+        $("dataErrorText").textContent=
+          `Не удалось загрузить данные: ${error.message}`;
         $("dataError").classList.remove("hidden");
       } finally {
-        if(id===state.loadId){state.loading=false;renderUI();}
+        if(id===state.loadId) {
+          state.loading=false;
+          renderUI();
+        }
       }
     }
 
     // ============================================================
-    // МЕНЮ И ПРОФИЛЬ
+    // МЕНЮ, ПРОФИЛЬ, ИНВЕНТАРЬ
     // ============================================================
 
     function buildUI() {
       $("studyCards").replaceChildren();
-      Object.entries(MODULES).forEach(([id,m])=>{
-        const b=el("button","module-card glass");
-        b.type="button";b.dataset.study=id;
-        const c=el("span","module-copy");
-        c.append(el("strong","",m.title),el("span","subtitle",m.subtitle),el("span","card-meta","80% → 50 баллов"));
-        b.append(el("span","module-icon",m.icon),c,el("span","module-status","→"));
-        $("studyCards").append(b);
+
+      Object.entries(MODULES).forEach(([id,module])=>{
+        const button=el("button","module-card glass");
+        button.type="button";
+        button.dataset.study=id;
+
+        const content=el("span","module-copy");
+        content.append(
+          el("strong","",module.title),
+          el("span","subtitle",module.subtitle),
+          el("span","card-meta","80% → 50 баллов")
+        );
+
+        button.append(
+          el("span","module-icon",module.icon),
+          content,
+          el("span","module-status","→")
+        );
+
+        $("studyCards").append(button);
       });
+
       $("inventoryGrid").replaceChildren();
-      INVENTORY.forEach((item,i)=>{
-        const b=el("button","inventory-slot locked");
-        b.type="button";b.dataset.item=String(i);
-        b.append(el("span","inventory-emoji","🔒"),el("span","inventory-cost",item.min));
-        $("inventoryGrid").append(b);
+
+      INVENTORY.forEach((item,index)=>{
+        const button=el("button","inventory-slot locked");
+        button.type="button";
+        button.dataset.item=String(index);
+
+        button.append(
+          el("span","inventory-emoji","🔒"),
+          el("span","inventory-cost",item.min)
+        );
+
+        $("inventoryGrid").append(button);
       });
     }
 
     function renderUI() {
       const pending=state.pending.has(DAILY_ID);
+
       $("dailyButton").disabled=!state.valid||
-        (!pending&&(!state.questionsReady||state.loading||!state.ready||state.dailyDone));
+        (!pending&&(
+          !state.questionsReady||
+          state.loading||
+          !state.ready||
+          state.dailyDone
+        ));
+
       $("dailyButton").classList.toggle("completed",state.dailyDone);
       $("dailyStatus").textContent=pending?"↻":state.dailyDone?"✅":"→";
-      $("dailyMeta").textContent=pending?"Есть неотправленный результат"
-        :state.dailyDone?"Сегодня пройдено · до встречи завтра"
-          :!state.questionsReady?"Вопросы ещё не загружены"
+
+      $("dailyMeta").textContent=pending
+        ?"Есть неотправленный результат"
+        :state.dailyDone
+          ?"Сегодня пройдено · до встречи завтра"
+          :!state.questionsReady
+            ?"Вопросы ещё не загружены"
             :"20 вопросов · средний ×1 / тяжёлый ×2";
 
-      document.querySelectorAll("[data-trainer]").forEach(b=>{
-        b.disabled=!state.valid||!state.questionsReady;
+      document.querySelectorAll("[data-trainer]").forEach(button=>{
+        button.disabled=!state.valid||!state.questionsReady;
       });
+
       $("flashcardsButton").disabled=!state.valid||!state.questionsReady;
 
-      $("studyCards").querySelectorAll("[data-study]").forEach(b=>{
-        const id=b.dataset.study,done=state.studyDone.has(id);
-        b.disabled=!state.valid;
-        b.classList.toggle("completed",done);
-        b.querySelector(".module-status").textContent=state.pending.has(id)?"↻":done?"✅":"→";
-        b.querySelector(".card-meta").textContent=state.pending.has(id)
-          ?"Есть неотправленный результат":"80% → 50 баллов";
+      $("studyCards").querySelectorAll("[data-study]").forEach(button=>{
+        const id=button.dataset.study;
+        const done=state.studyDone.has(id);
+
+        button.disabled=!state.valid;
+        button.classList.toggle("completed",done);
+        button.querySelector(".module-status").textContent=
+          state.pending.has(id)?"↻":done?"✅":"→";
+
+        button.querySelector(".card-meta").textContent=
+          state.pending.has(id)
+            ?"Есть неотправленный результат"
+            :"80% → 50 баллов";
       });
-      renderProfile();renderInventory();renderLeaderboard();renderBossStatus();
-      if(state.screen==="theory")renderTheoryStatus();
+
+      renderProfile();
+      renderInventory();
+      renderLeaderboard();
+      renderBossStatus();
+
+      if(state.screen==="theory") renderTheoryStatus();
     }
 
     function renderProfile() {
       $("profileName").textContent=player.name;
-      $("avatar").textContent=Array.from(player.name.trim())[0]?.toUpperCase()||"D";
-      $("idFooter").textContent=`ID ${player.id} · SPIELAUSWEIS · Не настоящий документ`;
+      $("avatar").textContent=
+        Array.from(player.name.trim())[0]?.toUpperCase()||"D";
+      $("idFooter").textContent=
+        `ID ${player.id} · SPIELAUSWEIS · Не настоящий документ`;
+
       if(!state.ready) {
         state.totalScore=null;
-        ["totalScore","playedDays","todayScore"].forEach(id=>$(id).textContent="—");
+
+        ["totalScore","playedDays","todayScore"].forEach(id=>{
+          $(id).textContent="—";
+        });
+
         $("profileRank").textContent="Проверка документов…";
-        $("nextRankText").textContent="Прогресс появится после загрузки статистики.";
+        $("nextRankText").textContent=
+          "Прогресс появится после загрузки статистики.";
         $("rankProgressFill").style.width="0%";
         $("rankProgressBar").setAttribute("aria-valuenow","0");
         $("citizenshipStamp").classList.add("hidden");
         return;
       }
-      const own=state.records.filter(r=>String(r.id)===player.id);
-      const total=own.reduce((s,r)=>s+scoreOf(r),0);
+
+      const own=state.records.filter(record=>String(record.id)===player.id);
+      const total=own.reduce((sum,record)=>sum+scoreOf(record),0);
       state.totalScore=total;
+
       const {next,progress}=rankInfo(total);
+
       $("totalScore").textContent=total;
-      $("todayScore").textContent=own.filter(r=>r.date===state.date).reduce((s,r)=>s+scoreOf(r),0);
-      $("playedDays").textContent=new Set(own.map(r=>r.date).filter(Boolean)).size;
+      $("todayScore").textContent=own
+        .filter(record=>record.date===state.date)
+        .reduce((sum,record)=>sum+scoreOf(record),0);
+      $("playedDays").textContent=
+        new Set(own.map(record=>record.date).filter(Boolean)).size;
       $("profileRank").textContent=getRank(total);
+
       $("nextRankText").textContent=next
         ?`До следующего звания «${next.name}» осталось ${next.min-total} очков`
         :"Максимальное звание. Игровой ПМЖ одобрен, гений 👑";
+
       $("rankProgressFill").style.width=`${progress}%`;
-      $("rankProgressBar").setAttribute("aria-valuenow",String(Math.round(progress)));
-      $("rankProgressBar").setAttribute("aria-valuetext",$("nextRankText").textContent);
+      $("rankProgressBar").setAttribute(
+        "aria-valuenow",String(Math.round(progress))
+      );
+      $("rankProgressBar").setAttribute(
+        "aria-valuetext",$("nextRankText").textContent
+      );
+
       $("citizenshipStamp").classList.toggle("hidden",next!==null);
     }
+
     function renderInventory() {
-      $("inventoryGrid").querySelectorAll("[data-item]").forEach(b=>{
-        const item=INVENTORY[Number(b.dataset.item)];
+      $("inventoryGrid").querySelectorAll("[data-item]").forEach(button=>{
+        const item=INVENTORY[Number(button.dataset.item)];
         const unlocked=state.totalScore!==null&&state.totalScore>=item.min;
-        b.classList.toggle("locked",!unlocked);b.classList.toggle("unlocked",unlocked);
-        b.querySelector(".inventory-emoji").textContent=unlocked?item.emoji:"🔒";
-        b.querySelector(".inventory-cost").textContent=unlocked?"✓":String(item.min);
-        b.setAttribute("aria-label",`${item.name} · ${unlocked?"открыт":`нужно ${item.min} баллов`}`);
+
+        button.classList.toggle("locked",!unlocked);
+        button.classList.toggle("unlocked",unlocked);
+        button.querySelector(".inventory-emoji").textContent=
+          unlocked?item.emoji:"🔒";
+        button.querySelector(".inventory-cost").textContent=
+          unlocked?"✓":String(item.min);
+        button.setAttribute(
+          "aria-label",
+          `${item.name} · ${unlocked?"открыт":`нужно ${item.min} баллов`}`
+        );
       });
     }
+
     function renderLeaderboard() {
       $("tabToday").classList.toggle("active",state.ratingTab==="today");
       $("tabAll").classList.toggle("active",state.ratingTab==="all");
-      $("tabToday").setAttribute("aria-selected",String(state.ratingTab==="today"));
-      $("tabAll").setAttribute("aria-selected",String(state.ratingTab==="all"));
-      const c=$("leaderboard");c.replaceChildren();$("leaderCount").textContent="";
+      $("tabToday").setAttribute(
+        "aria-selected",String(state.ratingTab==="today")
+      );
+      $("tabAll").setAttribute(
+        "aria-selected",String(state.ratingTab==="all")
+      );
+
+      const container=$("leaderboard");
+      container.replaceChildren();
+      $("leaderCount").textContent="";
+
       if(!state.ready) {
-        c.append(el("div","empty",state.loading?"Загружаем рейтинг…":"Рейтинг недоступен. Повтори загрузку."));
+        container.append(el(
+          "div","empty",
+          state.loading
+            ?"Загружаем рейтинг…"
+            :"Рейтинг недоступен. Повтори загрузку."
+        ));
         return;
       }
-      const all=new Map(),filtered=new Map();
-      state.records.forEach(r=>{
-        if(r.id==null)return;
-        const id=String(r.id);
-        if(!all.has(id))all.set(id,{id,name:r.name||"Игрок",score:0,days:new Set(),latest:""});
-        const e=all.get(id);e.score+=scoreOf(r);
-        if(r.date)e.days.add(r.date);
-        if((r.date||"")>=e.latest){e.latest=r.date||"";e.name=r.name||"Игрок";}
-        if(state.ratingTab==="all"||r.date===state.date) {
-          filtered.set(id,(filtered.get(id)||0)+scoreOf(r));
+
+      // Текущее звание — по общей сумме баллов.
+      const all=new Map();
+      const filtered=new Map();
+
+      state.records.forEach(record=>{
+        if(record.id==null) return;
+        const id=String(record.id);
+
+        if(!all.has(id)) {
+          all.set(id,{
+            id,
+            name:record.name||"Игрок",
+            score:0,
+            days:new Set(),
+            latest:""
+          });
+        }
+
+        const entry=all.get(id);
+        entry.score+=scoreOf(record);
+        if(record.date) entry.days.add(record.date);
+
+        if((record.date||"")>=entry.latest) {
+          entry.latest=record.date||"";
+          entry.name=record.name||"Игрок";
+        }
+
+        if(state.ratingTab==="all"||record.date===state.date) {
+          filtered.set(id,(filtered.get(id)||0)+scoreOf(record));
         }
       });
+
       const entries=Array.from(filtered,([id,score])=>({
-        ...all.get(id),total:all.get(id).score,score
-      })).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name,"ru")||a.id.localeCompare(b.id));
+        ...all.get(id),
+        total:all.get(id).score,
+        score
+      })).sort((a,b)=>
+        b.score-a.score||
+        a.name.localeCompare(b.name,"ru")||
+        a.id.localeCompare(b.id)
+      );
+
       $("leaderCount").textContent=`Игроков: ${entries.length}`;
-      if(!entries.length){c.append(el("div","empty","Пока пусто. Стань первым гением 🚀"));return;}
-      const mine=entries.findIndex(e=>e.id===player.id);
+
+      if(!entries.length) {
+        container.append(el(
+          "div","empty","Пока пусто. Стань первым гением 🚀"
+        ));
+        return;
+      }
+
+      const mine=entries.findIndex(entry=>entry.id===player.id);
       const visible=entries.slice(0,50).map((entry,index)=>({entry,index}));
-      if(mine>=50)visible.push({entry:entries[mine],index:mine});
-      visible.forEach(({entry:e,index:i})=>{
-        const row=el("div","leader-row");row.classList.toggle("me",e.id===player.id);
+
+      if(mine>=50) {
+        visible.push({entry:entries[mine],index:mine});
+      }
+
+      visible.forEach(({entry,index})=>{
+        const row=el("div","leader-row");
+        row.classList.toggle("me",entry.id===player.id);
+
         const info=el("div");
         info.append(
-          el("div","leader-name",e.name+(e.id===player.id?" · ты":"")),
-          el("div","leader-meta",`${getRank(e.total)} • Сыграно дней: ${e.days.size}`+
-            (state.ratingTab==="today"?" • Баллы за сегодня":""))
+          el(
+            "div","leader-name",
+            entry.name+(entry.id===player.id?" · ты":"")
+          ),
+          el(
+            "div","leader-meta",
+            `${getRank(entry.total)} • Сыграно дней: ${entry.days.size}`+
+            (state.ratingTab==="today"?" • Баллы за сегодня":"")
+          )
         );
-        row.append(el("div","muted",["🥇","🥈","🥉"][i]||String(i+1)),info,el("div","leader-score",e.score));
-        c.append(row);
+
+        row.append(
+          el("div","muted",["🥇","🥈","🥉"][index]||String(index+1)),
+          info,
+          el("div","leader-score",entry.score)
+        );
+
+        container.append(row);
       });
-      if(entries.length>50)c.append(el("div","empty","Топ-50 и твоя позиция."));
+
+      if(entries.length>50) {
+        container.append(el("div","empty","Топ-50 и твоя позиция."));
+      }
     }
+
     function renderBossStatus() {
       const pending=state.pending.has(BOSS_ID);
       const draft=state.drafts.get(address(BOSS_ID,"boss"));
       const resume=draft&&!draft.checked&&draft.date===today();
+
       $("startBossButton").disabled=!state.valid||state.starting||state.busy||
-        (!pending&&(!state.questionsReady||!state.ready||state.loading||state.bossDone));
+        (!pending&&(
+          !state.questionsReady||
+          !state.ready||
+          state.loading||
+          state.bossDone
+        ));
+
       if(pending) {
         $("startBossButton").textContent="Подтвердить победу ↻";
         $("bossStatus").textContent="Победа ждёт подтверждения сервера.";
@@ -1684,9 +2754,11 @@
         $("bossStatus").textContent="Дождись загрузки статистики.";
       } else if(state.bossDone) {
         $("startBossButton").textContent=BOSS_CLOSED;
-        $("bossStatus").textContent="Сегодняшняя награда уже получена. Приходи завтра.";
+        $("bossStatus").textContent=
+          "Сегодняшняя награда уже получена. Приходи завтра.";
       } else {
-        $("startBossButton").textContent=resume?"Вернуться в кабинет":"Зайти в кабинет";
+        $("startBossButton").textContent=
+          resume?"Вернуться в кабинет":"Зайти в кабинет";
         $("bossStatus").textContent=resume
           ?`Текущий термин: ${draft.committed.filter(Boolean).length} ответов, ${draft.hp} жизни.`
           :"Поражения не записываются. Новые попытки доступны до первой победы.";
@@ -1698,427 +2770,879 @@
     // ============================================================
 
     function makeAttempt(module,kind,level,units) {
-      const a={
-        module,kind,level,date:state.date,units,
-        answers:units.map(q=>q.type==="builder"?[]:null),
+      const attempt={
+        module,
+        kind,
+        level,
+        date:state.date,
+        units,
+        answers:units.map(question=>question.type==="builder"?[]:null),
         pools:[],
-        committed:units.map(()=>false),hp:MAX_HP,index:0,transitioning:false,
-        dead:false,deathMessage:"",checked:false,finishing:false,passed:false,
-        correctCount:0,rewardPoints:0,rewardState:"unresolved",
-        payload:null,saveMessage:"",saveError:false
+        committed:units.map(()=>false),
+        hp:MAX_HP,
+        index:0,
+        transitioning:false,
+        dead:false,
+        deathMessage:"",
+        checked:false,
+        finishing:false,
+        passed:false,
+        correctCount:0,
+        rewardPoints:0,
+        rewardState:"unresolved",
+        payload:null,
+        saveMessage:"",
+        saveError:false
       };
-      // Для daily перемешивание слов тоже стабильно по дате и ID вопроса.
-      a.pools=units.map(q=>q.type==="builder"
+
+      attempt.pools=units.map(question=>question.type==="builder"
         ?shuffle(
-          [...q.correctWords,...q.decoyWords].map((text,id)=>({id,text})),
+          [...question.correctWords,...question.decoyWords]
+            .map((text,id)=>({id,text})),
           kind==="daily"
-            ?seededRandom(`DeutschQuest:words:v1:${a.date}:${level}:${q.key}`)
+            ?seededRandom(
+              `DeutschQuest:words:v1:${attempt.date}:${level}:${question.key}`
+            )
             :Math.random
         )
         :null);
-      return a;
+
+      return attempt;
     }
 
     async function ensureData() {
-      if(state.loading){toast("Секунду, проверяем статистику.");return false;}
-      if(!state.ready||state.date!==today())await loadData();
-      if(!state.ready){toast("Не удалось проверить награду.",true);return false;}
+      if(state.loading) {
+        toast("Секунду, проверяем статистику.");
+        return false;
+      }
+
+      if(!state.ready||state.date!==today()) await loadData();
+
+      if(!state.ready) {
+        toast("Не удалось проверить награду.",true);
+        return false;
+      }
+
       return true;
     }
+
     function ensureQuestions() {
-      if(state.questionsReady)return true;
+      if(state.questionsReady) return true;
       toast("Сначала загрузи вопросы из Supabase.",true);
       return false;
     }
 
-    function showQuiz(a) {
-      state.attempt=a;state.onlyErrors=false;
-      state.root=a.kind==="boss"?"boss":a.kind==="study"?"study":"practice";
-      $("bossHud").classList.toggle("hidden",a.kind!=="boss");
-      $("checkBar").classList.toggle("hidden",isStream(a));
+    function showQuiz(attempt) {
+      state.attempt=attempt;
+      state.onlyErrors=false;
+      state.root=attempt.kind==="boss"
+        ?"boss"
+        :attempt.kind==="study"?"study":"practice";
+
+      $("bossHud").classList.toggle("hidden",attempt.kind!=="boss");
+      $("checkBar").classList.toggle("hidden",isStream(attempt));
       $("checkButton").disabled=false;
       $("checkButton").textContent="Проверить ответы";
-      $("progressLabel").textContent=a.kind==="trainer"?"Тренировка":a.kind==="boss"?"Отвечено":"Заполнено";
+      $("progressLabel").textContent=attempt.kind==="trainer"
+        ?"Тренировка"
+        :attempt.kind==="boss"?"Отвечено":"Заполнено";
 
-      if(a.kind==="boss") {
-        $("quizTitle").textContent="Termin bei Frau Müller";$("quizMode").textContent="🏢 Босс";
-        $("quizInstruction").textContent="Ответ фиксируется сразу. Третья ошибка отменяет термин. Новую попытку можно запросить после поражения.";
-      } else if(a.kind==="trainer") {
-        $("quizTitle").textContent=a.mode==="articles"?"Artikel-Trainer":"Grammatik-Trainer";
+      if(attempt.kind==="boss") {
+        $("quizTitle").textContent="Termin bei Frau Müller";
+        $("quizMode").textContent="🏢 Босс";
+        $("quizInstruction").textContent=
+          "Ответ фиксируется сразу. Третья ошибка отменяет термин. Новую попытку можно запросить после поражения.";
+      } else if(attempt.kind==="trainer") {
+        $("quizTitle").textContent=attempt.mode==="articles"
+          ?"Artikel-Trainer"
+          :"Grammatik-Trainer";
         $("quizMode").textContent="♾️ Без очков";
-        $("quizInstruction").textContent="Отвечай и жми «Следующий вопрос». Никаких баллов в рейтинг и дневных лимитов.";
-      } else if(a.kind==="study") {
-        $("quizTitle").textContent=MODULES[a.module].title;$("quizMode").textContent="Тетрадь";
-        $("quizInstruction").textContent=`Каждый вопрос, фраза и пропуск — один ответ. Нужно минимум ${Math.ceil(a.units.length*STUDY_THRESHOLD/100)} из ${a.units.length}.`;
+        $("quizInstruction").textContent=attempt.mode==="articles"
+          ?"Только базовый род слов: der, die, das. Никаких падежей и баллов в рейтинг."
+          :"Отвечай и жми «Следующий вопрос». Грамматика и падежи — без дневных лимитов и баллов в рейтинг.";
+      } else if(attempt.kind==="study") {
+        $("quizTitle").textContent=MODULES[attempt.module].title;
+        $("quizMode").textContent="Тетрадь";
+        $("quizInstruction").textContent=
+          `Каждый вопрос, фраза и пропуск — один ответ. Нужно минимум ${Math.ceil(attempt.units.length*STUDY_THRESHOLD/100)} из ${attempt.units.length}.`;
       } else {
-        $("quizTitle").textContent="Tagesquest";$("quizMode").textContent=a.level==="hard"?"Тяжёлый ×2":"Средний ×1";
-        $("quizInstruction").textContent=`${a.units.length} вопросов. Порога нет. Ответ = ${a.level==="hard"?2:1} балл. Набор фиксирован по дате ${a.date}.`;
+        $("quizTitle").textContent="Tagesquest";
+        $("quizMode").textContent=attempt.level==="hard"
+          ?"Тяжёлый ×2"
+          :"Средний ×1";
+        $("quizInstruction").textContent=
+          `${attempt.units.length} вопросов. Порога нет. Ответ = ${attempt.level==="hard"?2:1} балл. Набор фиксирован по дате ${attempt.date}.`;
       }
+
       showScreen("quiz");
-      if(isStream(a))renderStreamQuestion();else renderSheet(a,$("quizQuestions"));
-      updateProgress();updateBossHud();
+
+      if(isStream(attempt)) renderStreamQuestion();
+      else renderSheet(attempt,$("quizQuestions"));
+
+      updateProgress();
+      updateBossHud();
     }
 
     async function startDaily(level) {
-      if(!state.valid||state.busy||state.starting)return;
-      if(!ensureQuestions())return;
+      if(!state.valid||state.busy||state.starting) return;
+      if(!ensureQuestions()) return;
+
       state.starting=true;
+
       try {
-        if(!await ensureData())return;
-        if(showPending(DAILY_ID))return;
-        const date=today(),saved=await findSaved({kind:"daily",module:DAILY_ID,date});
-        if(saved){rememberRecord(saved);renderUI();toast("Сегодня квест уже пройден.");return;}
-        if(date!==today()){await loadData();toast("Начался новый день. Открой квест ещё раз.");return;}
+        if(!await ensureData()) return;
+        if(showPending(DAILY_ID)) return;
+
+        const date=today();
+        const saved=await findSaved({
+          kind:"daily",
+          module:DAILY_ID,
+          date
+        });
+
+        if(saved) {
+          rememberRecord(saved);
+          renderUI();
+          toast("Сегодня квест уже пройден.");
+          return;
+        }
+
+        if(date!==today()) {
+          await loadData();
+          toast("Начался новый день. Открой квест ещё раз.");
+          return;
+        }
 
         const key=address(DAILY_ID,level);
-        let a=state.drafts.get(key);
-        if(!a||a.date!==date) {
-          a=makeAttempt(DAILY_ID,"daily",level,dailySelection(date,level));
-          a.date=date;
-          state.drafts.set(key,a);
+        let attempt=state.drafts.get(key);
+
+        if(!attempt||attempt.date!==date) {
+          attempt=makeAttempt(
+            DAILY_ID,"daily",level,dailySelection(date,level)
+          );
+          attempt.date=date;
+          state.drafts.set(key,attempt);
         }
-        showQuiz(a);haptic();
-      } catch(error){toast(error.message,true);}
-      finally{state.starting=false;renderBossStatus();}
+
+        showQuiz(attempt);
+        haptic();
+      } catch(error) {
+        toast(error.message,true);
+      } finally {
+        state.starting=false;
+        renderBossStatus();
+      }
     }
 
     function openTheory(id) {
-      if(state.busy||state.starting||!state.valid)return;
-      const m=MODULES[id];if(!m)return;
-      state.selectedStudy=id;state.root="study";
-      $("theoryIcon").textContent=m.icon;$("theoryTitle").textContent=m.title;
-      $("theorySubtitle").textContent=m.subtitle;
-      $("theoryContent").innerHTML=m.theoryHTML;
-      renderTheoryStatus();showScreen("theory");haptic();
+      if(state.busy||state.starting||!state.valid) return;
+      const module=MODULES[id];
+      if(!module) return;
+
+      state.selectedStudy=id;
+      state.root="study";
+      $("theoryIcon").textContent=module.icon;
+      $("theoryTitle").textContent=module.title;
+      $("theorySubtitle").textContent=module.subtitle;
+      $("theoryContent").innerHTML=module.theoryHTML;
+
+      renderTheoryStatus();
+      showScreen("theory");
+      haptic();
     }
+
     function renderTheoryStatus() {
-      const id=state.selectedStudy;if(!id)return;
+      const id=state.selectedStudy;
+      if(!id) return;
+
       const pending=state.pending.has(id);
-      $("startStudyButton").textContent=pending?"Открыть неотправленный результат ↻":"Пройти тест";
+      $("startStudyButton").textContent=pending
+        ?"Открыть неотправленный результат ↻"
+        :"Пройти тест";
       $("startStudyButton").disabled=state.busy||state.starting;
-      $("theoryRewardNote").textContent=pending?"Результат ещё не подтверждён. Повтори отправку."
-        :state.studyDone.has(id)?"✅ Награда получена. Тренировка открыта."
+      $("theoryRewardNote").textContent=pending
+        ?"Результат ещё не подтверждён. Повтори отправку."
+        :state.studyDone.has(id)
+          ?"✅ Награда получена. Тренировка открыта."
           :"80% → 50 баллов. Одна награда за тему за всё время.";
     }
+
     async function startStudy(id,fresh=false) {
-      if(!state.valid||state.busy||state.starting)return;
+      if(!state.valid||state.busy||state.starting) return;
       state.starting=true;
+
       try {
-        if(!await ensureData())return;
-        if(showPending(id))return;
+        if(!await ensureData()) return;
+        if(showPending(id)) return;
+
         const key=address(id,"study");
-        let a=fresh?null:state.drafts.get(key);
-        if(!a){a=makeAttempt(id,"study","study",copy(studyUnits(id)));state.drafts.set(key,a);}
-        showQuiz(a);haptic();
+        let attempt=fresh?null:state.drafts.get(key);
+
+        if(!attempt) {
+          attempt=makeAttempt(id,"study","study",copy(studyUnits(id)));
+          state.drafts.set(key,attempt);
+        }
+
+        showQuiz(attempt);
+        haptic();
       } finally {
         state.starting=false;
-        if(state.screen==="theory")renderTheoryStatus();
+        if(state.screen==="theory") renderTheoryStatus();
       }
     }
 
     async function startBoss(fresh=false) {
-      if(!state.valid||state.busy||state.starting)return;
-      if(showPending(BOSS_ID))return;
-      if(!ensureQuestions())return;
-      state.starting=true;renderBossStatus();
+      if(!state.valid||state.busy||state.starting) return;
+      if(showPending(BOSS_ID)) return;
+      if(!ensureQuestions()) return;
+
+      state.starting=true;
+      renderBossStatus();
+
       try {
-        if(!await ensureData())return;
-        const date=today(),saved=await findSaved({kind:"boss",module:BOSS_ID,date});
-        if(saved){rememberRecord(saved);toast(BOSS_CLOSED,true);showScreen("boss");return;}
-        if(date!==today()){await loadData();toast("Начался новый день. Запроси термин снова.");return;}
-        const key=address(BOSS_ID,"boss");
-        let a=fresh?null:state.drafts.get(key);
-        if(!a||a.date!==date||a.checked) {
-          const units=shuffle(state.fullPool).slice(0,BOSS_COUNT)
-            .map(q=>shuffledOptions(copy(q),Math.random));
-          a=makeAttempt(BOSS_ID,"boss","boss",units);
-          state.drafts.set(key,a);
+        if(!await ensureData()) return;
+
+        const date=today();
+        const saved=await findSaved({
+          kind:"boss",
+          module:BOSS_ID,
+          date
+        });
+
+        if(saved) {
+          rememberRecord(saved);
+          toast(BOSS_CLOSED,true);
+          showScreen("boss");
+          return;
         }
-        a.transitioning=false;showQuiz(a);haptic();
-      } catch(error){toast(`Кабинет не открылся: ${error.message}`,true);}
-      finally{state.starting=false;renderBossStatus();}
+
+        if(date!==today()) {
+          await loadData();
+          toast("Начался новый день. Запроси термин снова.");
+          return;
+        }
+
+        const key=address(BOSS_ID,"boss");
+        let attempt=fresh?null:state.drafts.get(key);
+
+        if(!attempt||attempt.date!==date||attempt.checked) {
+          const units=shuffle(state.fullPool)
+            .slice(0,BOSS_COUNT)
+            .map(question=>shuffledOptions(copy(question),Math.random));
+
+          attempt=makeAttempt(BOSS_ID,"boss","boss",units);
+          state.drafts.set(key,attempt);
+        }
+
+        attempt.transitioning=false;
+        showQuiz(attempt);
+        haptic();
+      } catch(error) {
+        toast(`Кабинет не открылся: ${error.message}`,true);
+      } finally {
+        state.starting=false;
+        renderBossStatus();
+      }
     }
 
-    // Каждый НОВЫЙ запуск тренажёра — свежий Math.random() и новый поток.
     function startTrainer(mode) {
-      if(!state.valid||state.busy||state.starting||!ensureQuestions())return;
-      if(!state.trainerPools[mode]?.length)return;
+      if(!state.valid||state.busy||state.starting||!ensureQuestions()) return;
+      if(!state.trainerPools[mode]?.length) return;
+
       stopTimer();
+
       const key=`trainer:${mode}`;
-      const a=makeAttempt(key,"trainer",mode,[]);
-      a.mode=mode;
-      a.bag=shuffle(state.trainerPools[mode]);
-      a.seen=0;a.trainerCorrect=0;a.lastSignature="";
-      state.drafts.set(key,a);
-      nextTrainerUnit(a);
-      showQuiz(a);haptic();
+      const attempt=makeAttempt(key,"trainer",mode,[]);
+      attempt.mode=mode;
+      attempt.bag=shuffle(state.trainerPools[mode]);
+      attempt.seen=0;
+      attempt.trainerCorrect=0;
+      attempt.lastSignature="";
+
+      state.drafts.set(key,attempt);
+      nextTrainerUnit(attempt);
+      showQuiz(attempt);
+      haptic();
     }
-    function nextTrainerUnit(a) {
-      const source=state.trainerPools[a.mode];
-      if(!a.bag.length)a.bag=shuffle(source);
-      if(a.bag.length>1&&a.bag[a.bag.length-1].sentence===a.lastSignature) {
-        [a.bag[0],a.bag[a.bag.length-1]]=[a.bag[a.bag.length-1],a.bag[0]];
+
+    function nextTrainerUnit(attempt) {
+      const source=state.trainerPools[attempt.mode];
+
+      if(!attempt.bag.length) attempt.bag=shuffle(source);
+
+      if(
+        attempt.bag.length>1 &&
+        attempt.bag[attempt.bag.length-1].sentence===attempt.lastSignature
+      ) {
+        [attempt.bag[0],attempt.bag[attempt.bag.length-1]]=
+          [attempt.bag[attempt.bag.length-1],attempt.bag[0]];
       }
-      const q=shuffledOptions(copy(a.bag.pop()),Math.random);
-      a.lastSignature=q.sentence;
-      a.units=[q];a.answers=[null];a.pools=[null];a.committed=[false];
-      a.index=0;a.transitioning=false;
+
+      const question=shuffledOptions(copy(attempt.bag.pop()),Math.random);
+      attempt.lastSignature=question.sentence;
+      attempt.units=[question];
+      attempt.answers=[null];
+      attempt.pools=[null];
+      attempt.committed=[false];
+      attempt.index=0;
+      attempt.transitioning=false;
     }
 
     // ============================================================
-    // FLASHCARDS — ИЗ ЗАГРУЖЕННОЙ ТАБЛИЦЫ ПЕРЕВОДОВ
+    // FLASHCARDS
     // ============================================================
 
     function setFlashAccessibility(flipped) {
       $("flashFrontFace").setAttribute("aria-hidden",String(flipped));
       $("flashBackFace").setAttribute("aria-hidden",String(!flipped));
       $("flashCard").setAttribute("aria-pressed",String(flipped));
-      $("flashCard").setAttribute("aria-label",flipped
-        ?`Перевод: ${state.flashCurrent?.ru||""}. Нажми, чтобы увидеть немецкую фразу.`
-        :`Немецкая фраза: ${state.flashCurrent?.de||""}. Нажми, чтобы увидеть перевод.`);
+
+      $("flashCard").setAttribute(
+        "aria-label",
+        flipped
+          ?`Перевод: ${state.flashCurrent?.ru||""}. Нажми, чтобы увидеть немецкую фразу.`
+          :`Немецкая фраза: ${state.flashCurrent?.de||""}. Нажми, чтобы увидеть перевод.`
+      );
     }
+
     function startFlashcards() {
-      if(!state.valid||state.busy||state.starting||!ensureQuestions())return;
+      if(!state.valid||state.busy||state.starting||!ensureQuestions()) return;
+
       stopTimer();
       state.flashBag=shuffle(state.flashPool);
-      state.flashCurrent=null;state.flashLast="";
+      state.flashCurrent=null;
+      state.flashLast="";
       state.flashBusy=false;
-      state.root="practice";showScreen("flash");
-      nextFlashcard();haptic();
+      state.root="practice";
+
+      showScreen("flash");
+      nextFlashcard();
+      haptic();
     }
+
     function nextFlashcard() {
-      if(state.screen!=="flash"||state.flashBusy)return;
-      state.flashBusy=true;setFlashButtons(true);
+      if(state.screen!=="flash"||state.flashBusy) return;
+
+      state.flashBusy=true;
+      setFlashButtons(true);
+
       const request=++state.flashRequest;
-      if(!state.flashBag.length)state.flashBag=shuffle(state.flashPool);
-      if(state.flashBag.length>1&&state.flashBag[state.flashBag.length-1].de===state.flashLast) {
+
+      if(!state.flashBag.length) state.flashBag=shuffle(state.flashPool);
+
+      if(
+        state.flashBag.length>1 &&
+        state.flashBag[state.flashBag.length-1].de===state.flashLast
+      ) {
         [state.flashBag[0],state.flashBag[state.flashBag.length-1]]=
           [state.flashBag[state.flashBag.length-1],state.flashBag[0]];
       }
+
       const pair=state.flashBag.pop();
-      state.flashCurrent=pair;state.flashLast=pair.de;
+
+      state.flashCurrent=pair;
+      state.flashLast=pair.de;
+
       const card=$("flashCard");
-      card.classList.add("resetting");card.classList.remove("flipped");
-      $("flashFrontText").textContent=pair.de;$("flashBackText").textContent=pair.ru;
+      card.classList.add("resetting");
+      card.classList.remove("flipped");
+
+      // Немецкий всегда спереди, русский всегда сзади.
+      $("flashFrontText").textContent=pair.de;
+      $("flashBackText").textContent=pair.ru;
+
       setFlashAccessibility(false);
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        if(request!==state.flashRequest)return;
-        card.classList.remove("resetting");
-        state.flashBusy=false;setFlashButtons(false);
-      }));
-    }
-    function flipFlashcard() {
-      if(state.screen!=="flash"||state.flashBusy||!state.flashCurrent)return;
-      const flipped=$("flashCard").classList.toggle("flipped");
-      setFlashAccessibility(flipped);haptic();
-    }
 
-    // ============================================================
-    // ОБЩИЙ РЕНДЕР И ОТВЕТЫ
-    // ============================================================
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          if(request!==state.flashRequest) return;
 
-    function words(a,i) {
-      const map=new Map(a.pools[i].map(t=>[t.id,t.text]));
-      return a.answers[i].map(id=>map.get(id));
-    }
-    function hasAnswer(a,i) {
-      return a.units[i].type==="builder"?a.answers[i].length>0:a.answers[i]!==null;
-    }
-    function filled(a,i) {return isStream(a)?a.committed[i]:hasAnswer(a,i);}
-    function correct(a,i) {
-      if(!hasAnswer(a,i))return false;
-      const q=a.units[i];
-      if(q.type!=="builder")return a.answers[i]===q.correctIndex;
-      const w=words(a,i);
-      return w.length===q.correctWords.length&&w.join(" ")===q.correctWords.join(" ");
-    }
-    function canEdit(a,i) {
-      return state.attempt===a&&state.screen==="quiz"&&!a.checked&&!a.dead&&!a.finishing&&!state.busy&&
-        (!isStream(a)||(!a.transitioning&&!a.committed[i]));
-    }
-    function checkDay(a) {
-      if(a.kind==="study"||a.kind==="trainer"||a.date===today())return true;
-      a.finishing=true;stopTimer();blockQuiz();
-      state.drafts.delete(address(a.module,a.level));
-      toast("Начался новый день. Открой тест заново.",true);
-      void goRoot(a.kind==="boss"?"boss":"practice");
-      return false;
-    }
-    function blockQuiz() {
-      $("quizQuestions").querySelectorAll("button,select,input").forEach(n=>n.disabled=true);
-      $("checkButton").disabled=true;
-    }
-    function appendSentence(node,sentence) {
-      const parts=sentence.split("___");
-      parts.forEach((p,i)=>{
-        node.append(document.createTextNode(p));
-        if(i<parts.length-1)node.append(el("span","gap","_____"));
+          card.classList.remove("resetting");
+          state.flashBusy=false;
+          setFlashButtons(false);
+        });
       });
     }
+
+    function flipFlashcard() {
+      if(state.screen!=="flash"||state.flashBusy||!state.flashCurrent) return;
+
+      const flipped=$("flashCard").classList.toggle("flipped");
+      setFlashAccessibility(flipped);
+      haptic();
+    }
+
+    // ============================================================
+    // ОБЩИЙ РЕНДЕР ВОПРОСОВ
+    // ============================================================
+
+    function words(attempt,index) {
+      const map=new Map(
+        attempt.pools[index].map(token=>[token.id,token.text])
+      );
+      return attempt.answers[index].map(id=>map.get(id));
+    }
+
+    function hasAnswer(attempt,index) {
+      return attempt.units[index].type==="builder"
+        ?attempt.answers[index].length>0
+        :attempt.answers[index]!==null;
+    }
+
+    function filled(attempt,index) {
+      return isStream(attempt)
+        ?attempt.committed[index]
+        :hasAnswer(attempt,index);
+    }
+
+    function correct(attempt,index) {
+      if(!hasAnswer(attempt,index)) return false;
+
+      const question=attempt.units[index];
+
+      if(question.type!=="builder") {
+        return attempt.answers[index]===question.correctIndex;
+      }
+
+      const selected=words(attempt,index);
+
+      return selected.length===question.correctWords.length&&
+        selected.join(" ")===question.correctWords.join(" ");
+    }
+
+    function canEdit(attempt,index) {
+      return (
+        state.attempt===attempt &&
+        state.screen==="quiz" &&
+        !attempt.checked &&
+        !attempt.dead &&
+        !attempt.finishing &&
+        !state.busy &&
+        (
+          !isStream(attempt) ||
+          (!attempt.transitioning&&!attempt.committed[index])
+        )
+      );
+    }
+
+    function checkDay(attempt) {
+      if(
+        attempt.kind==="study" ||
+        attempt.kind==="trainer" ||
+        attempt.date===today()
+      ) {
+        return true;
+      }
+
+      attempt.finishing=true;
+      stopTimer();
+      blockQuiz();
+      state.drafts.delete(address(attempt.module,attempt.level));
+      toast("Начался новый день. Открой тест заново.",true);
+      void goRoot(attempt.kind==="boss"?"boss":"practice");
+      return false;
+    }
+
+    function blockQuiz() {
+      $("quizQuestions").querySelectorAll("button,select,input").forEach(node=>{
+        node.disabled=true;
+      });
+      $("checkButton").disabled=true;
+    }
+
+    function appendSentence(node,sentence) {
+      const parts=sentence.split("___");
+
+      parts.forEach((part,index)=>{
+        node.append(document.createTextNode(part));
+
+        if(index<parts.length-1) {
+          node.append(el("span","gap","_____"));
+        }
+      });
+    }
+
     function heading(block) {
       const info={
         1:["Aufgabe 1 · Разминка","Выбери правильный вариант."],
         2:["Aufgabe 2 · Конструктор","Собери фразу. Слово в ответе можно вернуть в банк."],
         3:["Aufgabe 3 · Диалог","Вставь слова в пропуски."]
       };
-      const n=el("header","block-heading");
-      n.append(el("h2","",info[block][0]),el("p","",info[block][1]));
-      return n;
-    }
-    function renderSheet(a,container,review=false,errors=false) {
-      container.replaceChildren();
-      const fragment=document.createDocumentFragment();let shown=0;
-      const visible=i=>(!review||a.kind!=="boss"||a.committed[i])&&(!review||!errors||!correct(a,i));
-      if(a.kind!=="study") {
-        a.units.forEach((q,i)=>{
-          if(visible(i)){fragment.append(buildQuestion(a,i,review));shown++;}
-        });
-      } else [1,2,3].forEach(block=>{
-        const ids=a.units.map((q,i)=>q.block===block?i:-1).filter(i=>i>=0&&visible(i));
-        if(!ids.length)return;
-        fragment.append(heading(block));
-        if(block===3) {
-          const dialog=el("article","question glass");
-          ids.forEach(i=>{dialog.append(buildGap(a,i,review));shown++;});
-          fragment.append(dialog);
-        } else ids.forEach(i=>{fragment.append(buildQuestion(a,i,review));shown++;});
-      });
-      if(!shown)fragment.append(el("div","empty glass","Ошибок нет. Сегодня ты официально не лох 👑"));
-      container.append(fragment);
-    }
-    function buildQuestion(a,i,review=false) {
-      const q=a.units[i],right=review&&correct(a,i);
-      const card=el("article","question glass");card.dataset.index=String(i);
-      if(review)card.classList.add(right?"is-correct":"is-wrong");
-      const h=el("div","row question-heading");
-      h.append(
-        el("span","",a.kind==="trainer"?`Вопрос ${a.seen+1}`:`Ответ ${i+1} / ${a.units.length}`),
-        el("span","",review?right?"✅ Верно":"❌ Ошибка":q.topic||"Практика")
-      );
-      const text=el("div","question-text");
-      if(q.type==="builder")text.textContent=q.question;
-      else appendSentence(text,q.sentence);
-      card.append(h,text);
-      if(q.translation)card.append(el("p","muted small",q.translation));
 
-      if(q.type==="builder") {
-        if(review) {
-          const user=el("div","user-answer","Твой ответ: "+(words(a,i).join(" ")||"Ничего не выбрано"));
-          user.style.marginBottom="10px";user.style.color="var(--muted)";
-          card.append(user,el("div",`feedback ${right?"good":"bad"}`,
-            right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${q.correctWords.join(" ")}`));
-        } else card.append(buildBuilder(a,i,card));
-        return card;
-      }
-      const options=el("div","answers");
-      q.options.forEach((value,j)=>{
-        const b=el("button","answer",value);b.type="button";
-        if(review) {
-          b.disabled=true;
-          if(j===q.correctIndex)b.classList.add("correct");
-          else if(j===a.answers[i])b.classList.add("wrong");
-        } else {
-          b.classList.toggle("selected",j===a.answers[i]);
-          b.setAttribute("aria-pressed",String(j===a.answers[i]));
-          b.addEventListener("click",()=>{
-            if(!canEdit(a,i)||!checkDay(a))return;
-            if(isStream(a)){commitStream(a,i,j,card);return;}
-            a.answers[i]=j;card.classList.remove("missing");
-            Array.from(options.children).forEach((child,k)=>{
-              child.classList.toggle("selected",k===j);
-              child.setAttribute("aria-pressed",String(k===j));
-            });
-            updateProgress();haptic();
-          });
-        }
-        options.append(b);
-      });
-      card.append(options);
-      if(review)card.append(el("div",`feedback ${right?"good":"bad"}`,
-        right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${q.options[q.correctIndex]}`));
-      return card;
-    }
-    function buildGap(a,i,review) {
-      const q=a.units[i],node=el("div","dialogue-line");node.dataset.index=String(i);
-      const [before,after]=q.sentence.split("___");
-      node.append(document.createTextNode(before));
-      if(review) {
-        const right=correct(a,i);
-        node.append(
-          el("span",`gap-review ${right?"correct":"wrong"}`,q.options[a.answers[i]]||"Не выбрано"),
-          document.createTextNode(after),
-          el("div",`feedback ${right?"good":"bad"}`,
-            right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${q.options[q.correctIndex]}`)
-        );
-      } else {
-        const select=el("select","gap-select");
-        select.setAttribute("aria-label",`Пропуск: ${before}…${after}`);
-        const placeholder=el("option","","Выбери…");placeholder.value="";
-        select.append(placeholder);
-        q.options.forEach((v,j)=>{
-          const option=el("option","",v);option.value=String(j);select.append(option);
-        });
-        select.value=a.answers[i]===null?"":String(a.answers[i]);
-        select.addEventListener("change",()=>{
-          if(!canEdit(a,i))return;
-          a.answers[i]=select.value===""?null:Number(select.value);
-          node.classList.remove("missing");updateProgress();haptic();
-        });
-        node.append(select,document.createTextNode(after));
-      }
+      const node=el("header","block-heading");
+      node.append(
+        el("h2","",info[block][0]),
+        el("p","",info[block][1])
+      );
+
       return node;
     }
 
-    function buildBuilder(a,i,card) {
-      const root=el("div","builder"),answer=el("div","builder-answer"),bank=el("div","builder-bank");
-      answer.setAttribute("aria-label","Собранная фраза");bank.setAttribute("aria-label","Банк слов");
-      const placeholder=el("span","builder-placeholder","Нажимай слова снизу. Здесь появится фраза.");
-      const tools=el("div","row builder-tools"),clear=el("button","button","Стереть");
-      clear.type="button";
-      tools.append(el("span","muted small","Слово в ответе → вернуть"),clear);
-      const lookup=new Map(a.pools[i].map(t=>[t.id,t])),buttons=new Map();
-      a.pools[i].forEach(t=>{
-        const b=el("button","word-token",t.text);
-        b.type="button";b.dataset.token=String(t.id);
-        b.setAttribute("aria-label",`Добавить: ${t.text}`);
-        buttons.set(t.id,b);bank.append(b);
+    function renderSheet(attempt,container,review=false,errors=false) {
+      container.replaceChildren();
+
+      const fragment=document.createDocumentFragment();
+      let shown=0;
+
+      const visible=index=>
+        (!review||attempt.kind!=="boss"||attempt.committed[index])&&
+        (!review||!errors||!correct(attempt,index));
+
+      if(attempt.kind!=="study") {
+        attempt.units.forEach((question,index)=>{
+          if(visible(index)) {
+            fragment.append(buildQuestion(attempt,index,review));
+            shown++;
+          }
+        });
+      } else {
+        [1,2,3].forEach(block=>{
+          const indices=attempt.units
+            .map((question,index)=>question.block===block?index:-1)
+            .filter(index=>index>=0&&visible(index));
+
+          if(!indices.length) return;
+
+          fragment.append(heading(block));
+
+          if(block===3) {
+            const dialogue=el("article","question glass");
+
+            indices.forEach(index=>{
+              dialogue.append(buildGap(attempt,index,review));
+              shown++;
+            });
+
+            fragment.append(dialogue);
+          } else {
+            indices.forEach(index=>{
+              fragment.append(buildQuestion(attempt,index,review));
+              shown++;
+            });
+          }
+        });
+      }
+
+      if(!shown) {
+        fragment.append(el(
+          "div","empty glass","Ошибок нет. Сегодня ты официально не лох 👑"
+        ));
+      }
+
+      container.append(fragment);
+    }
+
+    function buildQuestion(attempt,index,review=false) {
+      const question=attempt.units[index];
+      const right=review&&correct(attempt,index);
+
+      const card=el("article","question glass");
+      card.dataset.index=String(index);
+
+      if(review) card.classList.add(right?"is-correct":"is-wrong");
+
+      const questionHeading=el("div","row question-heading");
+      questionHeading.append(
+        el(
+          "span","",
+          attempt.kind==="trainer"
+            ?`Вопрос ${attempt.seen+1}`
+            :`Ответ ${index+1} / ${attempt.units.length}`
+        ),
+        el(
+          "span","",
+          review
+            ?right?"✅ Верно":"❌ Ошибка"
+            :question.topic||"Практика"
+        )
+      );
+
+      const text=el("div","question-text");
+
+      if(question.type==="builder") {
+        text.textContent=question.question;
+      } else {
+        appendSentence(text,question.sentence);
+      }
+
+      card.append(questionHeading,text);
+
+      if(question.translation) {
+        card.append(el("p","muted small",question.translation));
+      }
+
+      if(question.type==="builder") {
+        if(review) {
+          const userAnswer=el(
+            "div",
+            "user-answer",
+            "Твой ответ: "+(
+              words(attempt,index).join(" ")||"Ничего не выбрано"
+            )
+          );
+
+          userAnswer.style.marginBottom="10px";
+          userAnswer.style.color="var(--muted)";
+
+          card.append(
+            userAnswer,
+            el(
+              "div",
+              `feedback ${right?"good":"bad"}`,
+              right
+                ?"✓ Четко! Не лох"
+                :`🤡 Лох! Правильно: ${question.correctWords.join(" ")}`
+            )
+          );
+        } else {
+          card.append(buildBuilder(attempt,index,card));
+        }
+
+        return card;
+      }
+
+      const options=el("div","answers");
+
+      question.options.forEach((value,optionIndex)=>{
+        const button=el("button","answer",value);
+        button.type="button";
+
+        if(review) {
+          button.disabled=true;
+
+          if(optionIndex===question.correctIndex) {
+            button.classList.add("correct");
+          } else if(optionIndex===attempt.answers[index]) {
+            button.classList.add("wrong");
+          }
+        } else {
+          button.classList.toggle(
+            "selected",
+            optionIndex===attempt.answers[index]
+          );
+          button.setAttribute(
+            "aria-pressed",
+            String(optionIndex===attempt.answers[index])
+          );
+
+          button.addEventListener("click",()=>{
+            if(!canEdit(attempt,index)||!checkDay(attempt)) return;
+
+            if(isStream(attempt)) {
+              commitStream(attempt,index,optionIndex,card);
+              return;
+            }
+
+            attempt.answers[index]=optionIndex;
+            card.classList.remove("missing");
+
+            Array.from(options.children).forEach((child,i)=>{
+              child.classList.toggle("selected",i===optionIndex);
+              child.setAttribute("aria-pressed",String(i===optionIndex));
+            });
+
+            updateProgress();
+            haptic();
+          });
+        }
+
+        options.append(button);
       });
+
+      card.append(options);
+
+      if(review) {
+        card.append(el(
+          "div",
+          `feedback ${right?"good":"bad"}`,
+          right
+            ?"✓ Четко! Не лох"
+            :`🤡 Лох! Правильно: ${question.options[question.correctIndex]}`
+        ));
+      }
+
+      return card;
+    }
+
+    function buildGap(attempt,index,review) {
+      const question=attempt.units[index];
+      const node=el("div","dialogue-line");
+      node.dataset.index=String(index);
+
+      const [before,after]=question.sentence.split("___");
+      node.append(document.createTextNode(before));
+
+      if(review) {
+        const right=correct(attempt,index);
+
+        node.append(
+          el(
+            "span",
+            `gap-review ${right?"correct":"wrong"}`,
+            question.options[attempt.answers[index]]||"Не выбрано"
+          ),
+          document.createTextNode(after),
+          el(
+            "div",
+            `feedback ${right?"good":"bad"}`,
+            right
+              ?"✓ Четко! Не лох"
+              :`🤡 Лох! Правильно: ${question.options[question.correctIndex]}`
+          )
+        );
+      } else {
+        const select=el("select","gap-select");
+        select.setAttribute(
+          "aria-label",
+          `Пропуск: ${before}…${after}`
+        );
+
+        const placeholder=el("option","","Выбери…");
+        placeholder.value="";
+        select.append(placeholder);
+
+        question.options.forEach((value,optionIndex)=>{
+          const option=el("option","",value);
+          option.value=String(optionIndex);
+          select.append(option);
+        });
+
+        select.value=attempt.answers[index]===null
+          ?""
+          :String(attempt.answers[index]);
+
+        select.addEventListener("change",()=>{
+          if(!canEdit(attempt,index)) return;
+
+          attempt.answers[index]=select.value===""
+            ?null
+            :Number(select.value);
+
+          node.classList.remove("missing");
+          updateProgress();
+          haptic();
+        });
+
+        node.append(select,document.createTextNode(after));
+      }
+
+      return node;
+    }
+
+    function buildBuilder(attempt,index,card) {
+      const root=el("div","builder");
+      const answer=el("div","builder-answer");
+      const bank=el("div","builder-bank");
+
+      answer.setAttribute("aria-label","Собранная фраза");
+      bank.setAttribute("aria-label","Банк слов");
+
+      const placeholder=el(
+        "span",
+        "builder-placeholder",
+        "Нажимай слова снизу. Здесь появится фраза."
+      );
+
+      const tools=el("div","row builder-tools");
+      const clear=el("button","button","Стереть");
+      clear.type="button";
+
+      tools.append(
+        el("span","muted small","Слово в ответе → вернуть"),
+        clear
+      );
+
+      const lookup=new Map(
+        attempt.pools[index].map(token=>[token.id,token])
+      );
+      const buttons=new Map();
+
+      attempt.pools[index].forEach(token=>{
+        const button=el("button","word-token",token.text);
+        button.type="button";
+        button.dataset.token=String(token.id);
+        button.setAttribute("aria-label",`Добавить: ${token.text}`);
+
+        buttons.set(token.id,button);
+        bank.append(button);
+      });
+
       function paint() {
-        const ids=a.answers[i],used=new Set(ids),f=document.createDocumentFragment();
-        if(!ids.length)f.append(placeholder);
+        const ids=attempt.answers[index];
+        const used=new Set(ids);
+        const fragment=document.createDocumentFragment();
+
+        if(!ids.length) fragment.append(placeholder);
+
         ids.forEach(id=>{
-          const b=el("button","word-token",lookup.get(id).text);
-          b.type="button";b.dataset.token=String(id);
-          b.setAttribute("aria-label",`Убрать: ${lookup.get(id).text}`);f.append(b);
+          const token=lookup.get(id);
+          const button=el("button","word-token",token.text);
+          button.type="button";
+          button.dataset.token=String(id);
+          button.setAttribute("aria-label",`Убрать: ${token.text}`);
+          fragment.append(button);
         });
-        answer.replaceChildren(f);
-        buttons.forEach((b,id)=>{
+
+        answer.replaceChildren(fragment);
+
+        buttons.forEach((button,id)=>{
           const taken=used.has(id);
-          b.classList.toggle("used",taken);b.disabled=taken;
-          b.setAttribute("aria-hidden",String(taken));
+          button.classList.toggle("used",taken);
+          button.disabled=taken;
+          button.setAttribute("aria-hidden",String(taken));
         });
+
         clear.disabled=!ids.length;
       }
-      bank.addEventListener("click",e=>{
-        const b=e.target.closest("[data-token]");
-        if(!b||b.disabled||!canEdit(a,i)||!checkDay(a))return;
-        const id=Number(b.dataset.token);
-        if(!lookup.has(id)||a.answers[i].includes(id))return;
-        a.answers[i].push(id);card.classList.remove("missing");
-        paint();updateProgress();haptic();
+
+      bank.addEventListener("click",event=>{
+        const button=event.target.closest("[data-token]");
+
+        if(
+          !button ||
+          button.disabled ||
+          !canEdit(attempt,index) ||
+          !checkDay(attempt)
+        ) return;
+
+        const id=Number(button.dataset.token);
+
+        if(!lookup.has(id)||attempt.answers[index].includes(id)) return;
+
+        attempt.answers[index].push(id);
+        card.classList.remove("missing");
+        paint();
+        updateProgress();
+        haptic();
       });
-      answer.addEventListener("click",e=>{
-        const b=e.target.closest("[data-token]");
-        if(!b||!canEdit(a,i))return;
-        const pos=a.answers[i].indexOf(Number(b.dataset.token));
-        if(pos<0)return;
-        a.answers[i].splice(pos,1);paint();updateProgress();haptic();
+
+      answer.addEventListener("click",event=>{
+        const button=event.target.closest("[data-token]");
+        if(!button||!canEdit(attempt,index)) return;
+
+        const position=attempt.answers[index].indexOf(
+          Number(button.dataset.token)
+        );
+
+        if(position<0) return;
+
+        attempt.answers[index].splice(position,1);
+        paint();
+        updateProgress();
+        haptic();
       });
+
       clear.addEventListener("click",()=>{
-        if(!canEdit(a,i))return;
-        a.answers[i]=[];paint();updateProgress();haptic();
+        if(!canEdit(attempt,index)) return;
+        attempt.answers[index]=[];
+        paint();
+        updateProgress();
+        haptic();
       });
-      root.append(answer,bank,tools);paint();return root;
+
+      root.append(answer,bank,tools);
+      paint();
+      return root;
     }
 
     // ============================================================
@@ -2126,357 +3650,800 @@
     // ============================================================
 
     function renderStreamQuestion() {
-      const a=state.attempt;
-      if(!a||!isStream(a)||a.checked||a.dead)return;
-      $("quizQuestions").replaceChildren(buildQuestion(a,a.index,false));
+      const attempt=state.attempt;
+
+      if(
+        !attempt ||
+        !isStream(attempt) ||
+        attempt.checked ||
+        attempt.dead
+      ) return;
+
+      $("quizQuestions").replaceChildren(
+        buildQuestion(attempt,attempt.index,false)
+      );
     }
+
     function updateBossHud() {
-      const a=state.attempt;if(!a||a.kind!=="boss")return;
+      const attempt=state.attempt;
+      if(!attempt||attempt.kind!=="boss") return;
+
       $("bossHearts").replaceChildren();
+
       for(let i=0;i<MAX_HP;i++) {
-        const n=el("span",`heart${i<a.hp?"":" lost"}`,"❤️");
-        n.setAttribute("aria-hidden","true");$("bossHearts").append(n);
+        const heart=el(
+          "span",
+          `heart${i<attempt.hp?"":" lost"}`,
+          "❤️"
+        );
+        heart.setAttribute("aria-hidden","true");
+        $("bossHearts").append(heart);
       }
-      $("bossHearts").setAttribute("aria-label",`Жизней: ${a.hp} из ${MAX_HP}`);
-      $("bossHealthText").textContent=`Жизни: ${a.hp} / ${MAX_HP}`;
+
+      $("bossHearts").setAttribute(
+        "aria-label",
+        `Жизней: ${attempt.hp} из ${MAX_HP}`
+      );
+      $("bossHealthText").textContent=
+        `Жизни: ${attempt.hp} / ${MAX_HP}`;
     }
+
     function updateProgress() {
-      const a=state.attempt;if(!a)return;
-      if(a.kind==="trainer") {
-        const value=a.seen?a.trainerCorrect/a.seen*100:0;
-        $("progressText").textContent=`Верно ${a.trainerCorrect} / ${a.seen} · ∞`;
+      const attempt=state.attempt;
+      if(!attempt) return;
+
+      if(attempt.kind==="trainer") {
+        const value=attempt.seen
+          ?attempt.trainerCorrect/attempt.seen*100
+          :0;
+
+        $("progressText").textContent=
+          `Верно ${attempt.trainerCorrect} / ${attempt.seen} · ∞`;
         $("progressFill").style.width=`${value}%`;
         $("progressBar").setAttribute("aria-valuemax","100");
-        $("progressBar").setAttribute("aria-valuenow",String(Math.round(value)));
+        $("progressBar").setAttribute(
+          "aria-valuenow",String(Math.round(value))
+        );
+
         return;
       }
-      const count=a.units.reduce((s,_,i)=>s+(filled(a,i)?1:0),0);
-      $("progressText").textContent=`${count} / ${a.units.length}`;
-      $("progressFill").style.width=`${count/a.units.length*100}%`;
-      $("progressBar").setAttribute("aria-valuemax",String(a.units.length));
+
+      const count=attempt.units.reduce(
+        (sum,_,index)=>sum+(filled(attempt,index)?1:0),
+        0
+      );
+
+      $("progressText").textContent=`${count} / ${attempt.units.length}`;
+      $("progressFill").style.width=
+        `${count/attempt.units.length*100}%`;
+      $("progressBar").setAttribute(
+        "aria-valuemax",String(attempt.units.length)
+      );
       $("progressBar").setAttribute("aria-valuenow",String(count));
     }
-    function commitStream(a,i,j,card) {
-      if(!canEdit(a,i)||!isStream(a)||i!==a.index||a.committed[i])return;
-      if(!checkDay(a))return;
-      a.answers[i]=j;a.committed[i]=true;a.transitioning=true;
-      const q=a.units[i],right=j===q.correctIndex;
-      card.querySelectorAll(".answer").forEach((b,k)=>{
-        b.disabled=true;
-        if(k===q.correctIndex)b.classList.add("correct");
-        else if(k===j)b.classList.add("wrong");
-      });
-      card.classList.add(right?"is-correct":"is-wrong");
-      card.append(el("div",`feedback ${right?"good":"bad"}`,
-        right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${q.options[q.correctIndex]}`));
 
-      if(a.kind==="trainer") {
-        a.seen++;if(right)a.trainerCorrect++;
-        updateProgress();haptic(right?"success":"error");
-        const next=el("button","button primary full","Следующий вопрос →");
-        next.type="button";next.style.marginTop="15px";
+    function commitStream(attempt,index,optionIndex,card) {
+      if(
+        !canEdit(attempt,index) ||
+        !isStream(attempt) ||
+        index!==attempt.index ||
+        attempt.committed[index]
+      ) return;
+
+      if(!checkDay(attempt)) return;
+
+      // Фиксация до таймеров и сетевых запросов.
+      attempt.answers[index]=optionIndex;
+      attempt.committed[index]=true;
+      attempt.transitioning=true;
+
+      const question=attempt.units[index];
+      const right=optionIndex===question.correctIndex;
+
+      card.querySelectorAll(".answer").forEach((button,i)=>{
+        button.disabled=true;
+
+        if(i===question.correctIndex) {
+          button.classList.add("correct");
+        } else if(i===optionIndex) {
+          button.classList.add("wrong");
+        }
+      });
+
+      card.classList.add(right?"is-correct":"is-wrong");
+      card.append(el(
+        "div",
+        `feedback ${right?"good":"bad"}`,
+        right
+          ?"✓ Четко! Не лох"
+          :`🤡 Лох! Правильно: ${question.options[question.correctIndex]}`
+      ));
+
+      if(attempt.kind==="trainer") {
+        attempt.seen++;
+        if(right) attempt.trainerCorrect++;
+
+        updateProgress();
+        haptic(right?"success":"error");
+
+        const next=el(
+          "button","button primary full","Следующий вопрос →"
+        );
+        next.type="button";
+        next.style.marginTop="15px";
+
         next.addEventListener("click",()=>{
-          if(next.disabled||state.attempt!==a||state.screen!=="quiz"||a.checked)return;
+          if(
+            next.disabled ||
+            state.attempt!==attempt ||
+            state.screen!=="quiz" ||
+            attempt.checked
+          ) return;
+
           next.disabled=true;
-          nextTrainerUnit(a);renderStreamQuestion();updateProgress();
+          nextTrainerUnit(attempt);
+          renderStreamQuestion();
+          updateProgress();
         });
+
         card.append(next);
         return;
       }
 
-      if(!right)a.hp=Math.max(0,a.hp-1);
-      updateProgress();updateBossHud();
-      if(!right){card.classList.add("hit");toast(pick(BOSS_HIT_PHRASES),true);haptic("error");}
-      else haptic("success");
-      if(a.hp===0){a.dead=true;blockQuiz();finish(a,true);return;}
-      if(i===a.units.length-1){finish(a,false);return;}
+      if(!right) attempt.hp=Math.max(0,attempt.hp-1);
+
+      updateProgress();
+      updateBossHud();
+
+      if(!right) {
+        card.classList.add("hit");
+        toast(pick(BOSS_HIT_PHRASES),true);
+        haptic("error");
+      } else {
+        haptic("success");
+      }
+
+      if(attempt.hp===0) {
+        attempt.dead=true;
+        blockQuiz();
+        finish(attempt,true);
+        return;
+      }
+
+      if(index===attempt.units.length-1) {
+        finish(attempt,false);
+        return;
+      }
 
       stopTimer();
+
       state.stepTimer=setTimeout(()=>{
         state.stepTimer=null;
-        if(state.attempt!==a||state.screen!=="quiz"||a.checked||a.dead||a.finishing)return;
-        if(!checkDay(a))return;
-        a.index=i+1;a.transitioning=false;renderStreamQuestion();
+
+        if(
+          state.attempt!==attempt ||
+          state.screen!=="quiz" ||
+          attempt.checked ||
+          attempt.dead ||
+          attempt.finishing
+        ) return;
+
+        if(!checkDay(attempt)) return;
+
+        attempt.index=index+1;
+        attempt.transitioning=false;
+        renderStreamQuestion();
       },650);
     }
 
     // ============================================================
-    // ЗАВЕРШЕНИЕ И СОХРАНЕНИЕ LEADERBOARD
+    // ЗАВЕРШЕНИЕ И ОЧКИ — ПРЕЖНЯЯ ЛОГИКА
     // ============================================================
 
-    function finish(a,death=false) {
-      if(a.kind==="trainer"||a.checked||a.finishing)return;
-      a.finishing=true;a.checked=true;
-      if(death)a.dead=true;
-      stopTimer();blockQuiz();
-      a.correctCount=a.units.reduce((s,_,i)=>{
-        if(a.kind==="boss"&&!a.committed[i])return s;
-        return s+(correct(a,i)?1:0);
-      },0);
-      state.drafts.delete(address(a.module,a.level));state.onlyErrors=false;
+    function finish(attempt,death=false) {
+      if(
+        attempt.kind==="trainer" ||
+        attempt.checked ||
+        attempt.finishing
+      ) return;
 
-      if(a.kind==="boss") {
-        a.passed=!a.dead&&a.hp>0&&a.units.length===BOSS_COUNT&&a.committed.every(Boolean);
-        if(!a.passed) {
-          a.dead=true;a.rewardPoints=0;a.rewardState="failed";
-          a.deathMessage=pick(BOSS_DEATH_PHRASES);
-          a.saveMessage="Поражение не отправлено в базу. Запрашивай новый термин, лох.";
-          renderResult();showScreen("result");renderBossStatus();haptic("error");return;
+      attempt.finishing=true;
+      attempt.checked=true;
+
+      if(death) attempt.dead=true;
+
+      stopTimer();
+      blockQuiz();
+
+      attempt.correctCount=attempt.units.reduce((sum,_,index)=>{
+        if(attempt.kind==="boss"&&!attempt.committed[index]) return sum;
+        return sum+(correct(attempt,index)?1:0);
+      },0);
+
+      state.drafts.delete(address(attempt.module,attempt.level));
+      state.onlyErrors=false;
+
+      if(attempt.kind==="boss") {
+        attempt.passed=(
+          !attempt.dead &&
+          attempt.hp>0 &&
+          attempt.units.length===BOSS_COUNT &&
+          attempt.committed.every(Boolean)
+        );
+
+        if(!attempt.passed) {
+          attempt.dead=true;
+          attempt.rewardPoints=0;
+          attempt.rewardState="failed";
+          attempt.deathMessage=pick(BOSS_DEATH_PHRASES);
+          attempt.saveMessage=
+            "Поражение не отправлено в базу. Запрашивай новый термин, лох.";
+
+          renderResult();
+          showScreen("result");
+          renderBossStatus();
+          haptic("error");
+          return;
         }
-        a.rewardPoints=BOSS_REWARD;
-      } else if(a.kind==="study") {
-        a.passed=a.correctCount*100>=a.units.length*STUDY_THRESHOLD;
-        if(!a.passed) {
-          a.rewardState="failed";a.rewardPoints=0;a.saveMessage=STUDY_FAILURE;
-          renderResult();showScreen("result");haptic("error");return;
+
+        attempt.rewardPoints=BOSS_REWARD;
+      } else if(attempt.kind==="study") {
+        attempt.passed=
+          attempt.correctCount*100>=attempt.units.length*STUDY_THRESHOLD;
+
+        if(!attempt.passed) {
+          attempt.rewardState="failed";
+          attempt.rewardPoints=0;
+          attempt.saveMessage=STUDY_FAILURE;
+
+          renderResult();
+          showScreen("result");
+          haptic("error");
+          return;
         }
-        a.date=today();a.rewardPoints=STUDY_REWARD;
+
+        attempt.date=today();
+        attempt.rewardPoints=STUDY_REWARD;
       } else {
-        a.passed=true;a.rewardPoints=a.correctCount*(a.level==="hard"?2:1);
+        attempt.passed=true;
+        attempt.rewardPoints=
+          attempt.correctCount*(attempt.level==="hard"?2:1);
       }
 
-      a.payload={
-        record_id:uuid(),id:isDemo?"demo":Number(player.id),name:player.name,
-        score:a.rewardPoints,date:a.date,module:a.module
+      attempt.payload={
+        record_id:uuid(),
+        id:isDemo?"demo":Number(player.id),
+        name:player.name,
+        score:attempt.rewardPoints,
+        date:attempt.date,
+        module:attempt.module
       };
-      state.pending.set(a.module,a);
-      renderResult();showScreen("result");haptic("success");
-      void processAttempt(a);
+
+      state.pending.set(attempt.module,attempt);
+      renderResult();
+      showScreen("result");
+      haptic("success");
+      void processAttempt(attempt);
     }
+
     function checkAnswers() {
-      const a=state.attempt;
-      if(!a||isStream(a)||a.checked||a.finishing||state.busy)return;
-      if(!checkDay(a))return;
+      const attempt=state.attempt;
+
+      if(
+        !attempt ||
+        isStream(attempt) ||
+        attempt.checked ||
+        attempt.finishing ||
+        state.busy
+      ) return;
+
+      if(!checkDay(attempt)) return;
+
       const missing=[];
-      a.units.forEach((_,i)=>{if(!filled(a,i))missing.push(i);});
+      attempt.units.forEach((_,index)=>{
+        if(!filled(attempt,index)) missing.push(index);
+      });
+
       if(missing.length) {
-        $("quizQuestions").querySelectorAll("[data-index]").forEach(n=>{
-          n.classList.toggle("missing",missing.includes(Number(n.dataset.index)));
+        $("quizQuestions").querySelectorAll("[data-index]").forEach(node=>{
+          node.classList.toggle(
+            "missing",
+            missing.includes(Number(node.dataset.index))
+          );
         });
-        toast("Эй, ты ответил не на все вопросы! Давай доделывай.",true);haptic("error");
-        $("quizQuestions").querySelector(`[data-index="${missing[0]}"]`)?.scrollIntoView({
-          behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth",
+
+        toast("Эй, ты ответил не на все вопросы! Давай доделывай.",true);
+        haptic("error");
+
+        $("quizQuestions").querySelector(
+          `[data-index="${missing[0]}"]`
+        )?.scrollIntoView({
+          behavior:window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches?"instant":"smooth",
           block:"start"
         });
+
         return;
       }
-      finish(a,false);
+
+      finish(attempt,false);
     }
-    function resolveSaved(a,r) {
-      rememberRecord(r);a.saveError=false;
-      const same=r.record_id===a.payload?.record_id;
-      a.rewardState=same?"saved":"already";
-      a.saveMessage=same
-        ?isDemo?`Демо: ${scoreOf(r)} баллов в памяти страницы.`:`+${scoreOf(r)} баллов в общий рейтинг ✅`
-        :a.kind==="study"?"Тренировка завершена. Очки за этот модуль уже были получены ранее"
-          :a.kind==="boss"?"Сегодня 100 баллов за босса уже получены. Вторую награду не выдаём."
-            :`Дневной результат уже сохранён. Учтено ${scoreOf(r)} баллов.`;
-      state.pending.delete(a.module);
+
+    function resolveSaved(attempt,record) {
+      rememberRecord(record);
+      attempt.saveError=false;
+
+      const same=record.record_id===attempt.payload?.record_id;
+      attempt.rewardState=same?"saved":"already";
+
+      attempt.saveMessage=same
+        ?isDemo
+          ?`Демо: ${scoreOf(record)} баллов в памяти страницы.`
+          :`+${scoreOf(record)} баллов в общий рейтинг ✅`
+        :attempt.kind==="study"
+          ?"Тренировка завершена. Очки за этот модуль уже были получены ранее"
+          :attempt.kind==="boss"
+            ?"Сегодня 100 баллов за босса уже получены. Вторую награду не выдаём."
+            :`Дневной результат уже сохранён. Учтено ${scoreOf(record)} баллов.`;
+
+      state.pending.delete(attempt.module);
     }
-    async function processAttempt(a) {
-      if(a.kind==="trainer"||state.busy||!a.checked||
-        ["saved","already","failed"].includes(a.rewardState))return;
-      if(a.kind==="boss"&&(!a.passed||a.dead||a.payload?.score!==BOSS_REWARD))return;
-      state.busy=true;a.saveError=false;
-      a.saveMessage="Проверяем предыдущие результаты…";renderResult();
+
+    async function processAttempt(attempt) {
+      if(
+        attempt.kind==="trainer" ||
+        state.busy ||
+        !attempt.checked ||
+        ["saved","already","failed"].includes(attempt.rewardState)
+      ) return;
+
+      if(
+        attempt.kind==="boss" &&
+        (
+          !attempt.passed ||
+          attempt.dead ||
+          attempt.payload?.score!==BOSS_REWARD
+        )
+      ) return;
+
+      state.busy=true;
+      attempt.saveError=false;
+      attempt.saveMessage="Проверяем предыдущие результаты…";
+      renderResult();
+
       try {
-        const saved=await findSaved(a);
-        if(saved){resolveSaved(a,saved);return;}
+        const saved=await findSaved(attempt);
+
+        if(saved) {
+          resolveSaved(attempt,saved);
+          return;
+        }
+
         let record;
+
         if(isDemo) {
-          state.demoRecords.push(a.payload);record=a.payload;
+          state.demoRecords.push(attempt.payload);
+          record=attempt.payload;
         } else {
           try {
             const rows=await api({},{
-              method:"POST",headers:{Prefer:"return=representation"},body:a.payload
+              method:"POST",
+              headers:{Prefer:"return=representation"},
+              body:attempt.payload
             });
+
             record=Array.isArray(rows)?rows[0]:null;
-            if(!record)throw new Error("Сервер не вернул сохранённую запись.");
+
+            if(!record) {
+              throw new Error("Сервер не вернул сохранённую запись.");
+            }
           } catch(error) {
-            if(error.code!=="23505")throw error;
-            record=await findSaved(a);
-            if(!record)throw error;
+            if(error.code!=="23505") throw error;
+
+            record=await findSaved(attempt);
+
+            if(!record) throw error;
           }
         }
-        resolveSaved(a,record);
+
+        resolveSaved(attempt,record);
       } catch(error) {
         console.error(error);
-        a.rewardState="unresolved";a.saveError=true;
-        a.saveMessage=`Результат не подтверждён: ${error.message} Повтори отправку. Не закрывай страницу.`;
-        state.pending.set(a.module,a);toast("Не удалось подтвердить сохранение.",true);
+
+        attempt.rewardState="unresolved";
+        attempt.saveError=true;
+        attempt.saveMessage=
+          `Результат не подтверждён: ${error.message} `+
+          "Повтори отправку. Не закрывай страницу.";
+
+        state.pending.set(attempt.module,attempt);
+        toast("Не удалось подтвердить сохранение.",true);
       } finally {
-        state.busy=false;renderResult();renderUI();
+        state.busy=false;
+        renderResult();
+        renderUI();
       }
     }
 
     // ============================================================
-    // РЕЗУЛЬТАТЫ И НАЗАД
+    // РЕЗУЛЬТАТЫ И ВОЗВРАТ
     // ============================================================
 
     function renderResult() {
-      const a=state.attempt;
-      if(!a?.checked||a.kind==="trainer")return;
-      const total=a.units.length,p=a.correctCount/total;
-      const boss=a.kind==="boss",study=a.kind==="study";
-      const answered=boss?a.committed.filter(Boolean).length:total;
-      const unresolved=a.rewardState==="unresolved";
-      const percent=(p*100).toLocaleString("ru-RU",{maximumFractionDigits:1});
-      $("resultModule").textContent=boss?"Termin bei Frau Müller":study?MODULES[a.module].title:"Tagesquest";
+      const attempt=state.attempt;
+
+      if(!attempt?.checked||attempt.kind==="trainer") return;
+
+      const total=attempt.units.length;
+      const proportion=attempt.correctCount/total;
+      const boss=attempt.kind==="boss";
+      const study=attempt.kind==="study";
+      const answered=boss
+        ?attempt.committed.filter(Boolean).length
+        :total;
+      const unresolved=attempt.rewardState==="unresolved";
+      const percent=(proportion*100).toLocaleString(
+        "ru-RU",{maximumFractionDigits:1}
+      );
+
+      $("resultModule").textContent=boss
+        ?"Termin bei Frau Müller"
+        :study?MODULES[attempt.module].title:"Tagesquest";
 
       if(boss) {
-        $("resultEmoji").textContent=a.dead?"💀":"👑";
-        $("resultTitle").textContent=a.dead?"Термин отменен":"ВНЖ одобрен!";
-        $("resultScore").replaceChildren(document.createTextNode(String(a.rewardPoints)),el("span",""," баллов"));
-        $("resultDetails").textContent=`Ответов ${answered} / ${total}. Верных ${a.correctCount}. Жизни ${a.hp} / ${MAX_HP}.`;
-        $("resultMessage").textContent=a.dead?a.deathMessage:BOSS_WIN;
+        $("resultEmoji").textContent=attempt.dead?"💀":"👑";
+        $("resultTitle").textContent=attempt.dead
+          ?"Термин отменен"
+          :"ВНЖ одобрен!";
+
+        $("resultScore").replaceChildren(
+          document.createTextNode(String(attempt.rewardPoints)),
+          el("span",""," баллов")
+        );
+
+        $("resultDetails").textContent=
+          `Ответов ${answered} / ${total}. `+
+          `Верных ${attempt.correctCount}. `+
+          `Жизни ${attempt.hp} / ${MAX_HP}.`;
+
+        $("resultMessage").textContent=attempt.dead
+          ?attempt.deathMessage
+          :BOSS_WIN;
       } else {
-        $("resultEmoji").textContent=p===1?"👑":p>=.75?"😎":p>=.4?"🍺":"💀";
-        $("resultTitle").textContent=p===1?"Абсолютный гений":p>=.75?"Почти немец":p>=.4?"Нормально, пойдет":"Тотальный лох";
-        $("resultScore").replaceChildren(document.createTextNode(String(a.correctCount)),el("span","",` / ${total}`));
+        $("resultEmoji").textContent=proportion===1
+          ?"👑":proportion>=.75?"😎":proportion>=.4?"🍺":"💀";
+
+        $("resultTitle").textContent=proportion===1
+          ?"Абсолютный гений"
+          :proportion>=.75
+            ?"Почти немец"
+            :proportion>=.4?"Нормально, пойдет":"Тотальный лох";
+
+        $("resultScore").replaceChildren(
+          document.createTextNode(String(attempt.correctCount)),
+          el("span","",` / ${total}`)
+        );
+
         $("resultDetails").textContent=study
-          ?`Точность ${percent}%. Порог 80%. ${a.passed?"Пройдено ✅":"Не пройдено ❌"}`
-          :`Точность ${percent}%. Результат ${a.rewardPoints} / ${total*(a.level==="hard"?2:1)} баллов.`;
-        $("resultMessage").textContent=p===1?"0% лоха. Гёте гордился бы тобой."
-          :p>=.75?"Очень достойно. Пару раз ошибся, но не критично."
-            :p>=.4?"Половину знаешь, половину угадал."
+          ?`Точность ${percent}%. Порог 80%. ${attempt.passed?"Пройдено ✅":"Не пройдено ❌"}`
+          :`Точность ${percent}%. Результат ${attempt.rewardPoints} / ${total*(attempt.level==="hard"?2:1)} баллов.`;
+
+        $("resultMessage").textContent=proportion===1
+          ?"0% лоха. Гёте гордился бы тобой."
+          :proportion>=.75
+            ?"Очень достойно. Пару раз ошибся, но не критично."
+            :proportion>=.4
+              ?"Половину знаешь, половину угадал."
               :`Правильно только ${percent}%. Тебя бы даже за пивом не отправили.`;
       }
 
-      $("saveStatus").textContent=a.saveMessage;
-      $("saveStatus").classList.toggle("error",a.saveError||a.rewardState==="failed");
-      $("saveStatus").classList.toggle("success",a.rewardState==="saved");
-      $("retrySaveButton").classList.toggle("hidden",!unresolved||state.busy);
+      $("saveStatus").textContent=attempt.saveMessage;
+      $("saveStatus").classList.toggle(
+        "error",
+        attempt.saveError||attempt.rewardState==="failed"
+      );
+      $("saveStatus").classList.toggle(
+        "success",
+        attempt.rewardState==="saved"
+      );
+
+      $("retrySaveButton").classList.toggle(
+        "hidden",
+        !unresolved||state.busy
+      );
       $("retrySaveButton").disabled=state.busy;
       $("resultTheoryButton").classList.toggle("hidden",!study);
       $("resultTheoryButton").disabled=state.busy;
       $("resultHomeButton").disabled=state.busy;
-      $("resultHomeButton").textContent=state.busy?"Проверяем и сохраняем…"
-        :boss?"Вернуться к термину":study?"Вернуться к учебным темам":"Вернуться к практике";
-      const retryBoss=boss&&a.dead&&a.rewardState==="failed";
+
+      $("resultHomeButton").textContent=state.busy
+        ?"Проверяем и сохраняем…"
+        :boss
+          ?"Вернуться к термину"
+          :study?"Вернуться к учебным темам":"Вернуться к практике";
+
+      const retryBoss=boss&&attempt.dead&&attempt.rewardState==="failed";
+
       $("repeatButton").classList.toggle("hidden",!study&&!retryBoss);
       $("repeatButton").disabled=state.busy||state.starting||unresolved||
         (retryBoss&&(state.bossDone||!state.questionsReady));
-      $("repeatButton").textContent=retryBoss?"Запросить новый термин"
-        :unresolved?"Сначала подтверди отправку результата"
-          :a.passed?"Ещё раз — тренироваться 💪":"Попробовать снова 💪";
-      $("errorsButton").textContent=state.onlyErrors?"Показать все ответы":"Показать только где лох 🤡";
-      $("errorsButton").setAttribute("aria-pressed",String(state.onlyErrors));
-      $("reviewTitle").textContent=state.onlyErrors?`Ошибки: ${answered-a.correctCount}`:"Разбор ответов";
-      renderSheet(a,$("reviewQuestions"),true,state.onlyErrors);
-    }
-    function canLeaveResult() {
-      if(state.busy)return false;
-      if(state.attempt?.rewardState==="unresolved")return window.confirm(
-        "Результат ещё не подтверждён. Он останется только в памяти страницы. Продолжить?"
+
+      $("repeatButton").textContent=retryBoss
+        ?"Запросить новый термин"
+        :unresolved
+          ?"Сначала подтверди отправку результата"
+          :attempt.passed
+            ?"Ещё раз — тренироваться 💪"
+            :"Попробовать снова 💪";
+
+      $("errorsButton").textContent=state.onlyErrors
+        ?"Показать все ответы"
+        :"Показать только где лох 🤡";
+      $("errorsButton").setAttribute(
+        "aria-pressed",String(state.onlyErrors)
       );
+
+      $("reviewTitle").textContent=state.onlyErrors
+        ?`Ошибки: ${answered-attempt.correctCount}`
+        :"Разбор ответов";
+
+      renderSheet(attempt,$("reviewQuestions"),true,state.onlyErrors);
+    }
+
+    function canLeaveResult() {
+      if(state.busy) return false;
+
+      if(state.attempt?.rewardState==="unresolved") {
+        return window.confirm(
+          "Результат ещё не подтверждён. Он останется только в памяти страницы. Продолжить?"
+        );
+      }
+
       return true;
     }
+
     async function leaveQuiz() {
-      const a=state.attempt;
-      if(!a||a.checked||state.busy||a.finishing)return;
-      if(a.kind==="boss"&&a.transitioning)return;
-      if(a.kind==="trainer"){showScreen("practice");return;}
-      const any=a.units.some((_,i)=>hasAnswer(a,i));
-      if(any&&!window.confirm(a.kind==="boss"
-        ?"Выйти? Тот же термин и оставшиеся жизни сохранятся до перезагрузки."
-        :"Вернуться? Ответы сохранятся до перезагрузки."))return;
+      const attempt=state.attempt;
+
+      if(
+        !attempt ||
+        attempt.checked ||
+        state.busy ||
+        attempt.finishing
+      ) return;
+
+      if(attempt.kind==="boss"&&attempt.transitioning) return;
+
+      if(attempt.kind==="trainer") {
+        showScreen("practice");
+        return;
+      }
+
+      const any=attempt.units.some((_,index)=>hasAnswer(attempt,index));
+
+      if(any&&!window.confirm(
+        attempt.kind==="boss"
+          ?"Выйти? Тот же термин и оставшиеся жизни сохранятся до перезагрузки."
+          :"Вернуться? Ответы сохранятся до перезагрузки."
+      )) return;
+
       stopTimer();
-      if(a.kind==="study")openTheory(a.module);
-      else await goRoot(a.kind==="boss"?"boss":"practice");
+
+      if(attempt.kind==="study") {
+        openTheory(attempt.module);
+      } else {
+        await goRoot(attempt.kind==="boss"?"boss":"practice");
+      }
     }
+
     function handleBack() {
-      if(state.modal){closeDifficulty();return;}
-      if(state.busy||state.starting)return;
-      if(state.screen==="flash")showScreen("practice");
-      else if(state.screen==="theory")goRoot("study");
-      else if(state.screen==="quiz")leaveQuiz();
-      else if(state.screen==="result"&&canLeaveResult()) {
-        const a=state.attempt;
-        if(a.kind==="study")openTheory(a.module);
-        else goRoot(a.kind==="boss"?"boss":"practice");
+      if(state.modal) {
+        closeDifficulty();
+        return;
+      }
+
+      if(state.busy||state.starting) return;
+
+      if(state.screen==="flash") {
+        showScreen("practice");
+      } else if(state.screen==="theory") {
+        goRoot("study");
+      } else if(state.screen==="quiz") {
+        leaveQuiz();
+      } else if(state.screen==="result"&&canLeaveResult()) {
+        const attempt=state.attempt;
+
+        if(attempt.kind==="study") {
+          openTheory(attempt.module);
+        } else {
+          goRoot(attempt.kind==="boss"?"boss":"practice");
+        }
       }
     }
 
     // ============================================================
-    // СОБЫТИЯ И ПАРАЛЛЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ
+    // СОБЫТИЯ И ИНИЦИАЛИЗАЦИЯ
     // ============================================================
 
-    document.querySelectorAll("[data-tab]").forEach(b=>{
-      b.addEventListener("click",()=>{goRoot(b.dataset.tab);haptic();});
+    document.querySelectorAll("[data-tab]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        goRoot(button.dataset.tab);
+        haptic();
+      });
     });
+
     $("dailyButton").addEventListener("click",openDifficulty);
-    document.querySelectorAll("[data-trainer]").forEach(b=>{
-      b.addEventListener("click",()=>startTrainer(b.dataset.trainer));
+
+    document.querySelectorAll("[data-trainer]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        startTrainer(button.dataset.trainer);
+      });
     });
+
     $("flashcardsButton").addEventListener("click",startFlashcards);
     $("flashCard").addEventListener("click",flipFlashcard);
-    $("flashUnknown").addEventListener("click",()=>{nextFlashcard();haptic();});
-    $("flashRemembered").addEventListener("click",()=>{nextFlashcard();haptic();});
+    $("flashUnknown").addEventListener("click",()=>{
+      nextFlashcard();
+      haptic();
+    });
+    $("flashRemembered").addEventListener("click",()=>{
+      nextFlashcard();
+      haptic();
+    });
     $("flashBack").addEventListener("click",()=>showScreen("practice"));
+
     $("startBossButton").addEventListener("click",()=>startBoss(false));
-    $("studyCards").addEventListener("click",e=>{
-      const b=e.target.closest("[data-study]");
-      if(b&&!b.disabled)openTheory(b.dataset.study);
+
+    $("studyCards").addEventListener("click",event=>{
+      const button=event.target.closest("[data-study]");
+
+      if(button&&!button.disabled) {
+        openTheory(button.dataset.study);
+      }
     });
-    $("inventoryGrid").addEventListener("click",e=>{
-      const b=e.target.closest("[data-item]");if(!b)return;
-      if(state.totalScore===null){toast("Сначала дождись загрузки баллов.");return;}
-      const item=INVENTORY[Number(b.dataset.item)];
-      if(state.totalScore<item.min){toast("Сначала заработай баллы, лох",true);haptic("error");}
-      else {toast(`${item.emoji} ${item.name}. Нажито непосильной грамматикой, гений.`);haptic();}
+
+    $("inventoryGrid").addEventListener("click",event=>{
+      const button=event.target.closest("[data-item]");
+      if(!button) return;
+
+      if(state.totalScore===null) {
+        toast("Сначала дождись загрузки баллов.");
+        return;
+      }
+
+      const item=INVENTORY[Number(button.dataset.item)];
+
+      if(state.totalScore<item.min) {
+        toast("Сначала заработай баллы, лох",true);
+        haptic("error");
+      } else {
+        toast(
+          `${item.emoji} ${item.name}. Нажито непосильной грамматикой, гений.`
+        );
+        haptic();
+      }
     });
+
     $("startStudyButton").addEventListener("click",()=>{
-      if(state.selectedStudy)startStudy(state.selectedStudy);
+      if(state.selectedStudy) {
+        startStudy(state.selectedStudy);
+      }
     });
+
     $("theoryBack").addEventListener("click",()=>goRoot("study"));
     $("quizBack").addEventListener("click",leaveQuiz);
     $("checkButton").addEventListener("click",checkAnswers);
+
     $("reloadButton").addEventListener("click",()=>{
-      if(!state.busy&&!state.loading&&!state.starting)loadData();
+      if(!state.busy&&!state.loading&&!state.starting) {
+        loadData();
+      }
     });
+
     $("reloadQuestionsButton").addEventListener("click",()=>{
-      if(!state.busy&&!state.starting&&!state.questionsLoading)loadQuestions();
+      if(!state.busy&&!state.starting&&!state.questionsLoading) {
+        loadQuestions();
+      }
     });
-    $("tabToday").addEventListener("click",()=>{state.ratingTab="today";renderLeaderboard();haptic();});
-    $("tabAll").addEventListener("click",()=>{state.ratingTab="all";renderLeaderboard();haptic();});
-    $("retrySaveButton").addEventListener("click",()=>{if(state.attempt)processAttempt(state.attempt);});
-    $("errorsButton").addEventListener("click",()=>{state.onlyErrors=!state.onlyErrors;renderResult();haptic();});
+
+    $("tabToday").addEventListener("click",()=>{
+      state.ratingTab="today";
+      renderLeaderboard();
+      haptic();
+    });
+
+    $("tabAll").addEventListener("click",()=>{
+      state.ratingTab="all";
+      renderLeaderboard();
+      haptic();
+    });
+
+    $("retrySaveButton").addEventListener("click",()=>{
+      if(state.attempt) {
+        processAttempt(state.attempt);
+      }
+    });
+
+    $("errorsButton").addEventListener("click",()=>{
+      state.onlyErrors=!state.onlyErrors;
+      renderResult();
+      haptic();
+    });
+
     $("repeatButton").addEventListener("click",()=>{
-      const a=state.attempt;
-      if(!a||state.busy||state.starting||a.rewardState==="unresolved")return;
-      if(a.kind==="boss"&&a.dead)startBoss(true);
-      else if(a.kind==="study")startStudy(a.module,true);
+      const attempt=state.attempt;
+
+      if(
+        !attempt ||
+        state.busy ||
+        state.starting ||
+        attempt.rewardState==="unresolved"
+      ) return;
+
+      if(attempt.kind==="boss"&&attempt.dead) {
+        startBoss(true);
+      } else if(attempt.kind==="study") {
+        startStudy(attempt.module,true);
+      }
     });
+
     $("resultTheoryButton").addEventListener("click",()=>{
-      if(canLeaveResult())openTheory(state.attempt.module);
+      if(canLeaveResult()) {
+        openTheory(state.attempt.module);
+      }
     });
+
     $("resultHomeButton").addEventListener("click",()=>{
-      if(!canLeaveResult())return;
-      const a=state.attempt;
-      goRoot(a.kind==="boss"?"boss":a.kind==="study"?"study":"practice");
+      if(!canLeaveResult()) return;
+
+      const attempt=state.attempt;
+      goRoot(
+        attempt.kind==="boss"
+          ?"boss"
+          :attempt.kind==="study"?"study":"practice"
+      );
     });
-    try {tg?.BackButton?.onClick(handleBack);}catch(_){}
+
+    try {
+      tg?.BackButton?.onClick(handleBack);
+    } catch(_) {}
 
     function refreshDay() {
-      if(!document.hidden&&!state.modal&&!state.loading&&!state.busy&&!state.starting&&
-        [...ROOTS,"theory"].includes(state.screen)&&state.date!==today()) {
-        // Вопросы не перезагружаются каждый день:
-        // новый seed автоматически создаёт новый дейлик из текущей базы.
+      if(
+        !document.hidden &&
+        !state.modal &&
+        !state.loading &&
+        !state.busy &&
+        !state.starting &&
+        [...ROOTS,"theory"].includes(state.screen) &&
+        state.date!==today()
+      ) {
         loadData();
       }
     }
+
     document.addEventListener("visibilitychange",refreshDay);
     setInterval(refreshDay,30000);
-    window.addEventListener("beforeunload",e=>{
+
+    window.addEventListener("beforeunload",event=>{
       const boss=state.drafts.get(address(BOSS_ID,"boss"));
-      if(state.pending.size||state.busy||(boss&&!boss.checked&&boss.committed.some(Boolean))) {
-        e.preventDefault();e.returnValue="";
+
+      if(
+        state.pending.size ||
+        state.busy ||
+        (boss&&!boss.checked&&boss.committed.some(Boolean))
+      ) {
+        event.preventDefault();
+        event.returnValue="";
       }
     });
 
     async function init() {
       $("profileName").textContent=player.name;
-      $("avatar").textContent=Array.from(player.name)[0]?.toUpperCase()||"D";
+      $("avatar").textContent=
+        Array.from(player.name)[0]?.toUpperCase()||"D";
+
       try {
         validateTheory();
         state.valid=true;
@@ -2488,16 +4455,21 @@
         toast(error.message,true);
         return;
       }
+
       buildUI();
       showScreen("practice");
       renderUI();
 
-      // Независимые загрузки: ошибка контента не ломает рейтинг,
-      // ошибка рейтинга не ломает чтение теории.
-      await Promise.all([loadQuestions(),loadData()]);
+      // Контент и статистика загружаются независимо.
+      await Promise.all([
+        loadQuestions(),
+        loadData()
+      ]);
     }
 
     init();
   </script>
 </body>
 </html>
+
+🤖 AI-Generated | RocheChat
