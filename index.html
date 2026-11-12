@@ -1,3 +1,8 @@
+Готовый `index.html` ниже. У каждого босса свой дневной лимит победы: можно победить обоих и получить по 100 баллов. Поражения не сохраняются. Флаги предметов привязаны к Telegram ID и восстанавливаются по победам в Supabase.
+
+Для Бабки используется новый `module: 'boss_oma'`. SQL дополнительного уникального индекса указан в начале скрипта; таблицы и колонки менять не нужно.
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -91,23 +96,19 @@
     .hearts{display:flex;gap:5px;font-size:24px}
     .heart.lost{filter:grayscale(1);opacity:.3}
     .boss-label{color:var(--red);font-size:11px;letter-spacing:1px;font-weight:800}
-    .boss-hero{padding:25px 20px}
-    .boss-portrait{font-size:65px;text-align:center;margin:15px 0}
-    .boss-locked{color:var(--red);font-size:14px;line-height:1.6;margin-bottom:14px}
-    .dialogue-bubble{
-      position:relative;padding:19px;margin:0 0 17px 12px;
-      border-radius:20px 20px 20px 5px;
-      border:1px solid rgba(146,128,255,.25);
-      background:rgba(146,128,255,.1);
-      animation:appear .22s ease;
-    }
+    .boss-list{display:grid;gap:18px}
+    .boss-card{padding:22px;overflow:hidden;position:relative}
+    .boss-card.oma{background:linear-gradient(140deg,rgba(255,207,119,.08),rgba(255,255,255,.03))}
+    .boss-portrait{font-size:53px;margin-bottom:12px}
+    .boss-card h2{font-size:24px;margin-bottom:6px}
+    .boss-card .button{margin-top:12px}
+    .boss-locked{color:var(--red);font-size:13px;line-height:1.6}
+    .boss-entry.gated{border-color:rgba(255,130,153,.35);background:rgba(255,130,153,.08);color:#ffb4c2}
+    .boss-entry.gated:after{content:" 🔒"}
+    .dialogue-bubble{position:relative;padding:19px;margin:0 0 17px 12px;border-radius:20px 20px 20px 5px;border:1px solid rgba(146,128,255,.25);background:rgba(146,128,255,.1);animation:appear .22s ease}
     .dialogue-speaker{font-size:12px;font-weight:800;color:#c4baff;margin-bottom:9px}
     .dialogue-replica{font-size:18px;line-height:1.6}
-    .dialogue-bubble:before{
-      content:"";position:absolute;left:-10px;bottom:0;
-      width:12px;height:16px;background:rgba(146,128,255,.1);
-      clip-path:polygon(100% 0,100% 100%,0 100%);
-    }
+    .dialogue-bubble:before{content:"";position:absolute;left:-10px;bottom:0;width:12px;height:16px;background:rgba(146,128,255,.1);clip-path:polygon(100% 0,100% 100%,0 100%)}
     .questions{display:grid;gap:15px}
     .question{padding:19px;scroll-margin-top:calc(155px + var(--safe-top));transition:border-color .2s ease}
     .question-heading{color:var(--muted);font-size:12px;margin-bottom:14px}
@@ -203,13 +204,13 @@
     .id-footer{margin-top:15px;padding-top:10px;border-top:1px solid var(--border);color:var(--muted);font-family:ui-monospace,monospace;font-size:9px;overflow-wrap:anywhere}
     .inventory{padding:18px;margin-bottom:24px}
     .inventory h2{margin-bottom:5px;font-size:18px}
-    .inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .inventory-slot{min-width:0;padding:18px 9px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+    .inventory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+    .inventory-slot{min-width:0;padding:17px 6px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
     .inventory-slot.unlocked{border-color:rgba(96,223,173,.35);background:rgba(96,223,173,.06)}
     .inventory-slot.locked{opacity:.45;filter:grayscale(1)}
-    .inventory-emoji{font-size:35px}
-    .inventory-name{font-size:14px;font-weight:750}
-    .inventory-cost{font-size:11px;color:var(--muted);line-height:1.5}
+    .inventory-emoji{font-size:34px}
+    .inventory-name{font-size:13px;font-weight:750}
+    .inventory-cost{font-size:10px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
     .tabs{display:grid;grid-template-columns:1fr 1fr;padding:5px;gap:5px;border-radius:16px;margin:14px 0;background:rgba(255,255,255,.05)}
     .tab{border:0;background:transparent;padding:11px 8px;border-radius:12px;color:var(--muted);font-weight:650}
     .tab.active{background:#6654e8;color:white}
@@ -242,6 +243,8 @@
       .question,.module-card{padding:15px}
       .module-icon{flex-basis:42px;width:42px;height:42px}
       .pill{font-size:10px}
+      .inventory-grid{gap:5px}
+      .inventory-name{font-size:11px}
     }
     @media(prefers-reduced-motion:reduce){
       *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
@@ -260,9 +263,7 @@
       Демо вне Telegram. Вопросы загружаются из Supabase.
       Результаты сохраняются только в памяти страницы.
     </div>
-    <div id="questionsNotice" class="notice" role="status">
-      Загружаем вопросы. Бюрократия качает базу…
-    </div>
+    <div id="questionsNotice" class="notice" role="status">Загружаем вопросы. Бюрократия качает базу…</div>
     <div id="questionsError" class="notice hidden">
       <div id="questionsErrorText"></div>
       <button id="reloadQuestionsButton" class="button full" style="margin-top:10px" type="button">Повторить загрузку вопросов</button>
@@ -288,16 +289,13 @@
         <p class="muted small">Без баллов в рейтинг. Без дневных лимитов. Без оправданий.</p>
         <div class="gym-buttons">
           <button class="gym-button" data-trainer="articles" type="button" disabled>
-            <span class="emoji" aria-hidden="true">🧩</span>
-            <span><strong>Artikel</strong><small>Артикли · der / die / das</small></span>
+            <span class="emoji" aria-hidden="true">🧩</span><span><strong>Artikel</strong><small>Артикли · der / die / das</small></span>
           </button>
           <button class="gym-button" data-trainer="grammar" type="button" disabled>
-            <span class="emoji" aria-hidden="true">⚡</span>
-            <span><strong>Grammatik</strong><small>Грамматика · бесконечная практика</small></span>
+            <span class="emoji" aria-hidden="true">⚡</span><span><strong>Grammatik</strong><small>Грамматика · бесконечная практика</small></span>
           </button>
           <button id="flashcardsButton" class="gym-button" type="button" disabled>
-            <span class="emoji" aria-hidden="true">🃏</span>
-            <span><strong>Karteikarten</strong><small>Карточки перевода · переверни и вспомни</small></span>
+            <span class="emoji" aria-hidden="true">🃏</span><span><strong>Karteikarten</strong><small>Карточки перевода · переверни и вспомни</small></span>
           </button>
         </div>
       </section>
@@ -313,25 +311,11 @@
     </section>
 
     <section id="bossScreen" class="screen hidden">
-      <div class="boss-hero glass">
-        <span class="pill">Ausländerbehörde · Сюжет A1</span>
-        <div class="boss-portrait" aria-hidden="true">👩‍💼🏢</div>
-        <h1>Termin bei Frau Müller</h1>
-        <p class="muted">Прописка есть? Тогда заходи. У тебя 3 жизни и 20 шагов, чтобы не опозориться в кабинете.</p>
-        <div class="notice">
-          Ответы идут по сюжету. Третья ошибка отменяет термин.
-          Поражения не записываются — можно пробовать снова.
-          Победа: 100 баллов и игровой ВНЖ.
-          Награда в баллах — один раз в день.
-        </div>
-        <div id="bossGate" class="hidden">
-          <p class="boss-locked">🚫 Нет Meldebescheinigung. Сначала набери 100 баллов. Даже дверь считает тебя лохом.</p>
-          <button id="bossFakeButton" class="button full" type="button">Постучать без прописки 🤡</button>
-        </div>
-        <button id="startBossButton" class="button primary full" type="button" disabled>Зайти в кабинет</button>
-        <p id="bossStatus" class="muted small" style="margin:14px 0 0" aria-live="polite"></p>
-      </div>
-      <p class="footer-note">Игровая пародия. Предметы и ВНЖ — виртуальные, не настоящие документы.</p>
+      <h1>🏢 Термин</h1>
+      <p class="muted">Выбери, кто сегодня проверит твой немецкий на прочность. У каждого босса 20 шагов и 3 жизни.</p>
+      <div class="notice">Поражения не записываются. За победу — 100 баллов и предмет. Победная награда каждого босса доступна один раз в день.</div>
+      <div id="bossList" class="boss-list"></div>
+      <p class="footer-note">Сюжетная пародия. ВНЖ, прописка и брецель — игровые предметы.</p>
     </section>
 
     <section id="ratingScreen" class="screen hidden">
@@ -340,11 +324,7 @@
         <div id="citizenshipStamp" class="citizenship-stamp hidden">Niederlassungserlaubnis</div>
         <div class="profile-head">
           <div id="avatar" class="avatar">D</div>
-          <div>
-            <div class="id-label">NAME / ИМЯ</div>
-            <div id="profileName" class="profile-name">Игрок</div>
-            <div id="profileRank" class="rank"></div>
-          </div>
+          <div><div class="id-label">NAME / ИМЯ</div><div id="profileName" class="profile-name">Игрок</div><div id="profileRank" class="rank"></div></div>
         </div>
         <div class="stats">
           <div class="stat"><strong id="totalScore">—</strong><span>всего баллов</span></div>
@@ -353,15 +333,13 @@
         </div>
         <div class="rank-progress">
           <p id="nextRankText" aria-live="polite"></p>
-          <div id="rankProgressBar" class="progress-track" role="progressbar" aria-label="Прогресс звания" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div id="rankProgressFill" class="progress-fill"></div>
-          </div>
+          <div id="rankProgressBar" class="progress-track" role="progressbar" aria-label="Прогресс звания" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="rankProgressFill" class="progress-fill"></div></div>
         </div>
         <div id="idFooter" class="id-footer">SPIELAUSWEIS · Не настоящий документ</div>
       </section>
       <section class="inventory glass">
         <h2>🎒 Рюкзак бюргера</h2>
-        <p class="muted small">Два документа. Миллион поводов для бюрократии.</p>
+        <p class="muted small">Прописка, ВНЖ и перекус после бюрократии.</p>
         <div id="inventoryGrid" class="inventory-grid"></div>
       </section>
       <div class="row"><h2 style="margin:0">🏆 Кто здесь гений?</h2><span id="leaderCount" class="muted small"></span></div>
@@ -373,82 +351,46 @@
     </section>
 
     <section id="theoryScreen" class="screen hidden">
-      <header class="row quiz-top">
-        <button id="theoryBack" class="icon-button" aria-label="Назад" type="button">←</button>
-        <div class="quiz-title">Учебная карточка</div><div class="pill">A1</div>
-      </header>
-      <section class="theory-hero glass">
-        <div id="theoryIcon" class="module-icon"></div><h1 id="theoryTitle"></h1>
-        <p id="theorySubtitle" class="muted small"></p>
-      </section>
+      <header class="row quiz-top"><button id="theoryBack" class="icon-button" aria-label="Назад" type="button">←</button><div class="quiz-title">Учебная карточка</div><div class="pill">A1</div></header>
+      <section class="theory-hero glass"><div id="theoryIcon" class="module-icon"></div><h1 id="theoryTitle"></h1><p id="theorySubtitle" class="muted small"></p></section>
       <div id="theoryContent" class="theory-content glass"></div>
-      <div class="theory-actions">
-        <div id="theoryRewardNote" class="notice"></div>
-        <button id="startStudyButton" class="button primary full" type="button">Пройти тест</button>
-      </div>
+      <div class="theory-actions"><div id="theoryRewardNote" class="notice"></div><button id="startStudyButton" class="button primary full" type="button">Пройти тест</button></div>
     </section>
 
     <section id="quizScreen" class="screen hidden">
-      <header class="row quiz-top">
-        <button id="quizBack" class="icon-button" aria-label="Назад" type="button">←</button>
-        <div id="quizTitle" class="quiz-title"></div><div id="quizMode" class="pill"></div>
-      </header>
+      <header class="row quiz-top"><button id="quizBack" class="icon-button" aria-label="Назад" type="button">←</button><div id="quizTitle" class="quiz-title"></div><div id="quizMode" class="pill"></div></header>
       <div id="quizInstruction" class="notice"></div>
       <div class="progress-shell glass">
         <div id="bossHud" class="boss-hud hidden">
-          <div class="row">
-            <span class="boss-label">FRAU MÜLLER</span>
-            <div id="bossHearts" class="hearts" role="status" aria-live="polite"></div>
-          </div>
+          <div class="row"><span id="bossHudName" class="boss-label"></span><div id="bossHearts" class="hearts" role="status" aria-live="polite"></div></div>
           <div id="bossHealthText" class="muted small" style="margin-top:5px"></div>
         </div>
         <div class="row progress-label"><span id="progressLabel">Заполнено</span><strong id="progressText"></strong></div>
-        <div id="progressBar" class="progress-track" role="progressbar" aria-label="Прогресс ответов" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div id="progressFill" class="progress-fill"></div>
-        </div>
+        <div id="progressBar" class="progress-track" role="progressbar" aria-label="Прогресс ответов" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill" class="progress-fill"></div></div>
       </div>
-      <div id="bossSpeech" class="dialogue-bubble hidden">
-        <div class="dialogue-speaker">👩‍💼 Frau Müller</div>
-        <div id="bossReplica" class="dialogue-replica"></div>
-      </div>
+      <div id="bossSpeech" class="dialogue-bubble hidden"><div id="bossSpeaker" class="dialogue-speaker"></div><div id="bossReplica" class="dialogue-replica"></div></div>
       <div id="quizQuestions" class="questions"></div>
-      <div id="checkBar" class="floating-bar">
-        <div class="floating-inner"><button id="checkButton" class="button primary full" type="button">Проверить ответы</button></div>
-      </div>
+      <div id="checkBar" class="floating-bar"><div class="floating-inner"><button id="checkButton" class="button primary full" type="button">Проверить ответы</button></div></div>
     </section>
 
     <section id="flashScreen" class="screen hidden">
-      <header class="row quiz-top">
-        <button id="flashBack" class="icon-button" aria-label="Вернуться к практике" type="button">←</button>
-        <div class="quiz-title">Karteikarten</div><div class="pill">Без очков</div>
-      </header>
+      <header class="row quiz-top"><button id="flashBack" class="icon-button" aria-label="Вернуться к практике" type="button">←</button><div class="quiz-title">Karteikarten</div><div class="pill">Без очков</div></header>
       <p class="muted small">Вспомни перевод. Нажми на карточку, чтобы проверить себя. Счёт не ведём — тут качаем память, а не эго.</p>
       <div class="flash-stage">
         <button id="flashCard" class="flash-card" type="button" aria-label="Перевернуть карточку" aria-pressed="false">
           <span class="flash-inner">
-            <span id="flashFrontFace" class="flash-face flash-front">
-              <span class="pill">Deutsch</span><span id="flashFrontText" class="flash-text"></span>
-              <span class="flash-hint">Нажми, чтобы увидеть перевод ↻</span>
-            </span>
-            <span id="flashBackFace" class="flash-face flash-back" aria-hidden="true">
-              <span class="pill">Перевод</span><span id="flashBackText" class="flash-text"></span>
-              <span class="flash-hint">Нажми, чтобы вернуть немецкую фразу ↻</span>
-            </span>
+            <span id="flashFrontFace" class="flash-face flash-front"><span class="pill">Deutsch</span><span id="flashFrontText" class="flash-text"></span><span class="flash-hint">Нажми, чтобы увидеть перевод ↻</span></span>
+            <span id="flashBackFace" class="flash-face flash-back" aria-hidden="true"><span class="pill">Перевод</span><span id="flashBackText" class="flash-text"></span><span class="flash-hint">Нажми, чтобы вернуть немецкую фразу ↻</span></span>
           </span>
         </button>
       </div>
-      <div class="flash-actions">
-        <button id="flashUnknown" class="button unknown" type="button">Не знал 🤡</button>
-        <button id="flashRemembered" class="button remember" type="button">Вспомнил 😎</button>
-      </div>
+      <div class="flash-actions"><button id="flashUnknown" class="button unknown" type="button">Не знал 🤡</button><button id="flashRemembered" class="button remember" type="button">Вспомнил 😎</button></div>
     </section>
 
     <section id="resultScreen" class="screen hidden">
       <div class="result-card glass">
-        <div id="resultEmoji" class="result-emoji"></div><div id="resultModule" class="pill"></div>
-        <h1 id="resultTitle" style="margin-top:18px"></h1>
-        <div id="resultScore" class="result-score"></div>
-        <p id="resultDetails" class="muted small"></p><p id="resultMessage" class="muted"></p>
+        <div id="resultEmoji" class="result-emoji"></div><div id="resultModule" class="pill"></div><h1 id="resultTitle" style="margin-top:18px"></h1>
+        <div id="resultScore" class="result-score"></div><p id="resultDetails" class="muted small"></p><p id="resultMessage" class="muted"></p>
         <div id="saveStatus" class="save-status" role="status" aria-live="polite"></div>
       </div>
       <div class="result-actions">
@@ -487,58 +429,46 @@
     "use strict";
 
     /*
-      Схема Supabase не меняется.
-      Сохраняются прежние module ID и уникальные индексы:
-      daily_quest: (id,date,module)
-      boss_fight: (id,date,module)
-      study_*: (id,module)
+      НОВЫЙ ИНДЕКС ДЛЯ БОССА OMA:
 
-      Босс:
-      последовательный локальный BOSS_DIALOGUE;
-      поражения не записываются;
-      победа = 100, один раз в день.
+      create unique index if not exists leaderboard_boss_oma_daily_unique
+      on public."Leaderboard" (id,date,module)
+      where module = 'boss_oma';
 
-      has_aufenthaltstitel хранится под ключом конкретного игрока.
-      Устанавливается после подтверждённого результата.
-      Восстанавливается по существующей победе в Leaderboard.
-      localStorage — удобство UI, не защищённая серверная награда.
+      Для Müller остаётся module='boss_fight' и прежний дневной индекс.
+      Индексы daily_quest и study_* не меняются.
+      Новых таблиц и колонок не требуется.
 
-      Для production необходимы RLS и серверная проверка Telegram
-      initData и результатов. initDataUnsafe — только для интерфейса.
-      Service role / secret key не размещать в HTML.
+      Каждый босс: победа 100 баллов один раз в день.
+      Поражения не записываются.
+      Флаги предметов: localStorage по Telegram ID +
+      восстановление из победных записей Leaderboard.
+
+      Кнопка закрытого по очкам босса визуально заблокирована,
+      но принимает клик для toast. Сам startBoss также проверяет порог.
+      При уже полученной дневной победе используется настоящий disabled.
+
+      Production: нужны RLS и серверная проверка Telegram initData,
+      очков и лимитов. Клиентский localStorage не является защитой.
+      Service_role/secret key не размещать в HTML.
     */
 
-    const SUPABASE_URL = "https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
-    const SUPABASE_KEY = "sb_publishable_bTmaC-ZOR2dpN9OzerfWdg_CTcujMY1";
-    const SUPABASE_REST_URL = SUPABASE_URL.replace(/\/Leaderboard\/?$/, "");
-    const GAME_TIME_ZONE = "Europe/Kyiv";
-    const DAILY_ID = "daily_quest";
-    const BOSS_ID = "boss_fight";
-    const LEGACY_DAILY_IDS = ["articles","translation","grammar"];
-    const LEGACY_BOSS_ID = "boss_auslaenderbehoerde";
-    const DAILY_COUNT = 20;
-    const MAX_HP = 3;
-    const BOSS_REWARD = 100;
-    const STUDY_REWARD = 50;
-    const STUDY_THRESHOLD = 80;
-    const PAGE_SIZE = 1000;
-    const REQUEST_TIMEOUT = 15000;
-    const STUDY_FAILURE = "Меньше 80%. Иди учи теорию, лох";
-    const BOSS_CLOSED = "Frau Müller сегодня больше не принимает";
-    const BOSS_GATE_MESSAGE = "У тебя даже прописки нет, лох. Набери 100 баллов в квестах!";
-    const BOSS_WIN = "Frau Müller тяжело вздохнула и шлепнула печать. Ты выжил и получил ВНЖ (игровой). +100 баллов.";
-    const BOSS_HIT_PHRASES = [
-      "Frau Müller: Где ваша справка? Минус жизнь, лох.",
-      "Frau Müller: Ваш немецкий оскорбляет мои уши.",
-      "Frau Müller: Вы не заполнили Формуляр А-38!",
-      "Frau Müller: Schneller, bitte! Очередь задерживаешь!"
-    ];
-    const BOSS_DEATH_PHRASES = [
-      "Термин отменен. Frau Müller вызвала полицию, тебя депортируют.",
-      "Охрана выкинула тебя из кабинета. Иди учи алфавит.",
-      "Отказано в игровом ВНЖ. Даже твоя прописка делает вид, что тебя не знает."
-    ];
-    const RANKS = [
+    const SUPABASE_URL="https://aqknqdurauzlbeeikxnw.supabase.co/rest/v1/Leaderboard";
+    const SUPABASE_KEY="sb_publishable_bTmaC-ZOR2dpN9OzerfWdg_CTcujMY1";
+    const SUPABASE_REST_URL=SUPABASE_URL.replace(/\/Leaderboard\/?$/,"");
+    const GAME_TIME_ZONE="Europe/Kyiv";
+    const DAILY_ID="daily_quest";
+    const LEGACY_DAILY_IDS=["articles","translation","grammar"];
+    const DAILY_COUNT=20;
+    const MAX_HP=3;
+    const BOSS_REWARD=100;
+    const STUDY_REWARD=50;
+    const STUDY_THRESHOLD=80;
+    const PAGE_SIZE=1000;
+    const REQUEST_TIMEOUT=15000;
+    const STUDY_FAILURE="Меньше 80%. Иди учи теорию, лох";
+
+    const RANKS=[
       {min:0,name:"Новичок",emoji:"🌱"},{min:50,name:"Турист",emoji:"🎒"},
       {min:150,name:"Охотник за артиклями",emoji:"🧩"},{min:300,name:"Студент",emoji:"📚"},
       {min:500,name:"Покоритель Präsens",emoji:"⚡"},{min:800,name:"Берлинец",emoji:"🐻"},
@@ -548,200 +478,297 @@
     ];
 
     // ============================================================
-    // СЮЖЕТНЫЙ БОСС: 20 ПОСЛЕДОВАТЕЛЬНЫХ ШАГОВ A1
-    //
-    // text/options: выбор ответа.
-    // constructor: собираем фразу и нажимаем "Ответить Frau Müller".
-    // Типы нормализуются для общего интерфейса, порядок не перемешивается.
+    // FRAU MÜLLER: ВСЕ ИМЕНА PLATON, ВСЕ ГОРОДА SINSHEIM
     // ============================================================
 
-    const BOSS_DIALOGUE = [
+    const BOSS_DIALOGUE=[
       {
-        format:"text",
-        replica:"Guten Tag. Was wollen Sie hier?",
+        format:"text",replica:"Guten Tag. Was wollen Sie hier?",
         question:"Поздоровайся и скажи, что у тебя назначен термин.",
-        options:[
-          "Guten Tag. Ich habe einen Termin.",
-          "Schlampe",
-          "Mein Name ist Platon.",
-          "Auf Wiedersehen."
-        ],
-        correctIndex:0
+        options:["Guten Tag. Ich habe einen Termin.","Schlampe","Mein Name ist Platon.","Auf Wiedersehen."],correctIndex:0
       },
       {
-        format:"options",
-        replica:"Also gut. Welches Dokument brauchen Sie?",
+        format:"options",replica:"Also gut. Welches Dokument brauchen Sie?",
         question:"Ich will ___ Aufenthaltstitel haben.",
-        options:["einen","ein","eine","einem"],
-        correctIndex:0
+        options:["einen","ein","eine","einem"],correctIndex:0
       },
       {
-        format:"constructor",
-        replica:"Ihre Papiere, bitte! Sagen Sie auf Deutsch: „Я забыл свой паспорт“.",
+        format:"constructor",replica:"Ihre Papiere, bitte! Sagen Sie: „Я забыл свой паспорт“.",
         question:"Я забыл свой паспорт.",
         correctWords:["Ich","habe","meinen","Pass","vergessen."],
         decoyWords:["vergesse","mein","hat"]
       },
       {
-        format:"text",
-        replica:"Kein Pass? Na gut. Wie heißen Sie?",
-        question:"Ответь, что тебя зовут Олена.",
-        options:[
-          "Ich wohne Olena.",
-          "Ich heiße Olena.",
-          "Ich komme Olena.",
-          "Ich habe Olena."
-        ],
-        correctIndex:1
+        format:"text",replica:"Kein Pass? Na gut. Wie heißen Sie?",
+        question:"Ответь строго: «Меня зовут Платон».",
+        options:["Mein Name wohnt Platon.","Mein Name ist Platon.","Mein Name kommt Platon.","Mein Name hat Platon."],correctIndex:1
       },
       {
-        format:"options",
-        replica:"Woher kommen Sie?",
-        question:"Ich ___ aus der Ukraine.",
-        options:["kommst","kommt","komme","kommen"],
-        correctIndex:2
+        format:"options",replica:"Woher kommen Sie?",
+        question:"Ich ___ aus Sinsheim.",
+        options:["kommst","kommt","komme","kommen"],correctIndex:2
       },
       {
-        format:"constructor",
-        replica:"Wo wohnen Sie? Sagen Sie: „Я живу в Берлине“.",
-        question:"Я живу в Берлине.",
-        correctWords:["Ich","wohne","in","Berlin."],
+        format:"constructor",replica:"Wo wohnen Sie? Sagen Sie: „Я живу в Sinsheim“.",
+        question:"Я живу в Sinsheim.",
+        correctWords:["Ich","wohne","in","Sinsheim."],
         decoyWords:["wohnst","nach","bin"]
       },
       {
-        format:"text",
-        replica:"Haben Sie eine Meldebescheinigung?",
+        format:"text",replica:"Haben Sie eine Meldebescheinigung?",
         question:"Скажи, что прописка у тебя есть.",
-        options:[
-          "Nein, ich bin ein Auto.",
-          "Ja, ich wohne Kaffee.",
-          "Ich lerne morgen.",
-          "Ja, hier ist meine Meldebescheinigung."
-        ],
-        correctIndex:3
+        options:["Nein, ich bin ein Auto.","Ja, ich wohne Kaffee.","Ich lerne morgen.","Ja, hier ist meine Meldebescheinigung."],correctIndex:3
       },
       {
-        format:"options",
-        replica:"Wie alt sind Sie?",
+        format:"options",replica:"Wie alt sind Sie?",
         question:"Ich ___ zwanzig Jahre alt.",
-        options:["bin","habe","ist","bist"],
-        correctIndex:0
+        options:["bin","habe","ist","bist"],correctIndex:0
       },
       {
-        format:"text",
-        replica:"Welche Sprache sprechen Sie?",
+        format:"text",replica:"Welche Sprache sprechen Sie?",
         question:"Скажи, что немного говоришь по-немецки.",
-        options:[
-          "Ich esse Deutsch.",
-          "Ich spreche ein bisschen Deutsch.",
-          "Ich wohne Deutsch.",
-          "Ich fahre Deutsch."
-        ],
-        correctIndex:1
+        options:["Ich esse Deutsch.","Ich spreche ein bisschen Deutsch.","Ich wohne Deutsch.","Ich fahre Deutsch."],correctIndex:1
       },
       {
-        format:"constructor",
-        replica:"Gut. Sagen Sie: „Я учу немецкий каждый день“.",
+        format:"constructor",replica:"Gut. Sagen Sie: „Я учу немецкий каждый день“.",
         question:"Я учу немецкий каждый день.",
         correctWords:["Ich","lerne","jeden","Tag","Deutsch."],
         decoyWords:["lernst","Nacht","lernen"]
       },
       {
-        format:"options",
-        replica:"Arbeiten Sie?",
+        format:"options",replica:"Arbeiten Sie?",
         question:"Ja, ich ___ in einem Café.",
-        options:["arbeitest","arbeiten","arbeite","arbeitet"],
-        correctIndex:2
+        options:["arbeitest","arbeiten","arbeite","arbeitet"],correctIndex:2
       },
       {
-        format:"text",
-        replica:"Wann arbeiten Sie?",
+        format:"text",replica:"Wann arbeiten Sie?",
         question:"Скажи, что работаешь по понедельникам.",
-        options:[
-          "Ich arbeite um Montag.",
-          "Ich arbeite im Montag.",
-          "Ich arbeite Montag Uhr.",
-          "Ich arbeite am Montag."
-        ],
-        correctIndex:3
+        options:["Ich arbeite um Montag.","Ich arbeite im Montag.","Ich arbeite Montag Uhr.","Ich arbeite am Montag."],correctIndex:3
       },
       {
-        format:"options",
-        replica:"Sind Sie verheiratet?",
+        format:"options",replica:"Sind Sie verheiratet?",
         question:"Nein, ich bin ___ verheiratet.",
-        options:["nicht","kein","keine","nein"],
-        correctIndex:0
+        options:["nicht","kein","keine","nein"],correctIndex:0
       },
       {
-        format:"constructor",
-        replica:"Haben Sie Kinder? Sagen Sie: „У меня нет детей“.",
+        format:"constructor",replica:"Haben Sie Kinder? Sagen Sie: „У меня нет детей“.",
         question:"У меня нет детей.",
         correctWords:["Ich","habe","keine","Kinder."],
         decoyWords:["bin","kein","hat"]
       },
       {
-        format:"text",
-        replica:"Wie ist Ihre Telefonnummer?",
-        question:"Назови номер вежливо.",
-        options:[
-          "Meine Telefonnummer ist acht Uhr.",
-          "Meine Telefonnummer ist 030 123456.",
-          "Ich wohne Telefonnummer.",
-          "Mein Telefon ist verheiratet."
-        ],
-        correctIndex:1
+        format:"text",replica:"Wie ist Ihre Telefonnummer?",
+        question:"Назови номер телефона.",
+        options:["Meine Telefonnummer ist acht Uhr.","Meine Telefonnummer ist 030 123456.","Ich wohne Telefonnummer.","Mein Telefon ist verheiratet."],correctIndex:1
       },
       {
-        format:"options",
-        replica:"Sie brauchen ein Foto.",
+        format:"options",replica:"Sie brauchen ein Foto.",
         question:"Ich ___ ein Foto dabei.",
-        options:["bin","ist","habe","haben"],
-        correctIndex:2
+        options:["bin","ist","habe","haben"],correctIndex:2
       },
       {
-        format:"constructor",
-        replica:"Füllen Sie das Formular aus. Sagen Sie: „Мне нужна помощь“.",
+        format:"constructor",replica:"Füllen Sie das Formular aus. Sagen Sie: „Мне нужна помощь“.",
         question:"Мне нужна помощь.",
         correctWords:["Ich","brauche","Hilfe."],
         decoyWords:["brauchst","bin","helfe"]
       },
       {
-        format:"text",
-        replica:"Unterschreiben Sie bitte hier.",
+        format:"text",replica:"Unterschreiben Sie bitte hier.",
         question:"Согласись и поблагодари.",
-        options:[
-          "Ich bin gestern.",
-          "Das ist ein Bahnhof.",
-          "Nein, ich wohne.",
-          "Ja, gern. Danke."
-        ],
-        correctIndex:3
+        options:["Ich bin gestern.","Das ist ein Bahnhof.","Nein, ich wohne.","Ja, gern. Danke."],correctIndex:3
       },
       {
-        format:"options",
-        replica:"Ihr Dokument ist morgen fertig. Kommen Sie um zehn Uhr.",
+        format:"options",replica:"Ihr Dokument ist morgen fertig. Kommen Sie um zehn Uhr.",
         question:"Ich komme morgen ___ zehn Uhr.",
-        options:["um","am","im","in"],
-        correctIndex:0
+        options:["um","am","im","in"],correctIndex:0
       },
       {
-        format:"constructor",
-        replica:"Gut. Das ist alles. Sagen Sie höflich auf Wiedersehen.",
+        format:"constructor",replica:"Gut. Das ist alles. Sagen Sie höflich auf Wiedersehen.",
         question:"Большое спасибо. До свидания.",
         correctWords:["Vielen","Dank.","Auf","Wiedersehen."],
         decoyWords:["Gute","Nacht.","Hallo."]
       }
     ];
 
-    let moduleArticles=[];
-    let moduleArticlesHard=[];
-    let moduleGrammar=[];
-    let moduleGrammarHard=[];
-    let moduleTranslation=[];
-    let moduleTranslationHard=[];
+    // ============================================================
+    // BÖSE OMA: 20 ШАГОВ A1, АТМОСФЕРА КАССЫ ALDI/LIDL
+    // ============================================================
+
+    const OMA_DIALOGUE=[
+      {
+        format:"text",replica:"Hallo! Geht das auch schneller?! Ich habe keine Zeit!",
+        question:"Вежливо извинись перед бабкой.",
+        options:["Entschuldigung.","Halt die Klappe, Oma.","Ich bin eine Banane.","Auf Wiedersehen."],correctIndex:0
+      },
+      {
+        format:"options",replica:"Legen Sie den Warentrenner dazwischen! Sind Sie blind?",
+        question:"Где разделитель товаров? Wo ist ___ Warentrenner?",
+        options:["der","den","dem","das"],correctIndex:0
+      },
+      {
+        format:"constructor",replica:"Das macht 15 Euro! Haben Sie Kleingeld?!",
+        question:"У меня нет наличных.",
+        correctWords:["Ich","habe","kein","Bargeld."],
+        decoyWords:["keine","nicht","Bargelds"]
+      },
+      {
+        format:"text",replica:"Kein Bargeld? Wie wollen Sie bezahlen?",
+        question:"Скажи, что платишь картой.",
+        options:["Ich esse die Karte.","Ich zahle mit Karte.","Ich wohne mit Karte.","Ich schlafe im Supermarkt."],correctIndex:1
+      },
+      {
+        format:"options",replica:"Was kaufen Sie denn?",
+        question:"Ich ___ Brot und Milch.",
+        options:["kaufst","kaufen","kaufe","kauft"],correctIndex:2
+      },
+      {
+        format:"constructor",replica:"Ist das Ihre Milch? Sagen Sie: „Молоко стоит один евро“.",
+        question:"Молоко стоит один евро.",
+        correctWords:["Die","Milch","kostet","einen","Euro."],
+        decoyWords:["Das","kosten","eine"]
+      },
+      {
+        format:"text",replica:"Sie haben zu viele Sachen! Wie viele Äpfel sind das?",
+        question:"Скажи, что у тебя три яблока.",
+        options:["Ich bin drei Äpfel.","Ich habe drei Apfel Uhr.","Ich wohne drei Äpfel.","Ich habe drei Äpfel."],correctIndex:3
+      },
+      {
+        format:"options",replica:"Und die Äpfel? Was kosten sie?",
+        question:"___ kosten die Äpfel?",
+        options:["Wie viel","Woher","Wer","Wann"],correctIndex:0
+      },
+      {
+        format:"constructor",replica:"Brauchen Sie eine Tüte? Sagen Sie: „Мне нужен пакет“.",
+        question:"Мне нужен пакет.",
+        correctWords:["Ich","brauche","eine","Tüte."],
+        decoyWords:["einen","brauchst","bin"]
+      },
+      {
+        format:"text",replica:"Ihre Tasche steht auf meinen Sachen!",
+        question:"Предложи убрать свою сумку.",
+        options:["Meine Tasche spricht Deutsch.","Entschuldigung. Ich nehme meine Tasche.","Ich esse Ihre Tasche.","Sie sind mein Brot."],correctIndex:1
+      },
+      {
+        format:"options",replica:"Der Einkaufswagen steht im Weg!",
+        question:"___ Einkaufswagen steht hier.",
+        options:["Das","Die","Der","Den"],correctIndex:2
+      },
+      {
+        format:"constructor",replica:"Ich will vorbei! Sagen Sie: „Пожалуйста, проходите“.",
+        question:"Пожалуйста, проходите.",
+        correctWords:["Bitte,","gehen","Sie","vorbei."],
+        decoyWords:["gehst","du","essen"]
+      },
+      {
+        format:"text",replica:"Haben Sie fünfzig Cent?",
+        question:"Скажи, что мелочи нет.",
+        options:["Ich bin fünfzig Cent.","Mein Name ist Geld.","Ich kaufe Zeit.","Nein, ich habe kein Kleingeld."],correctIndex:3
+      },
+      {
+        format:"options",replica:"Warum dauert das so lange?",
+        question:"Ich ___ noch einen Moment.",
+        options:["brauche","brauchst","braucht","brauchen"],correctIndex:0
+      },
+      {
+        format:"constructor",replica:"Die Kasse ist frei! Sagen Sie: „Я готов“.",
+        question:"Я готов.",
+        correctWords:["Ich","bin","fertig."],
+        decoyWords:["habe","bist","morgen"]
+      },
+      {
+        format:"text",replica:"Wollen Sie den Kassenbon?",
+        question:"Скажи: «Да, пожалуйста».",
+        options:["Nein, ich bin Milch.","Ja, bitte.","Ich komme aus Brot.","Fünf Uhr."],correctIndex:1
+      },
+      {
+        format:"options",replica:"Diese Brezel ist für Sie. Aber erst richtig antworten!",
+        question:"Die Brezel ist ___ mich.",
+        options:["aus","mit","für","bei"],correctIndex:2
+      },
+      {
+        format:"constructor",replica:"Sie lernen ja doch! Sagen Sie: „Я люблю брецели“.",
+        question:"Я люблю брецели.",
+        correctWords:["Ich","mag","Brezeln."],
+        decoyWords:["magst","bin","Milch."]
+      },
+      {
+        format:"text",replica:"So. Nehmen Sie Ihre Sachen!",
+        question:"Поблагодари бабку.",
+        options:["Ich wohne Ihre Sachen.","Mein Brot ist verheiratet.","Ich zahle schlafen.","Vielen Dank."],correctIndex:3
+      },
+      {
+        format:"constructor",replica:"Endlich! Einen schönen Tag!",
+        question:"Спасибо. Вам тоже.",
+        correctWords:["Danke.","Ihnen","auch."],
+        decoyWords:["Ich","bin","nicht."]
+      }
+    ];
+
+    const BOSSES={
+      muller:{
+        id:"muller",
+        module:"boss_fight",
+        legacyModules:["boss_auslaenderbehoerde"],
+        name:"Frau Müller",
+        location:"Ausländerbehörde",
+        icon:"👩‍💼",
+        threshold:100,
+        flag:"has_aufenthaltstitel",
+        item:"🪪 ВНЖ",
+        dialogue:BOSS_DIALOGUE,
+        gate:"У тебя даже прописки нет, лох. Набери 100 баллов в квестах!",
+        closed:"Frau Müller сегодня больше не принимает. Приходи завтра.",
+        entry:"Зайти в кабинет",
+        retry:"Запросить новый термин",
+        description:"Паспорт, прописка, формуляр. Докажи, что твой немецкий переживёт бюрократию.",
+        hit:[
+          "Frau Müller: Где ваша справка? Минус жизнь, лох.",
+          "Frau Müller: Ваш немецкий оскорбляет мои уши.",
+          "Frau Müller: Вы не заполнили Формуляр А-38!",
+          "Frau Müller: Schneller, bitte! Очередь задерживаешь!"
+        ],
+        death:[
+          "Термин отменен. Frau Müller вызвала полицию, тебя депортируют.",
+          "Охрана выкинула тебя из кабинета. Иди учи алфавит.",
+          "Отказано в игровом ВНЖ. Даже прописка делает вид, что тебя не знает."
+        ],
+        win:"Frau Müller тяжело вздохнула и шлепнула печать. Ты выжил! +100 баллов.",
+        winTitle:"ВНЖ одобрен!"
+      },
+      oma:{
+        id:"oma",
+        module:"boss_oma",
+        legacyModules:[],
+        name:"Böse Oma",
+        location:"Supermarkt · Aldi / Lidl",
+        icon:"👵",
+        threshold:500,
+        flag:"has_brezel",
+        item:"🥨 Брецель",
+        dialogue:OMA_DIALOGUE,
+        gate:"Сначала заработай 500 баллов, лох",
+        closed:"Бабка сегодня уже побеждена. Приходи завтра.",
+        entry:"Встать в очередь",
+        retry:"Встать в очередь снова",
+        description:"Бабка дышит в спину, требует Warentrenner и мелочь. Тележка уже нацелена на твою пятку.",
+        hit:[
+          "Schneller! Я тут до пенсии стоять буду?!",
+          "Бабка: Где Warentrenner, лох?! Получай тележкой!",
+          "Бабка: Мелочь есть? А мозги?! Минус жизнь.",
+          "Бабка: Всю очередь задерживаешь! Тележка наносит критический стыд."
+        ],
+        death:[
+          "Бабка затоптала тебя тележкой. Касса закрыта, лох.",
+          "Ты проиграл спор за Warentrenner. Охрана вынесла тебя вместе с корзинкой.",
+          "Бабка забрала твоё место в очереди и последние надежды. Иди учи немецкий."
+        ],
+        win:"Бабка убрала тележку и нехотя уступила место. Очередь пережита! +100 баллов.",
+        winTitle:"Бабка побеждена!"
+      }
+    };
 
     // ============================================================
-    // ЛОКАЛЬНЫЕ УЧЕБНЫЕ УПРАЖНЕНИЯ
+    // ЛОКАЛЬНАЯ УЧЁБА — ПРЕЖНИЕ УПРАЖНЕНИЯ
     // ============================================================
 
     const studyPersonalpronomen={
@@ -958,7 +985,7 @@
     };
 
     // ============================================================
-    // TELEGRAM И СОСТОЯНИЕ
+    // TELEGRAM, STORAGE, СОСТОЯНИЕ
     // ============================================================
 
     const tg=window.Telegram?.WebApp;
@@ -966,7 +993,7 @@
       tg?.ready();tg?.expand();
       if(typeof tg?.requestFullscreen==="function"&&tg.isVersionAtLeast?.("8.0"))tg.requestFullscreen();
       tg?.setHeaderColor?.("#0b1020");tg?.setBackgroundColor?.("#0b1020");
-    }catch(error){console.warn("Telegram UI:",error);}
+    }catch(e){console.warn("Telegram UI:",e);}
 
     const telegramUser=tg?.initDataUnsafe?.user;
     const isDemo=!(telegramUser&&Number.isSafeInteger(telegramUser.id)&&telegramUser.id>0);
@@ -976,12 +1003,17 @@
         [telegramUser.first_name,telegramUser.last_name].filter(Boolean).join(" ")||
         telegramUser.username||"Игрок"
       ).slice(0,120),
-      has_aufenthaltstitel:false
+      has_aufenthaltstitel:false,
+      has_brezel:false
     };
 
-    const TITLE_STORAGE_KEY=`DeutschQuest:${isDemo?"demo":player.id}:has_aufenthaltstitel`;
-    try{player.has_aufenthaltstitel=localStorage.getItem(TITLE_STORAGE_KEY)==="true";}
-    catch(error){console.warn("localStorage unavailable:",error);}
+    function storageKey(flag){return `DeutschQuest:${isDemo?"demo":player.id}:${flag}`;}
+    for(const flag of ["has_aufenthaltstitel","has_brezel"]){
+      try{player[flag]=localStorage.getItem(storageKey(flag))==="true";}
+      catch(e){console.warn("Storage unavailable:",e);}
+    }
+
+    let moduleArticles=[],moduleArticlesHard=[],moduleGrammar=[],moduleGrammarHard=[],moduleTranslation=[],moduleTranslationHard=[];
 
     const ROOTS=["practice","study","boss","rating"];
     const SCREENS=[...ROOTS,"theory","quiz","flash","result"];
@@ -990,13 +1022,12 @@
       screen:"practice",root:"practice",date:today(),ratingTab:"today",
       ready:false,loading:false,valid:false,starting:false,busy:false,
       questionsReady:false,questionsLoading:false,questionsLoadId:0,
-      records:[],demoRecords:[],dailyDone:false,bossDone:false,
+      records:[],demoRecords:[],dailyDone:false,bossDone:new Set(),
       studyDone:new Set(),pending:new Map(),drafts:new Map(),attempt:null,
       selectedStudy:null,onlyErrors:false,totalScore:null,loadId:0,
       modal:false,modalOpener:null,modalY:0,toastTimer:null,stepTimer:null,
-      dailyPools:{medium:[],hard:[]},fullPool:[],
-      trainerPools:{articles:[],grammar:[]},
-      flashPool:[],flashBag:[],flashCurrent:null,flashLast:"",
+      dailyPools:{medium:[],hard:[]},trainerPools:{articles:[],grammar:[]},
+      fullPool:[],flashPool:[],flashBag:[],flashCurrent:null,flashLast:"",
       flashBusy:false,flashRequest:0
     };
 
@@ -1007,10 +1038,10 @@
       return n;
     }
     function today(){
-      const parts=new Intl.DateTimeFormat("en-US",{
+      const p=new Intl.DateTimeFormat("en-US",{
         timeZone:GAME_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"
       }).formatToParts(new Date());
-      const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+      const v=Object.fromEntries(p.map(x=>[x.type,x.value]));
       return `${v.year}-${v.month}-${v.day}`;
     }
     function scoreOf(r){const n=Number(r.score);return Number.isFinite(n)?n:0;}
@@ -1028,10 +1059,8 @@
       return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join("-");
     }
     function haptic(type="selection"){
-      try{
-        if(type==="selection")tg?.HapticFeedback?.selectionChanged();
-        else tg?.HapticFeedback?.notificationOccurred(type);
-      }catch(_){}
+      try{if(type==="selection")tg?.HapticFeedback?.selectionChanged();else tg?.HapticFeedback?.notificationOccurred(type);}
+      catch(_){}
     }
     function toast(text,error=false){
       clearTimeout(state.toastTimer);$("toast").textContent=text;
@@ -1048,18 +1077,21 @@
     function isStream(a){return a.kind==="boss"||a.kind==="trainer";}
     function address(id,level){return`${id}:${level}`;}
     function stopTimer(){clearTimeout(state.stepTimer);state.stepTimer=null;}
-    function hasRegistration(){return state.ready&&state.totalScore!==null&&state.totalScore>=100;}
-
-    function grantAufenthaltstitel(){
-      const newlyGranted=!player.has_aufenthaltstitel;
-      player.has_aufenthaltstitel=true;
-      try{localStorage.setItem(TITLE_STORAGE_KEY,"true");}
-      catch(error){console.warn("Could not persist inventory flag:",error);}
+    function bossConfig(a){return BOSSES[a.bossId];}
+    function canEnterBoss(id){return state.ready&&state.totalScore!==null&&state.totalScore>=BOSSES[id].threshold;}
+    function grantFlag(flag){
+      const newlyGranted=!player[flag];player[flag]=true;
+      try{localStorage.setItem(storageKey(flag),"true");}
+      catch(e){console.warn("Could not save item:",e);}
       return newlyGranted;
+    }
+    function bossIdForRecord(r){
+      if(String(r.id)!==player.id||scoreOf(r)<=0)return null;
+      return Object.values(BOSSES).find(b=>[b.module,...b.legacyModules].includes(r.module))?.id||null;
     }
 
     // ============================================================
-    // SEEDED DAILY
+    // СТАБИЛЬНЫЙ РАНДОМ ДЕЙЛИКА
     // ============================================================
 
     function hashString(text){
@@ -1070,9 +1102,8 @@
     function seededRandom(text){
       let seed=hashString(text);
       return()=>{
-        seed=(seed+0x6D2B79F5)>>>0;
-        let t=seed;t=Math.imul(t^(t>>>15),t|1);
-        t^=t+Math.imul(t^(t>>>7),t|61);
+        seed=(seed+0x6D2B79F5)>>>0;let t=seed;
+        t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);
         return((t^(t>>>14))>>>0)/4294967296;
       };
     }
@@ -1084,7 +1115,7 @@
     }
 
     // ============================================================
-    // SUPABASE REST — ПРЕЖНИЙ КОНТРАКТ
+    // SUPABASE REST
     // ============================================================
 
     async function rest(tableName,query={},options={}){
@@ -1102,8 +1133,10 @@
         if(text){try{data=JSON.parse(text);}catch(_){data={message:text};}}
         if(!response.ok){const e=new Error(data?.message||`HTTP ${response.status}`);e.code=data?.code;throw e;}
         return data;
-      }catch(e){if(e.name==="AbortError")throw new Error("Сервер не ответил вовремя. Проверь сеть.");throw e;}
-      finally{clearTimeout(timer);}
+      }catch(e){
+        if(e.name==="AbortError")throw new Error("Сервер не ответил вовремя. Проверь сеть.");
+        throw e;
+      }finally{clearTimeout(timer);}
     }
     function api(query={},options={}){return rest("Leaderboard",query,options);}
     async function fetchTable(name,filters={},order="id.asc",select="*"){
@@ -1120,13 +1153,12 @@
     }
 
     // ============================================================
-    // АДАПТЕРЫ ВОПРОСОВ
+    // ПРАКТИКА И УЧЁБА: ПРЕЖНИЕ АДАПТЕРЫ
     // ============================================================
 
     function requireStrings(v,label,min=1,max=Infinity){
-      if(!Array.isArray(v)||v.length<min||v.length>max||!v.every(x=>typeof x==="string"&&x.trim())){
+      if(!Array.isArray(v)||v.length<min||v.length>max||!v.every(x=>typeof x==="string"&&x.trim()))
         throw new Error(`Некорректный массив: ${label}`);
-      }
       return v.slice();
     }
     function requireIndex(v,options,label){
@@ -1137,22 +1169,18 @@
       if(typeof v!=="string"||!v.trim())throw new Error(`Пустой текст: ${label}`);
       return v;
     }
-    function rowKey(name,r){
-      if(r.id==null)throw new Error(`Нет ID: ${name}`);
-      return`${name}:${String(r.id)}`;
-    }
+    function rowKey(name,r){if(r.id==null)throw new Error(`Нет ID: ${name}`);return`${name}:${String(r.id)}`;}
     function isBasicArticle(q){
       return q.category==="articles"&&q.type==="choice"&&Array.isArray(q.options)&&
-        q.options.length===3&&new Set(q.options).size===3&&
-        q.options.every(x=>["der","die","das"].includes(x));
+        q.options.length===3&&new Set(q.options).size===3&&q.options.every(x=>["der","die","das"].includes(x));
     }
     function adaptArticle(r){
       const key=rowKey("quiz_articles",r);
       if(typeof r.sentence==="string"&&r.sentence.trim()&&Array.isArray(r.options)){
         const options=requireStrings(r.options,key,4,6);
         return{key,type:"choice",block:0,topic:"Grammatik · Kasus",category:"grammar",
-          level:r.is_hard?"hard":"medium",sentence:requireText(r.sentence,key),
-          options,correctIndex:requireIndex(r.correct_index,options,key)};
+          level:r.is_hard?"hard":"medium",sentence:requireText(r.sentence,key),options,
+          correctIndex:requireIndex(r.correct_index,options,key)};
       }
       if(!["der","die","das"].includes(r.article))throw new Error(`Неверный артикль: ${key}`);
       return{key,type:"choice",block:0,topic:"Artikel",category:"articles",level:r.is_hard?"hard":"medium",
@@ -1170,11 +1198,12 @@
       const base={key,block:0,topic:"Übersetzung",category:"translation",level:r.is_hard?"hard":"medium",direction};
       if(r.format==="options"){
         const options=requireStrings(r.options,key,4,6);
-        return{...base,type:"choice",sentence:requireText(r.text,key),options,
-          correctIndex:requireIndex(r.correct_index,options,key)};
+        return{...base,type:"choice",sentence:requireText(r.text,key),options,correctIndex:requireIndex(r.correct_index,options,key)};
       }
-      if(r.format==="constructor")return{...base,type:"builder",question:requireText(r.text,key),
-        correctWords:requireStrings(r.correct_words,key),decoyWords:requireStrings(r.decoy_words,key,2)};
+      if(r.format==="constructor")return{
+        ...base,type:"builder",question:requireText(r.text,key),
+        correctWords:requireStrings(r.correct_words,key),decoyWords:requireStrings(r.decoy_words,key,2)
+      };
       throw new Error(`Неверный формат: ${key}`);
     }
     function studyUnits(id){
@@ -1185,18 +1214,17 @@
         ...b.dialogue.map((q,i)=>({...q,key:`${id}:gap:${i}`,sentence:q.line,type:"gap",block:3,topic:m.title,category:m.category}))
       ];
     }
-    function bossUnits(){
-      return BOSS_DIALOGUE.map((q,i)=>q.format==="constructor"
-        ?{...q,key:`boss-story:${i}`,type:"builder",block:0,topic:"Dialog A1"}
-        :{...q,key:`boss-story:${i}`,type:"choice",block:0,topic:"Dialog A1",sentence:q.question});
+    function bossUnits(id){
+      return BOSSES[id].dialogue.map((q,i)=>q.format==="constructor"
+        ?{...q,key:`${id}:story:${i}`,type:"builder",block:0,topic:"Dialog A1"}
+        :{...q,key:`${id}:story:${i}`,type:"choice",block:0,topic:"Dialog A1",sentence:q.question});
     }
     function builderToChoice(q){
       const right=q.correctWords.join(" "),wrong=new Set();
       for(let i=0;i<q.correctWords.length&&wrong.size<3;i++){
         for(const d of q.decoyWords){
-          const w=q.correctWords.slice();w[i]=d;
-          const s=w.join(" ");if(s!==right)wrong.add(s);
-          if(wrong.size===3)break;
+          const w=q.correctWords.slice();w[i]=d;const s=w.join(" ");
+          if(s!==right)wrong.add(s);if(wrong.size===3)break;
         }
       }
       if(wrong.size<3)throw new Error(`Не хватает обманок: ${q.key}`);
@@ -1226,21 +1254,17 @@
       translations.forEach(q=>{
         const constructor=q.type==="builder"||q.format==="constructor";
         const source=constructor?q.question??q.text:q.sentence??q.text??q.de;
-        let translation;
+        let translated;
         if(constructor){
-          const w=q.correctWords??q.correct_words;if(!Array.isArray(w))return;translation=w.join(" ");
+          const w=q.correctWords??q.correct_words;if(!Array.isArray(w))return;translated=w.join(" ");
         }else{
           const raw=q.correctIndex??q.correct_index;if(raw==null)return;
-          const i=Number(raw);
-          if(!Array.isArray(q.options)||!Number.isInteger(i)||i<0||i>=q.options.length)return;
-          translation=q.options[i];
+          const i=Number(raw);if(!Array.isArray(q.options)||!Number.isInteger(i)||i<0||i>=q.options.length)return;
+          translated=q.options[i];
         }
-        if(q.direction==="ru-de")add(translation,source);else add(source,translation);
+        if(q.direction==="ru-de")add(translated,source);else add(source,translated);
       });
-      articles.forEach(q=>{
-        if(q.category&&q.category!=="articles")return;
-        add(q.word??q.sentence,q.translation);
-      });
+      articles.forEach(q=>{if(q.category&&q.category!=="articles")return;add(q.word??q.sentence,q.translation);});
       return Array.from(unique.values());
     }
     function validateUnits(units,label,allowEmpty=false){
@@ -1261,70 +1285,53 @@
         if(!m.theoryHTML?.trim())throw new Error(`Нет теории: ${m.title}`);
         validateUnits(studyUnits(id),m.title);
       });
-      if(BOSS_DIALOGUE.length!==20)throw new Error("Сюжет босса должен содержать 20 шагов.");
-      validateUnits(bossUnits(),"Сюжет Frau Müller");
-      BOSS_DIALOGUE.forEach(q=>requireText(q.replica,"Реплика босса"));
+      Object.values(BOSSES).forEach(b=>{
+        if(b.dialogue.length!==20)throw new Error(`У ${b.name} должно быть 20 шагов.`);
+        validateUnits(bossUnits(b.id),b.name);b.dialogue.forEach(q=>requireText(q.replica,b.name));
+      });
     }
-
     async function loadQuestions(){
       if(state.questionsLoading)return;
       const id=++state.questionsLoadId;state.questionsLoading=true;
-      $("questionsError").classList.add("hidden");$("questionsNotice").classList.remove("hidden");
-      renderUI();
+      $("questionsError").classList.add("hidden");$("questionsNotice").classList.remove("hidden");renderUI();
       try{
-        const [ar,gr,tr]=await Promise.all([
-          fetchTable("quiz_articles"),fetchTable("quiz_grammar"),fetchTable("quiz_translation")
-        ]);
+        const [ar,gr,tr]=await Promise.all([fetchTable("quiz_articles"),fetchTable("quiz_grammar"),fetchTable("quiz_translation")]);
         if(id!==state.questionsLoadId)return;
         const loadedArticles=ar.map(adaptArticle).sort(compareStableKey);
         const loadedGrammar=gr.map(adaptGrammar).sort(compareStableKey);
         const translations=tr.map(adaptTranslation).sort(compareStableKey);
-        validateUnits(loadedArticles,"quiz_articles",true);
-        validateUnits(loadedGrammar,"quiz_grammar",true);
-        validateUnits(translations,"quiz_translation",true);
+        validateUnits(loadedArticles,"quiz_articles",true);validateUnits(loadedGrammar,"quiz_grammar",true);validateUnits(translations,"quiz_translation",true);
         const articles=loadedArticles.filter(isBasicArticle);
         const grammar=[...loadedGrammar,...loadedArticles.filter(q=>q.category==="grammar")].sort(compareStableKey);
         const practice=[...articles,...grammar,...translations];
-        const medium=practice.filter(q=>q.level==="medium").sort(compareStableKey);
-        const hard=practice.filter(q=>q.level==="hard").sort(compareStableKey);
-        if(medium.length<DAILY_COUNT||hard.length<DAILY_COUNT)
-          throw new Error(`Нужно минимум 20 вопросов на сложность. Сейчас ${medium.length} / ${hard.length}.`);
+        const medium=practice.filter(q=>q.level==="medium").sort(compareStableKey),hard=practice.filter(q=>q.level==="hard").sort(compareStableKey);
+        if(medium.length<20||hard.length<20)throw new Error(`Нужно 20 вопросов на сложность. Сейчас ${medium.length} / ${hard.length}.`);
         const local=Object.keys(MODULES).flatMap(studyUnits);
-        const articlePool=uniqueChoices(articles).filter(isBasicArticle);
-        const grammarPool=uniqueChoices([...grammar,...local]);
-        const pairs=flashPairs(translations,articles);
+        const articlePool=uniqueChoices(articles).filter(isBasicArticle),grammarPool=uniqueChoices([...grammar,...local]),pairs=flashPairs(translations,articles);
         if(!articlePool.length||!grammarPool.length||!pairs.length)throw new Error("Пустой тренировочный режим.");
-
-        moduleArticles=articles.filter(q=>q.level==="medium");
-        moduleArticlesHard=articles.filter(q=>q.level==="hard");
-        moduleGrammar=grammar.filter(q=>q.level==="medium");
-        moduleGrammarHard=grammar.filter(q=>q.level==="hard");
-        moduleTranslation=translations.filter(q=>q.level==="medium");
-        moduleTranslationHard=translations.filter(q=>q.level==="hard");
-        state.dailyPools={medium,hard};
-        state.fullPool=uniqueChoices([...practice,...local]);
+        moduleArticles=articles.filter(q=>q.level==="medium");moduleArticlesHard=articles.filter(q=>q.level==="hard");
+        moduleGrammar=grammar.filter(q=>q.level==="medium");moduleGrammarHard=grammar.filter(q=>q.level==="hard");
+        moduleTranslation=translations.filter(q=>q.level==="medium");moduleTranslationHard=translations.filter(q=>q.level==="hard");
+        state.dailyPools={medium,hard};state.fullPool=uniqueChoices([...practice,...local]);
         state.trainerPools={articles:articlePool,grammar:grammarPool};
         state.flashPool=pairs;state.flashBag=[];state.flashCurrent=null;state.flashLast="";
         state.drafts.delete("trainer:articles");state.drafts.delete("trainer:grammar");
         state.questionsReady=true;$("questionsNotice").classList.add("hidden");
-      }catch(error){
-        console.error(error);$("questionsNotice").classList.add("hidden");
-        $("questionsErrorText").textContent=`Не удалось загрузить вопросы: ${error.message}`;
+      }catch(e){
+        console.error(e);$("questionsNotice").classList.add("hidden");$("questionsErrorText").textContent=`Не удалось загрузить вопросы: ${e.message}`;
         $("questionsError").classList.remove("hidden");toast("Вопросы не загрузились. Попробуй ещё раз.",true);
       }finally{if(id===state.questionsLoadId){state.questionsLoading=false;renderUI();}}
     }
 
     // ============================================================
-    // ЭКРАНЫ И МОДАЛЬНОЕ ОКНО
+    // ЭКРАНЫ И MODAL
     // ============================================================
 
     function setFlashButtons(disabled){
       $("flashCard").disabled=disabled;$("flashUnknown").disabled=disabled;$("flashRemembered").disabled=disabled;
     }
     function showScreen(name){
-      if(state.screen==="flash"&&name!=="flash"){
-        state.flashRequest++;state.flashBusy=false;setFlashButtons(false);
-      }
+      if(state.screen==="flash"&&name!=="flash"){state.flashRequest++;state.flashBusy=false;setFlashButtons(false);}
       state.screen=name;if(ROOTS.includes(name))state.root=name;
       SCREENS.forEach(s=>$(`${s}Screen`).classList.toggle("hidden",s!==name));
       $("bottomNav").classList.toggle("hidden",!ROOTS.includes(name));
@@ -1344,23 +1351,19 @@
       state.onlyErrors=false;renderResult();showScreen("result");return true;
     }
     function openDifficulty(){
-      if(state.busy||state.starting||!state.valid)return;
-      if(showPending(DAILY_ID))return;
+      if(state.busy||state.starting||!state.valid)return;if(showPending(DAILY_ID))return;
       if(!state.questionsReady){toast("Сначала загрузи вопросы из базы.",true);return;}
       if(!state.ready||state.loading){toast("Дождись загрузки статистики.",true);return;}
       if(state.dailyDone){toast("Сегодня квест уже закрыт. Приходи завтра.");return;}
       state.modal=true;state.modalOpener=document.activeElement;state.modalY=window.scrollY;
       $("difficultyModal").classList.remove("hidden");
       document.body.style.position="fixed";document.body.style.top=`-${state.modalY}px`;document.body.style.width="100%";
-      $("appMain").inert=true;$("bottomNav").inert=true;
-      $("difficultyModal").querySelector("[data-level='medium']").focus();
+      $("appMain").inert=true;$("bottomNav").inert=true;$("difficultyModal").querySelector("[data-level='medium']").focus();
     }
     function closeDifficulty(focus=true){
-      if(!state.modal)return;
-      $("difficultyModal").classList.add("hidden");
+      if(!state.modal)return;$("difficultyModal").classList.add("hidden");
       document.body.style.position="";document.body.style.top="";document.body.style.width="";
-      $("appMain").inert=false;$("bottomNav").inert=false;
-      window.scrollTo({top:state.modalY,behavior:"instant"});
+      $("appMain").inert=false;$("bottomNav").inert=false;window.scrollTo({top:state.modalY,behavior:"instant"});
       if(focus)state.modalOpener?.focus({preventScroll:true});state.modal=false;
     }
     $("difficultyModal").addEventListener("click",e=>{
@@ -1374,26 +1377,22 @@
       if(!state.modal)return;
       if(e.key==="Escape"){e.preventDefault();closeDifficulty();return;}
       if(e.key!=="Tab")return;
-      const buttons=Array.from($("difficultyModal").querySelectorAll("button"));
-      const first=buttons[0],last=buttons[buttons.length-1];
+      const buttons=Array.from($("difficultyModal").querySelectorAll("button")),first=buttons[0],last=buttons[buttons.length-1];
       if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
     });
 
     // ============================================================
-    // LEADERBOARD И ВОССТАНОВЛЕНИЕ ВНЖ
+    // LEADERBOARD И ПРЕДМЕТЫ ПО ПОБЕДАМ
     // ============================================================
 
     function dailyRecord(r,date){
       return String(r.id)===player.id&&r.date===date&&[DAILY_ID,...LEGACY_DAILY_IDS].includes(r.module);
     }
-    function anyBossWin(r){
-      return String(r.id)===player.id&&scoreOf(r)>0&&[BOSS_ID,LEGACY_BOSS_ID].includes(r.module);
-    }
-    function bossRecord(r,date){return anyBossWin(r)&&r.date===date;}
+    function bossRecord(r,date,bossId){return bossIdForRecord(r)===bossId&&r.date===date;}
     function matches(r,a){
       if(a.kind==="daily")return dailyRecord(r,a.date);
-      if(a.kind==="boss")return bossRecord(r,a.date);
+      if(a.kind==="boss")return bossRecord(r,a.date,a.bossId);
       return String(r.id)===player.id&&r.module===a.module;
     }
     async function findSaved(a){
@@ -1402,7 +1401,9 @@
       if(a.kind==="daily"){
         query.module=`in.(${[DAILY_ID,...LEGACY_DAILY_IDS].join(",")})`;query.date=`eq.${a.date}`;
       }else if(a.kind==="boss"){
-        query.module=`in.(${BOSS_ID},${LEGACY_BOSS_ID})`;query.date=`eq.${a.date}`;query.score="gt.0";
+        const b=bossConfig(a),ids=[b.module,...b.legacyModules];
+        query.module=ids.length===1?`eq.${ids[0]}`:`in.(${ids.join(",")})`;
+        query.date=`eq.${a.date}`;query.score="gt.0";
       }else query.module=`eq.${a.module}`;
       const rows=await api(query);if(!Array.isArray(rows))throw new Error("Не удалось проверить результат.");
       return rows[0]||null;
@@ -1411,8 +1412,11 @@
       const i=state.records.findIndex(x=>x.record_id===r.record_id);
       if(i<0)state.records.push(r);else state.records[i]=r;
       if(dailyRecord(r,state.date))state.dailyDone=true;
-      if(bossRecord(r,state.date))state.bossDone=true;
-      if(anyBossWin(r))grantAufenthaltstitel();
+      const bossId=bossIdForRecord(r);
+      if(bossId){
+        grantFlag(BOSSES[bossId].flag);
+        if(r.date===state.date)state.bossDone.add(bossId);
+      }
       if(String(r.id)===player.id&&MODULES[r.module])state.studyDone.add(r.module);
     }
     async function loadData(){
@@ -1421,42 +1425,40 @@
       $("dayNote").textContent=`🇺🇦 ${date} · По киевскому времени`;renderUI();
       try{
         let records,ownToday;
-        if(isDemo){
-          records=state.demoRecords.slice();ownToday=records.filter(r=>String(r.id)===player.id&&r.date===date);
-        }else [records,ownToday]=await Promise.all([fetchAll(),fetchAll({id:`eq.${player.id}`,date:`eq.${date}`})]);
+        if(isDemo){records=state.demoRecords.slice();ownToday=records.filter(r=>String(r.id)===player.id&&r.date===date);}
+        else [records,ownToday]=await Promise.all([fetchAll(),fetchAll({id:`eq.${player.id}`,date:`eq.${date}`})]);
         if(id!==state.loadId)return;if(date!==today())return loadData();
         state.records=records;state.dailyDone=ownToday.some(r=>dailyRecord(r,date));
-        state.bossDone=ownToday.some(r=>bossRecord(r,date));
+        state.bossDone=new Set(ownToday.map(bossIdForRecord).filter(Boolean));
         state.studyDone=new Set(records.filter(r=>String(r.id)===player.id&&MODULES[r.module]).map(r=>r.module));
-        if(records.some(anyBossWin))grantAufenthaltstitel();
-        for(const a of Array.from(state.pending.values())){
-          const saved=records.find(r=>matches(r,a));if(saved)resolveSaved(a,saved);
-        }
+        records.forEach(r=>{const bossId=bossIdForRecord(r);if(bossId)grantFlag(BOSSES[bossId].flag);});
+        for(const a of Array.from(state.pending.values())){const saved=records.find(r=>matches(r,a));if(saved)resolveSaved(a,saved);}
         state.ready=true;
-      }catch(error){
-        if(id!==state.loadId)return;console.error(error);
-        $("dataErrorText").textContent=`Не удалось загрузить данные: ${error.message}`;
+      }catch(e){
+        if(id!==state.loadId)return;console.error(e);$("dataErrorText").textContent=`Не удалось загрузить данные: ${e.message}`;
         $("dataError").classList.remove("hidden");
       }finally{if(id===state.loadId){state.loading=false;renderUI();}}
     }
 
     // ============================================================
-    // МЕНЮ И НОВЫЙ ИНВЕНТАРЬ: 2 СЛОТА
+    // МЕНЮ ДВУХ БОССОВ И ИНВЕНТАРЬ
     // ============================================================
 
     const INVENTORY=[
       {id:"registration",emoji:"📄",name:"Прописка",de:"Meldebescheinigung",requirement:"100 баллов"},
-      {id:"residence",emoji:"🪪",name:"ВНЖ",de:"Aufenthaltstitel",requirement:"Победа над Frau Müller"}
+      {id:"residence",emoji:"🪪",name:"ВНЖ",de:"Aufenthaltstitel",requirement:"Победа над Müller",flag:"has_aufenthaltstitel"},
+      {id:"brezel",emoji:"🥨",name:"Брецель",de:"Brezel",requirement:"Победа над Oma",flag:"has_brezel"}
     ];
     function inventoryUnlocked(item){
-      return item.id==="registration"?hasRegistration():player.has_aufenthaltstitel;
+      return item.id==="registration"
+        ?state.ready&&state.totalScore!==null&&state.totalScore>=100
+        :player[item.flag];
     }
     function buildUI(){
       $("studyCards").replaceChildren();
       Object.entries(MODULES).forEach(([id,m])=>{
         const b=el("button","module-card glass");b.type="button";b.dataset.study=id;
-        const c=el("span","module-copy");
-        c.append(el("strong","",m.title),el("span","subtitle",m.subtitle),el("span","card-meta","80% → 50 баллов"));
+        const c=el("span","module-copy");c.append(el("strong","",m.title),el("span","subtitle",m.subtitle),el("span","card-meta","80% → 50 баллов"));
         b.append(el("span","module-icon",m.icon),c,el("span","module-status","→"));$("studyCards").append(b);
       });
       $("inventoryGrid").replaceChildren();
@@ -1466,15 +1468,29 @@
           el("span","inventory-cost",item.de),el("span","inventory-cost inventory-requirement",item.requirement));
         $("inventoryGrid").append(b);
       });
+      $("bossList").replaceChildren();
+      Object.values(BOSSES).forEach(boss=>{
+        const card=el("article",`boss-card glass ${boss.id}`);
+        card.dataset.bossCard=boss.id;
+        card.append(
+          el("div","boss-portrait",boss.icon),
+          el("span","pill",boss.location),
+          el("h2","",boss.name),
+          el("p","muted small",boss.description),
+          el("p","muted small",`Вход: ${boss.threshold} баллов · Награда: 100 баллов + ${boss.item}`)
+        );
+        const entry=el("button","button primary full boss-entry",boss.entry);
+        entry.type="button";entry.dataset.boss=boss.id;
+        const status=el("p","small boss-card-status");status.style.margin="12px 0 0";status.setAttribute("aria-live","polite");
+        card.append(entry,status);$("bossList").append(card);
+      });
     }
     function renderUI(){
       const pending=state.pending.has(DAILY_ID);
       $("dailyButton").disabled=!state.valid||(!pending&&(!state.questionsReady||state.loading||!state.ready||state.dailyDone));
-      $("dailyButton").classList.toggle("completed",state.dailyDone);
-      $("dailyStatus").textContent=pending?"↻":state.dailyDone?"✅":"→";
-      $("dailyMeta").textContent=pending?"Есть неотправленный результат"
-        :state.dailyDone?"Сегодня пройдено · до встречи завтра"
-          :!state.questionsReady?"Вопросы ещё не загружены":"20 вопросов · средний ×1 / тяжёлый ×2";
+      $("dailyButton").classList.toggle("completed",state.dailyDone);$("dailyStatus").textContent=pending?"↻":state.dailyDone?"✅":"→";
+      $("dailyMeta").textContent=pending?"Есть неотправленный результат":state.dailyDone?"Сегодня пройдено · до встречи завтра"
+        :!state.questionsReady?"Вопросы ещё не загружены":"20 вопросов · средний ×1 / тяжёлый ×2";
       document.querySelectorAll("[data-trainer]").forEach(b=>b.disabled=!state.valid||!state.questionsReady);
       $("flashcardsButton").disabled=!state.valid||!state.questionsReady;
       $("studyCards").querySelectorAll("[data-study]").forEach(b=>{
@@ -1482,7 +1498,7 @@
         b.querySelector(".module-status").textContent=state.pending.has(id)?"↻":state.studyDone.has(id)?"✅":"→";
         b.querySelector(".card-meta").textContent=state.pending.has(id)?"Есть неотправленный результат":"80% → 50 баллов";
       });
-      renderProfile();renderInventory();renderLeaderboard();renderBossStatus();
+      renderProfile();renderInventory();renderLeaderboard();renderBossCards();
       if(state.screen==="theory")renderTheoryStatus();
     }
     function renderProfile(){
@@ -1491,22 +1507,15 @@
       if(!state.ready){
         state.totalScore=null;["totalScore","playedDays","todayScore"].forEach(id=>$(id).textContent="—");
         $("profileRank").textContent="Проверка документов…";$("nextRankText").textContent="Прогресс появится после загрузки статистики.";
-        $("rankProgressFill").style.width="0%";$("rankProgressBar").setAttribute("aria-valuenow","0");
-        $("citizenshipStamp").classList.add("hidden");return;
+        $("rankProgressFill").style.width="0%";$("rankProgressBar").setAttribute("aria-valuenow","0");$("citizenshipStamp").classList.add("hidden");return;
       }
-      const own=state.records.filter(r=>String(r.id)===player.id);
-      const total=own.reduce((s,r)=>s+scoreOf(r),0);state.totalScore=total;
-      const{next,progress}=rankInfo(total);
-      $("totalScore").textContent=total;
-      $("todayScore").textContent=own.filter(r=>r.date===state.date).reduce((s,r)=>s+scoreOf(r),0);
-      $("playedDays").textContent=new Set(own.map(r=>r.date).filter(Boolean)).size;
-      $("profileRank").textContent=getRank(total);
-      $("nextRankText").textContent=next?`До следующего звания «${next.name}» осталось ${next.min-total} очков`
-        :"Максимальное звание. Игровой ПМЖ одобрен, гений 👑";
-      $("rankProgressFill").style.width=`${progress}%`;
-      $("rankProgressBar").setAttribute("aria-valuenow",String(Math.round(progress)));
-      $("rankProgressBar").setAttribute("aria-valuetext",$("nextRankText").textContent);
-      $("citizenshipStamp").classList.toggle("hidden",next!==null);
+      const own=state.records.filter(r=>String(r.id)===player.id),total=own.reduce((s,r)=>s+scoreOf(r),0);
+      state.totalScore=total;const{next,progress}=rankInfo(total);
+      $("totalScore").textContent=total;$("todayScore").textContent=own.filter(r=>r.date===state.date).reduce((s,r)=>s+scoreOf(r),0);
+      $("playedDays").textContent=new Set(own.map(r=>r.date).filter(Boolean)).size;$("profileRank").textContent=getRank(total);
+      $("nextRankText").textContent=next?`До следующего звания «${next.name}» осталось ${next.min-total} очков`:"Максимальное звание. Игровой ПМЖ одобрен, гений 👑";
+      $("rankProgressFill").style.width=`${progress}%`;$("rankProgressBar").setAttribute("aria-valuenow",String(Math.round(progress)));
+      $("rankProgressBar").setAttribute("aria-valuetext",$("nextRankText").textContent);$("citizenshipStamp").classList.toggle("hidden",next!==null);
     }
     function renderInventory(){
       $("inventoryGrid").querySelectorAll("[data-item]").forEach(b=>{
@@ -1517,31 +1526,38 @@
         b.setAttribute("aria-label",`${item.name}, ${unlocked?"получено":item.requirement}`);
       });
     }
-    function renderBossStatus(){
-      const pending=state.pending.has(BOSS_ID),draft=state.drafts.get(address(BOSS_ID,"boss"));
-      const resume=draft&&!draft.checked&&draft.date===today();
-      const gated=state.ready&&state.totalScore!==null&&state.totalScore<100&&!pending&&!state.bossDone;
-      $("bossGate").classList.toggle("hidden",!gated);
-      $("startBossButton").classList.toggle("hidden",gated);
-      $("startBossButton").disabled=!state.valid||state.starting||state.busy||
-        (!pending&&(!state.ready||state.loading||state.bossDone||!hasRegistration()));
-      if(pending){
-        $("startBossButton").textContent="Подтвердить победу ↻";
-        $("bossStatus").textContent="Победа ждёт подтверждения сервера. ВНЖ выдаётся после сохранения.";
-      }else if(!state.ready){
-        $("startBossButton").textContent="Проверяем документы…";$("bossStatus").textContent="Дождись загрузки статистики.";
-      }else if(state.bossDone){
-        $("startBossButton").textContent=BOSS_CLOSED;$("bossStatus").textContent="Сегодняшние 100 баллов уже получены. Приходи завтра.";
-      }else if(gated){
-        $("bossStatus").textContent=`До прописки осталось ${100-state.totalScore} баллов.`;
-      }else{
-        $("startBossButton").textContent=resume?"Вернуться в кабинет":"Зайти в кабинет";
-        $("bossStatus").textContent=resume
-          ?`Текущий термин: ${draft.committed.filter(Boolean).length} шагов, ${draft.hp} жизни.`
-          :player.has_aufenthaltstitel
-            ?"Игровой ВНЖ уже есть. Новая победа принесёт только 100 баллов."
-            :"Первая победа: 100 баллов + игровой Aufenthaltstitel.";
-      }
+    function renderBossCards(){
+      $("bossList").querySelectorAll("[data-boss-card]").forEach(card=>{
+        const id=card.dataset.bossCard,boss=BOSSES[id];
+        const button=card.querySelector("[data-boss]"),status=card.querySelector(".boss-card-status");
+        const pending=state.pending.has(boss.module),done=state.bossDone.has(id);
+        const gated=state.ready&&!canEnterBoss(id)&&!pending&&!done;
+        const draft=state.drafts.get(address(boss.module,"boss"));
+        const resume=draft&&!draft.checked&&draft.date===today();
+
+        button.disabled=!state.valid||state.starting||state.busy||(!pending&&(!state.ready||state.loading||done));
+        button.classList.toggle("gated",gated);
+        button.classList.toggle("primary",!gated);
+        card.classList.toggle("completed",done);
+        status.className="small boss-card-status "+(gated?"boss-locked":"muted");
+
+        if(pending){
+          button.textContent="Подтвердить победу ↻";
+          status.textContent="Победа ещё не подтверждена. Предмет выдаётся после сохранения.";
+        }else if(!state.ready){
+          button.textContent="Проверяем доступ…";status.textContent="Дождись загрузки статистики.";
+        }else if(done){
+          button.textContent=boss.closed;status.textContent="Сегодня 100 баллов уже получены.";
+        }else if(gated){
+          button.textContent=`Вход закрыт · ${boss.threshold} баллов`;
+          status.textContent=`Не хватает ${boss.threshold-state.totalScore} баллов.`;
+        }else{
+          button.textContent=resume?"Продолжить встречу":boss.entry;
+          status.textContent=resume?`Пройдено ${draft.committed.filter(Boolean).length} шагов. Жизни: ${draft.hp}.`
+            :player[boss.flag]?`${boss.item} уже получен. Новая победа даст только 100 баллов.`
+              :`Первая победа откроет ${boss.item}.`;
+        }
+      });
     }
     function renderLeaderboard(){
       $("tabToday").classList.toggle("active",state.ratingTab==="today");$("tabAll").classList.toggle("active",state.ratingTab==="all");
@@ -1580,7 +1596,7 @@
         module,kind,level,date:state.date,units,answers:units.map(q=>q.type==="builder"?[]:null),pools:[],
         committed:units.map(()=>false),hp:MAX_HP,index:0,transitioning:false,dead:false,deathMessage:"",
         checked:false,finishing:false,passed:false,correctCount:0,rewardPoints:0,rewardState:"unresolved",
-        payload:null,saveMessage:"",saveError:false,newTitle:false
+        payload:null,saveMessage:"",saveError:false,newItem:false,bossId:null
       };
       a.pools=units.map(q=>q.type==="builder"
         ?shuffle([...q.correctWords,...q.decoyWords].map((text,id)=>({id,text})),
@@ -1599,14 +1615,14 @@
     }
     function showQuiz(a){
       state.attempt=a;state.onlyErrors=false;state.root=a.kind==="boss"?"boss":a.kind==="study"?"study":"practice";
-      $("bossHud").classList.toggle("hidden",a.kind!=="boss");
-      $("bossSpeech").classList.toggle("hidden",a.kind!=="boss");
-      $("checkBar").classList.toggle("hidden",isStream(a));
-      $("checkButton").disabled=false;$("checkButton").textContent="Проверить ответы";
+      $("bossHud").classList.toggle("hidden",a.kind!=="boss");$("bossSpeech").classList.toggle("hidden",a.kind!=="boss");
+      $("checkBar").classList.toggle("hidden",isStream(a));$("checkButton").disabled=false;$("checkButton").textContent="Проверить ответы";
       $("progressLabel").textContent=a.kind==="trainer"?"Тренировка":a.kind==="boss"?"Пройдено шагов":"Заполнено";
       if(a.kind==="boss"){
-        $("quizTitle").textContent="Termin bei Frau Müller";$("quizMode").textContent="Сюжет A1";
-        $("quizInstruction").textContent="20 шагов и 3 жизни. Выбор ответа фиксируется сразу. Собранную фразу отправляй кнопкой «Ответить Frau Müller». Третья ошибка — конец термина.";
+        const b=bossConfig(a);
+        $("quizTitle").textContent=b.name;$("quizMode").textContent="Сюжет A1";
+        $("bossHudName").textContent=b.name.toUpperCase();$("bossSpeaker").textContent=`${b.icon} ${b.name}`;
+        $("quizInstruction").textContent="20 шагов и 3 жизни. Ответ фиксируется сразу. Конструктор отправляй отдельной кнопкой. Третья ошибка — конец встречи.";
       }else if(a.kind==="trainer"){
         $("quizTitle").textContent=a.mode==="articles"?"Artikel-Trainer":"Grammatik-Trainer";$("quizMode").textContent="♾️ Без очков";
         $("quizInstruction").textContent=a.mode==="articles"?"Только базовый род слов: der, die, das. Без баллов в рейтинг."
@@ -1618,13 +1634,11 @@
         $("quizTitle").textContent="Tagesquest";$("quizMode").textContent=a.level==="hard"?"Тяжёлый ×2":"Средний ×1";
         $("quizInstruction").textContent=`${a.units.length} вопросов. Порога нет. Ответ = ${a.level==="hard"?2:1} балл. Набор фиксирован по дате ${a.date}.`;
       }
-      showScreen("quiz");
-      if(isStream(a))renderStreamQuestion();else renderSheet(a,$("quizQuestions"));
+      showScreen("quiz");if(isStream(a))renderStreamQuestion();else renderSheet(a,$("quizQuestions"));
       updateProgress();updateBossHud();
     }
     async function startDaily(level){
-      if(!state.valid||state.busy||state.starting||!ensureQuestions())return;
-      state.starting=true;
+      if(!state.valid||state.busy||state.starting||!ensureQuestions())return;state.starting=true;
       try{
         if(!await ensureData())return;if(showPending(DAILY_ID))return;
         const date=today(),saved=await findSaved({kind:"daily",module:DAILY_ID,date});
@@ -1633,7 +1647,7 @@
         const key=address(DAILY_ID,level);let a=state.drafts.get(key);
         if(!a||a.date!==date){a=makeAttempt(DAILY_ID,"daily",level,dailySelection(date,level));a.date=date;state.drafts.set(key,a);}
         showQuiz(a);haptic();
-      }catch(e){toast(e.message,true);}finally{state.starting=false;renderBossStatus();}
+      }catch(e){toast(e.message,true);}finally{state.starting=false;renderBossCards();}
     }
     function openTheory(id){
       if(state.busy||state.starting||!state.valid||!MODULES[id])return;
@@ -1642,8 +1656,7 @@
       $("theoryContent").innerHTML=m.theoryHTML;renderTheoryStatus();showScreen("theory");haptic();
     }
     function renderTheoryStatus(){
-      const id=state.selectedStudy;if(!id)return;
-      const pending=state.pending.has(id);
+      const id=state.selectedStudy;if(!id)return;const pending=state.pending.has(id);
       $("startStudyButton").textContent=pending?"Открыть неотправленный результат ↻":"Пройти тест";
       $("startStudyButton").disabled=state.busy||state.starting;
       $("theoryRewardNote").textContent=pending?"Результат ещё не подтверждён. Повтори отправку."
@@ -1659,25 +1672,24 @@
       }finally{state.starting=false;if(state.screen==="theory")renderTheoryStatus();}
     }
 
-    // Босс больше НЕ зависит от загрузки базы практики.
-    async function startBoss(fresh=false){
-      if(!state.valid||state.busy||state.starting)return;
-      if(showPending(BOSS_ID))return;
-      state.starting=true;renderBossStatus();
+    async function startBoss(id,fresh=false){
+      const boss=BOSSES[id];if(!boss||!state.valid||state.busy||state.starting)return;
+      if(showPending(boss.module))return;
+      state.starting=true;renderBossCards();
       try{
         if(!await ensureData())return;
-        if(!hasRegistration()){toast(BOSS_GATE_MESSAGE,true);showScreen("boss");return;}
-        const date=today(),saved=await findSaved({kind:"boss",module:BOSS_ID,date});
-        if(saved){rememberRecord(saved);toast(BOSS_CLOSED,true);showScreen("boss");return;}
-        if(date!==today()){await loadData();toast("Начался новый день. Запроси термин снова.");return;}
-        const key=address(BOSS_ID,"boss");let a=fresh?null:state.drafts.get(key);
+        if(!canEnterBoss(id)){toast(boss.gate,true);haptic("error");return;}
+        const date=today(),saved=await findSaved({kind:"boss",module:boss.module,bossId:id,date});
+        if(saved){rememberRecord(saved);toast(boss.closed,true);showScreen("boss");return;}
+        if(date!==today()){await loadData();toast("Начался новый день. Выбери босса ещё раз.");return;}
+        const key=address(boss.module,"boss");let a=fresh?null:state.drafts.get(key);
         if(!a||a.date!==date||a.checked){
-          a=makeAttempt(BOSS_ID,"boss","boss",copy(bossUnits()));
-          a.date=date;state.drafts.set(key,a);
+          a=makeAttempt(boss.module,"boss","boss",copy(bossUnits(id)));
+          a.bossId=id;a.date=date;state.drafts.set(key,a);
         }
         a.transitioning=false;showQuiz(a);haptic();
-      }catch(e){toast(`Кабинет не открылся: ${e.message}`,true);}
-      finally{state.starting=false;renderBossStatus();}
+      }catch(e){toast(`Встреча не началась: ${e.message}`,true);}
+      finally{state.starting=false;renderBossCards();}
     }
 
     function startTrainer(mode){
@@ -1720,7 +1732,8 @@
       const card=$("flashCard");card.classList.add("resetting");card.classList.remove("flipped");
       $("flashFrontText").textContent=pair.de;$("flashBackText").textContent=pair.ru;setFlashAccessibility(false);
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        if(request!==state.flashRequest)return;card.classList.remove("resetting");state.flashBusy=false;setFlashButtons(false);
+        if(request!==state.flashRequest)return;
+        card.classList.remove("resetting");state.flashBusy=false;setFlashButtons(false);
       }));
     }
     function flipFlashcard(){
@@ -1729,12 +1742,10 @@
     }
 
     // ============================================================
-    // ОБЩИЙ РЕНДЕР И СОСТОЯНИЕ ОТВЕТОВ
+    // ОБЩИЙ РЕНДЕР И КОНСТРУКТОР
     // ============================================================
 
-    function words(a,i){
-      const map=new Map(a.pools[i].map(t=>[t.id,t.text]));return a.answers[i].map(id=>map.get(id));
-    }
+    function words(a,i){const map=new Map(a.pools[i].map(t=>[t.id,t.text]));return a.answers[i].map(id=>map.get(id));}
     function hasAnswer(a,i){return a.units[i].type==="builder"?a.answers[i].length>0:a.answers[i]!==null;}
     function filled(a,i){return isStream(a)?a.committed[i]:hasAnswer(a,i);}
     function correct(a,i){
@@ -1752,8 +1763,7 @@
       toast("Начался новый день. Открой тест заново.",true);void goRoot(a.kind==="boss"?"boss":"practice");return false;
     }
     function blockQuiz(){
-      $("quizQuestions").querySelectorAll("button,select,input").forEach(n=>n.disabled=true);
-      $("checkButton").disabled=true;
+      $("quizQuestions").querySelectorAll("button,select,input").forEach(n=>n.disabled=true);$("checkButton").disabled=true;
     }
     function appendSentence(n,s){
       const parts=s.split("___");parts.forEach((p,i)=>{n.append(document.createTextNode(p));if(i<parts.length-1)n.append(el("span","gap","_____"));});
@@ -1775,8 +1785,7 @@
         const ids=a.units.map((q,i)=>q.block===block?i:-1).filter(i=>i>=0&&visible(i));if(!ids.length)return;
         f.append(heading(block));
         if(block===3){
-          const dialog=el("article","question glass");
-          ids.forEach(i=>{dialog.append(buildGap(a,i,review));shown++;});f.append(dialog);
+          const dialog=el("article","question glass");ids.forEach(i=>{dialog.append(buildGap(a,i,review));shown++;});f.append(dialog);
         }else ids.forEach(i=>{f.append(buildQuestion(a,i,review));shown++;});
       });
       if(!shown)f.append(el("div","empty glass","Ошибок нет. Сегодня ты официально не лох 👑"));container.append(f);
@@ -1784,9 +1793,7 @@
     function buildQuestion(a,i,review=false){
       const q=a.units[i],right=review&&correct(a,i),card=el("article","question glass");
       card.dataset.index=String(i);if(review)card.classList.add(right?"is-correct":"is-wrong");
-      if(review&&a.kind==="boss"){
-        card.append(el("div","muted small",`Frau Müller: ${q.replica}`));
-      }
+      if(review&&a.kind==="boss")card.append(el("div","muted small",`${bossConfig(a).name}: ${q.replica}`));
       const h=el("div","row question-heading");
       h.append(el("span","",a.kind==="trainer"?`Вопрос ${a.seen+1}`:`Ответ ${i+1} / ${a.units.length}`),
         el("span","",review?right?"✅ Верно":"❌ Ошибка":q.topic||"Практика"));
@@ -1850,7 +1857,7 @@
       const placeholder=el("span","builder-placeholder","Нажимай слова снизу. Здесь появится фраза.");
       const tools=el("div","row builder-tools"),clear=el("button","button","Стереть");clear.type="button";
       tools.append(el("span","muted small","Слово в ответе → вернуть"),clear);
-      const submit=a.kind==="boss"?el("button","button primary full","Ответить Frau Müller"):null;
+      const submit=a.kind==="boss"?el("button","button primary full",`Ответить ${bossConfig(a).name}`):null;
       if(submit){submit.type="button";submit.style.marginTop="13px";}
       const lookup=new Map(a.pools[i].map(t=>[t.id,t])),buttons=new Map();
       a.pools[i].forEach(t=>{
@@ -1885,7 +1892,7 @@
     }
 
     // ============================================================
-    // ПОТОК И ХП: ТОЛЬКО ТЕРМИН
+    // ГИБРИДНЫЕ ДИАЛОГИ, ХП И ФИКСАЦИЯ
     // ============================================================
 
     function renderStreamQuestion(){
@@ -1912,8 +1919,7 @@
         $("progressBar").setAttribute("aria-valuenow",String(Math.round(value)));return;
       }
       const count=a.units.reduce((s,_,i)=>s+(filled(a,i)?1:0),0);
-      $("progressText").textContent=`${count} / ${a.units.length}`;
-      $("progressFill").style.width=`${count/a.units.length*100}%`;
+      $("progressText").textContent=`${count} / ${a.units.length}`;$("progressFill").style.width=`${count/a.units.length*100}%`;
       $("progressBar").setAttribute("aria-valuemax",String(a.units.length));$("progressBar").setAttribute("aria-valuenow",String(count));
     }
 
@@ -1921,10 +1927,9 @@
       if(!canEdit(a,i)||!isStream(a)||i!==a.index||a.committed[i]||!hasAnswer(a,i))return;
       if(!checkDay(a))return;
 
-      // Сначала фиксируем попытку: двойной клик не снимет две жизни.
+      // До таймеров и async: повторный клик не снимает ещё одну жизнь.
       a.committed[i]=true;a.transitioning=true;
       const q=a.units[i],right=correct(a,i);
-
       card.querySelectorAll("button,select").forEach(b=>b.disabled=true);
       if(q.type==="choice"){
         card.querySelectorAll(".answer").forEach((b,j)=>{
@@ -1933,8 +1938,7 @@
       }
       card.classList.add(right?"is-correct":"is-wrong");
       const correctText=q.type==="builder"?q.correctWords.join(" "):q.options[q.correctIndex];
-      card.append(el("div",`feedback ${right?"good":"bad"}`,
-        right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${correctText}`));
+      card.append(el("div",`feedback ${right?"good":"bad"}`,right?"✓ Четко! Не лох":`🤡 Лох! Правильно: ${correctText}`));
 
       if(a.kind==="trainer"){
         a.seen++;if(right)a.trainerCorrect++;updateProgress();haptic(right?"success":"error");
@@ -1945,12 +1949,18 @@
         });card.append(next);return;
       }
 
+      const boss=bossConfig(a);
       if(!right)a.hp=Math.max(0,a.hp-1);
       updateProgress();updateBossHud();
-      if(!right){card.classList.add("hit");toast(pick(BOSS_HIT_PHRASES),true);haptic("error");}else haptic("success");
+      if(!right){
+        card.classList.add("hit");
+        if(a.bossId==="oma"){
+          $("quizScreen").classList.remove("hit");void $("quizScreen").offsetWidth;$("quizScreen").classList.add("hit");
+        }
+        toast(pick(boss.hit),true);haptic("error");
+      }else haptic("success");
 
       if(a.hp===0){
-        // Жёсткая блокировка в том же стеке вызовов.
         a.dead=true;blockQuiz();finish(a,true);return;
       }
       if(i===a.units.length-1){finish(a,false);return;}
@@ -1959,12 +1969,13 @@
         state.stepTimer=null;
         if(state.attempt!==a||state.screen!=="quiz"||a.checked||a.dead||a.finishing)return;
         if(!checkDay(a))return;
-        a.index=i+1;a.transitioning=false;renderStreamQuestion();updateBossHud();
+        a.index=i+1;a.transitioning=false;$("quizScreen").classList.remove("hit");
+        renderStreamQuestion();updateBossHud();
       },700);
     }
 
     // ============================================================
-    // ЗАВЕРШЕНИЕ И СОХРАНЕНИЕ
+    // ЗАВЕРШЕНИЕ И ПРЕЖНЯЯ ОТПРАВКА В LEADERBOARD
     // ============================================================
 
     function finish(a,death=false){
@@ -1975,11 +1986,12 @@
       },0);
       state.drafts.delete(address(a.module,a.level));state.onlyErrors=false;
       if(a.kind==="boss"){
-        a.passed=!a.dead&&a.hp>0&&a.units.length===BOSS_DIALOGUE.length&&a.committed.every(Boolean);
+        const boss=bossConfig(a);
+        a.passed=!a.dead&&a.hp>0&&a.units.length===boss.dialogue.length&&a.committed.every(Boolean);
         if(!a.passed){
-          a.dead=true;a.rewardPoints=0;a.rewardState="failed";a.deathMessage=pick(BOSS_DEATH_PHRASES);
-          a.saveMessage="Поражение не записано. ВНЖ не выдан. Запроси новый термин, лох.";
-          renderResult();showScreen("result");renderBossStatus();haptic("error");return;
+          a.dead=true;a.rewardPoints=0;a.rewardState="failed";a.deathMessage=pick(boss.death);
+          a.saveMessage="Поражение не записано. Предмет не выдан. Попробуй снова, лох.";
+          renderResult();showScreen("result");renderBossCards();haptic("error");return;
         }
         a.rewardPoints=BOSS_REWARD;
       }else if(a.kind==="study"){
@@ -2008,25 +2020,24 @@
       finish(a,false);
     }
     function resolveSaved(a,r){
-      const hadTitle=player.has_aufenthaltstitel;
+      const boss=a.kind==="boss"?bossConfig(a):null;
+      const hadItem=boss?player[boss.flag]:false;
       rememberRecord(r);a.saveError=false;
       const same=r.record_id===a.payload?.record_id;a.rewardState=same?"saved":"already";
-      if(a.kind==="boss"&&anyBossWin(r)){
-        a.newTitle=!hadTitle;
-        grantAufenthaltstitel();
+      if(boss&&bossIdForRecord(r)===boss.id){
+        a.newItem=!hadItem;grantFlag(boss.flag);
       }
       a.saveMessage=same
-        ?isDemo?`Демо: ${scoreOf(r)} баллов в памяти страницы.`
-          :`+${scoreOf(r)} баллов в общий рейтинг ✅`
+        ?isDemo?`Демо: ${scoreOf(r)} баллов в памяти страницы.`:`+${scoreOf(r)} баллов в общий рейтинг ✅`
         :a.kind==="study"?"Тренировка завершена. Очки за этот модуль уже были получены ранее"
-          :a.kind==="boss"?"Сегодня награда за босса уже получена. Повторные 100 баллов не начислены."
+          :boss?"Сегодня награда этого босса уже получена. Повторные 100 баллов не начислены."
             :`Дневной результат уже сохранён. Учтено ${scoreOf(r)} баллов.`;
-      if(a.kind==="boss"&&a.newTitle)a.saveMessage+=" 🪪 Aufenthaltstitel добавлен в рюкзак!";
+      if(boss&&a.newItem)a.saveMessage+=` ${boss.item} добавлен в рюкзак!`;
       state.pending.delete(a.module);
     }
     async function processAttempt(a){
       if(a.kind==="trainer"||state.busy||!a.checked||["saved","already","failed"].includes(a.rewardState))return;
-      if(a.kind==="boss"&&(!a.passed||a.dead||a.payload?.score!==BOSS_REWARD))return;
+      if(a.kind==="boss"&&(!a.passed||a.dead||a.payload?.score!==BOSS_REWARD||a.payload?.module!==bossConfig(a).module))return;
       state.busy=true;a.saveError=false;a.saveMessage="Проверяем предыдущие результаты…";renderResult();
       try{
         const saved=await findSaved(a);if(saved){resolveSaved(a,saved);return;}
@@ -2049,49 +2060,47 @@
     }
 
     // ============================================================
-    // РЕЗУЛЬТАТЫ
+    // РЕЗУЛЬТАТЫ И ВОЗВРАТ
     // ============================================================
 
     function renderResult(){
       const a=state.attempt;if(!a?.checked||a.kind==="trainer")return;
-      const total=a.units.length,p=a.correctCount/total,boss=a.kind==="boss",study=a.kind==="study";
+      const total=a.units.length,p=a.correctCount/total,boss=a.kind==="boss"?bossConfig(a):null,study=a.kind==="study";
       const answered=boss?a.committed.filter(Boolean).length:total,unresolved=a.rewardState==="unresolved";
       const percent=(p*100).toLocaleString("ru-RU",{maximumFractionDigits:1});
-      $("resultModule").textContent=boss?"Termin bei Frau Müller":study?MODULES[a.module].title:"Tagesquest";
+      $("resultModule").textContent=boss?`${boss.name} · ${boss.location}`:study?MODULES[a.module].title:"Tagesquest";
       if(boss){
-        $("resultEmoji").textContent=a.dead?"💀":"🪪";
-        $("resultTitle").textContent=a.dead?"Термин отменен":"ВНЖ одобрен!";
+        $("resultEmoji").textContent=a.dead?"💀":boss.id==="oma"?"🥨":"🪪";
+        $("resultTitle").textContent=a.dead?"Встреча провалена":boss.winTitle;
         $("resultScore").replaceChildren(document.createTextNode(String(a.rewardPoints)),el("span",""," баллов"));
         $("resultDetails").textContent=`Шагов ${answered} / ${total}. Верных ${a.correctCount}. Жизни ${a.hp} / ${MAX_HP}.`;
-        $("resultMessage").textContent=a.dead?a.deathMessage:
-          a.newTitle?BOSS_WIN+" Новый Aufenthaltstitel ждёт в рюкзаке."
-          :player.has_aufenthaltstitel?"Frau Müller продлила твой игровой ВНЖ. Документ уже есть — сегодня только +100 баллов."
-            :BOSS_WIN;
+        $("resultMessage").textContent=a.dead?a.deathMessage:boss.win+
+          (a.newItem?` Новый предмет: ${boss.item}!`
+            :player[boss.flag]?` ${boss.item} уже есть в рюкзаке.`
+              :` ${boss.item} будет выдан после подтверждения победы.`);
       }else{
         $("resultEmoji").textContent=p===1?"👑":p>=.75?"😎":p>=.4?"🍺":"💀";
         $("resultTitle").textContent=p===1?"Абсолютный гений":p>=.75?"Почти немец":p>=.4?"Нормально, пойдет":"Тотальный лох";
         $("resultScore").replaceChildren(document.createTextNode(String(a.correctCount)),el("span","",` / ${total}`));
-        $("resultDetails").textContent=study
-          ?`Точность ${percent}%. Порог 80%. ${a.passed?"Пройдено ✅":"Не пройдено ❌"}`
+        $("resultDetails").textContent=study?`Точность ${percent}%. Порог 80%. ${a.passed?"Пройдено ✅":"Не пройдено ❌"}`
           :`Точность ${percent}%. Результат ${a.rewardPoints} / ${total*(a.level==="hard"?2:1)} баллов.`;
         $("resultMessage").textContent=p===1?"0% лоха. Гёте гордился бы тобой."
           :p>=.75?"Очень достойно. Пару раз ошибся, но не критично."
             :p>=.4?"Половину знаешь, половину угадал."
               :`Правильно только ${percent}%. Тебя бы даже за пивом не отправили.`;
       }
-      $("saveStatus").textContent=a.saveMessage;
-      $("saveStatus").classList.toggle("error",a.saveError||a.rewardState==="failed");
+      $("saveStatus").textContent=a.saveMessage;$("saveStatus").classList.toggle("error",a.saveError||a.rewardState==="failed");
       $("saveStatus").classList.toggle("success",a.rewardState==="saved");
       $("retrySaveButton").classList.toggle("hidden",!unresolved||state.busy);$("retrySaveButton").disabled=state.busy;
       $("resultTheoryButton").classList.toggle("hidden",!study);$("resultTheoryButton").disabled=state.busy;
-      $("resultHomeButton").disabled=state.busy;
-      $("resultHomeButton").textContent=state.busy?"Проверяем и сохраняем…"
-        :boss?"Вернуться к термину":study?"Вернуться к учебным темам":"Вернуться к практике";
+      $("resultHomeButton").disabled=state.busy;$("resultHomeButton").textContent=state.busy?"Проверяем и сохраняем…"
+        :boss?"Вернуться к выбору боссов":study?"Вернуться к учебным темам":"Вернуться к практике";
       const retryBoss=boss&&a.dead&&a.rewardState==="failed";
       $("repeatButton").classList.toggle("hidden",!study&&!retryBoss);
-      $("repeatButton").disabled=state.busy||state.starting||unresolved||(retryBoss&&(state.bossDone||!hasRegistration()));
-      $("repeatButton").textContent=retryBoss?"Запросить новый термин"
-        :unresolved?"Сначала подтверди отправку результата":a.passed?"Ещё раз — тренироваться 💪":"Попробовать снова 💪";
+      $("repeatButton").disabled=state.busy||state.starting||unresolved||
+        (retryBoss&&(state.bossDone.has(a.bossId)||!canEnterBoss(a.bossId)));
+      $("repeatButton").textContent=retryBoss?boss.retry:unresolved?"Сначала подтверди отправку результата"
+        :a.passed?"Ещё раз — тренироваться 💪":"Попробовать снова 💪";
       $("errorsButton").textContent=state.onlyErrors?"Показать все ответы":"Показать только где лох 🤡";
       $("errorsButton").setAttribute("aria-pressed",String(state.onlyErrors));
       $("reviewTitle").textContent=state.onlyErrors?`Ошибки: ${answered-a.correctCount}`:"Разбор ответов";
@@ -2099,13 +2108,11 @@
     }
     function canLeaveResult(){
       if(state.busy)return false;
-      if(state.attempt?.rewardState==="unresolved")return window.confirm(
-        "Результат ещё не подтверждён. Он останется только в памяти страницы. Продолжить?"
-      );return true;
+      if(state.attempt?.rewardState==="unresolved")return window.confirm("Результат ещё не подтверждён. Он останется только в памяти страницы. Продолжить?");
+      return true;
     }
     async function leaveQuiz(){
-      const a=state.attempt;if(!a||a.checked||state.busy||a.finishing)return;
-      if(a.kind==="boss"&&a.transitioning)return;
+      const a=state.attempt;if(!a||a.checked||state.busy||a.finishing)return;if(a.kind==="boss"&&a.transitioning)return;
       if(a.kind==="trainer"){showScreen("practice");return;}
       const any=a.units.some((_,i)=>hasAnswer(a,i));
       if(any&&!window.confirm(a.kind==="boss"
@@ -2135,8 +2142,15 @@
     $("flashUnknown").addEventListener("click",()=>{nextFlashcard();haptic();});
     $("flashRemembered").addEventListener("click",()=>{nextFlashcard();haptic();});
     $("flashBack").addEventListener("click",()=>showScreen("practice"));
-    $("bossFakeButton").addEventListener("click",()=>{toast(BOSS_GATE_MESSAGE,true);haptic("error");});
-    $("startBossButton").addEventListener("click",()=>startBoss(false));
+
+    $("bossList").addEventListener("click",e=>{
+      const button=e.target.closest("[data-boss]");
+      if(!button||button.disabled)return;
+      const id=button.dataset.boss,boss=BOSSES[id];
+      if(state.pending.has(boss.module)){showPending(boss.module);return;}
+      if(!canEnterBoss(id)){toast(boss.gate,true);haptic("error");return;}
+      startBoss(id,false);
+    });
     $("studyCards").addEventListener("click",e=>{
       const b=e.target.closest("[data-study]");if(b&&!b.disabled)openTheory(b.dataset.study);
     });
@@ -2145,11 +2159,11 @@
       const item=INVENTORY[Number(b.dataset.item)];
       if(item.id==="registration"&&!state.ready){toast("Сначала дождись загрузки баллов.");return;}
       if(!inventoryUnlocked(item)){
-        toast(item.id==="registration"?"Сначала заработай 100 баллов, лох":"Сначала переживи термин у Frau Müller, лох",true);haptic("error");
-      }else{
-        toast(item.id==="registration"?"📄 Игровая прописка получена. Теперь хотя бы адрес у тебя есть."
-          :"🪪 Игровой ВНЖ получен. Frau Müller помнит твои страдания.");haptic();
-      }
+        const message=item.id==="registration"?"Сначала заработай 100 баллов, лох"
+          :item.id==="residence"?"Сначала переживи термин у Frau Müller, лох"
+            :"Сначала победи бабку в супермаркете, лох";
+        toast(message,true);haptic("error");
+      }else{toast(`${item.emoji} ${item.name} получен. Это игровой предмет, гений.`);haptic();}
     });
     $("startStudyButton").addEventListener("click",()=>{if(state.selectedStudy)startStudy(state.selectedStudy);});
     $("theoryBack").addEventListener("click",()=>goRoot("study"));
@@ -2163,31 +2177,28 @@
     $("errorsButton").addEventListener("click",()=>{state.onlyErrors=!state.onlyErrors;renderResult();haptic();});
     $("repeatButton").addEventListener("click",()=>{
       const a=state.attempt;if(!a||state.busy||state.starting||a.rewardState==="unresolved")return;
-      if(a.kind==="boss"&&a.dead)startBoss(true);else if(a.kind==="study")startStudy(a.module,true);
+      if(a.kind==="boss"&&a.dead)startBoss(a.bossId,true);else if(a.kind==="study")startStudy(a.module,true);
     });
     $("resultTheoryButton").addEventListener("click",()=>{if(canLeaveResult())openTheory(state.attempt.module);});
     $("resultHomeButton").addEventListener("click",()=>{
       if(!canLeaveResult())return;const a=state.attempt;goRoot(a.kind==="boss"?"boss":a.kind==="study"?"study":"practice");
     });
     try{tg?.BackButton?.onClick(handleBack);}catch(_){}
-
-    // Подхватываем выдачу предмета в другой вкладке этого же браузера.
     window.addEventListener("storage",e=>{
-      if(e.key===TITLE_STORAGE_KEY&&e.newValue==="true"){
-        player.has_aufenthaltstitel=true;renderInventory();renderBossStatus();
+      for(const flag of ["has_aufenthaltstitel","has_brezel"]){
+        if(e.key===storageKey(flag)&&e.newValue==="true"){player[flag]=true;renderInventory();renderBossCards();}
       }
     });
     function refreshDay(){
       if(!document.hidden&&!state.modal&&!state.loading&&!state.busy&&!state.starting&&
         [...ROOTS,"theory"].includes(state.screen)&&state.date!==today())loadData();
     }
-    document.addEventListener("visibilitychange",refreshDay);
-    setInterval(refreshDay,30000);
+    document.addEventListener("visibilitychange",refreshDay);setInterval(refreshDay,30000);
     window.addEventListener("beforeunload",e=>{
-      const boss=state.drafts.get(address(BOSS_ID,"boss"));
-      if(state.pending.size||state.busy||(boss&&!boss.checked&&boss.committed.some(Boolean))){
-        e.preventDefault();e.returnValue="";
-      }
+      const activeBoss=Object.values(BOSSES).some(b=>{
+        const a=state.drafts.get(address(b.module,"boss"));return a&&!a.checked&&a.committed.some(Boolean);
+      });
+      if(state.pending.size||state.busy||activeBoss){e.preventDefault();e.returnValue="";}
     });
     async function init(){
       $("profileName").textContent=player.name;$("avatar").textContent=Array.from(player.name)[0]?.toUpperCase()||"D";
@@ -2203,3 +2214,4 @@
   </script>
 </body>
 </html>
+🤖 AI-Generated | RocheChat2
