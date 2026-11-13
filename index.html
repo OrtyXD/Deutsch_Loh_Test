@@ -2353,7 +2353,7 @@ async function startStudy(id, fresh = false) {
     renderTheoryStatus();
   }
 }
-}
+
 async function startBoss(id,fresh=false){
   const boss=BOSSES[id];if(!boss||state.busy||state.starting||!state.valid)return;
   if(showPending(boss.module))return;state.starting=true;renderBossCards();
