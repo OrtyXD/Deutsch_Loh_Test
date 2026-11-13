@@ -2138,14 +2138,221 @@ function renderTheoryStatus(){
     :state.studyDone.has(id)?"✅ Тест уже пройден и награда получена. Повторяй без новых очков."
       :"80% → 50 баллов один раз за всё время. Это проверка упражнений, а не сертификат уровня.";
 }
-async function startStudy(id,fresh=false){
-  if(!state.valid||state.busy||state.starting)return;state.starting=true;
-  try{
-    if(!await ensureData())return;if(showPending(id))return;
-    const key=address(id);let a=fresh?null:state.drafts.get(key);
-    if(!a){a=makeAttempt(id,"study",copy(studyUnits(id)));state.drafts.set(key,a);}
-    showQuiz(a);
-  }finally{state.starting=false;renderTheoryStatus();}
+// ============================================================
+// УЧЕБНЫЕ ЗАДАНИЯ ИЗ SUPABASE
+// ============================================================
+
+// Эти модули уже наполнены в study_questions.
+// Для них отсутствие строк считается ошибкой,
+// а не поводом вернуть старый тест из 6 вопросов.
+const DB_STUDY_REQUIRED = new Set([
+  "study_akkusativ",
+  "study_dativ"
+]);
+
+function adaptStudyQuestion(row, moduleId) {
+  const module = MODULES[moduleId];
+
+  if (!module) {
+    throw new Error("Неизвестный учебный модуль.");
+  }
+
+  if (row.module_id !== moduleId) {
+    throw new Error("Сервер вернул вопрос другого модуля.");
+  }
+
+  if (!["A1", "A2"].includes(row.level)) {
+    throw new Error(
+      `Не указан корректный уровень: ${row.question_key || row.id}`
+    );
+  }
+
+  if (!Number.isInteger(row.position) || row.position < 1) {
+    throw new Error(
+      `Некорректная позиция вопроса: ${row.question_key || row.id}`
+    );
+  }
+
+  const key = text(
+    row.question_key,
+    "Ключ учебного вопроса"
+  );
+
+  const base = {
+    key: `study-db:${key}`,
+    topic: module.title,
+    category: "grammar",
+    level: row.level,
+    explanation: text(
+      row.explanation,
+      `Объяснение ${key}`
+    ),
+    position: row.position
+  };
+
+  if (row.format === "builder") {
+    const accepted = row.accepted_sentences ?? [];
+
+    if (
+      !Array.isArray(accepted) ||
+      !accepted.every(value =>
+        typeof value === "string" && value.trim()
+      )
+    ) {
+      throw new Error(
+        `Некорректные альтернативные ответы: ${key}`
+      );
+    }
+
+    return {
+      ...base,
+      type: "builder",
+      block: 2,
+      question: text(row.prompt, key),
+      correctWords: strings(row.correct_words, key),
+      decoyWords: strings(row.decoy_words, key, 2),
+      acceptedSentences: accepted.slice()
+    };
+  }
+
+  if (row.format === "choice" || row.format === "gap") {
+    const options = strings(row.options, key, 4, 6);
+
+    return {
+      ...base,
+      type: row.format === "gap" ? "gap" : "choice",
+      block: row.format === "gap" ? 3 : 1,
+      sentence: text(row.prompt, key),
+      options,
+      correctIndex: indexOfCorrect(
+        row.correct_index,
+        options,
+        key
+      )
+    };
+  }
+
+  throw new Error(
+    `Неизвестный формат учебного вопроса: ${key}`
+  );
+}
+
+async function loadStudyUnits(moduleId) {
+  // Запрашиваем свежие задания при создании новой попытки.
+  // Уже начатый тест остаётся неизменным до завершения.
+  const rows = await fetchTable(
+    "study_questions",
+    {
+      module_id: `eq.${moduleId}`,
+      active: "eq.true"
+    },
+    "position.asc,id.asc"
+  );
+
+  if (!rows.length) {
+    if (DB_STUDY_REQUIRED.has(moduleId)) {
+      throw new Error(
+        "Для этой темы не найдены активные задания. " +
+        "Проверь study_questions и политику SELECT."
+      );
+    }
+
+    // Остальные темы ещё не перенесены в базу.
+    return copy(studyUnits(moduleId));
+  }
+
+  const units = rows.map(row =>
+    adaptStudyQuestion(row, moduleId)
+  );
+
+  const uniqueKeys = new Set(
+    units.map(question => question.key)
+  );
+
+  if (uniqueKeys.size !== units.length) {
+    throw new Error(
+      "В учебном тесте повторяются ключи заданий."
+    );
+  }
+
+  // Учебный интерфейс показывает блоки последовательно:
+  // разминка → конструкторы → текст с пропусками.
+  // Внутри блока сохраняем порядок position.
+  units.sort((a, b) =>
+    a.block - b.block ||
+    a.position - b.position ||
+    stableSort(a, b)
+  );
+
+  validateUnits(
+    units,
+    `Учебный тест: ${MODULES[moduleId].title}`
+  );
+
+  return units;
+}
+async function startStudy(id, fresh = false) {
+  if (
+    !state.valid ||
+    state.busy ||
+    state.starting ||
+    !MODULES[id]
+  ) {
+    return;
+  }
+
+  state.starting = true;
+  renderTheoryStatus();
+
+  try {
+    if (!await ensureData()) {
+      return;
+    }
+
+    // Незавершённая отправка награды имеет приоритет.
+    if (showPending(id)) {
+      return;
+    }
+
+    const key = address(id);
+
+    // При возврате продолжаем тот же тест:
+    // ответы и состав вопросов не меняются.
+    let attempt = fresh
+      ? null
+      : state.drafts.get(key);
+
+    if (!attempt) {
+      $("startStudyButton").textContent =
+        "Загружаем учебные задания…";
+
+      const units = await loadStudyUnits(id);
+
+      attempt = makeAttempt(
+        id,
+        "study",
+        copy(units)
+      );
+
+      state.drafts.set(key, attempt);
+    }
+
+    showQuiz(attempt);
+    haptic();
+
+  } catch (error) {
+    console.error("Study question loading:", error);
+
+    toast(
+      `Не удалось открыть тест: ${error.message}`,
+      true
+    );
+
+  } finally {
+    state.starting = false;
+    renderTheoryStatus();
+  }
+}
 }
 async function startBoss(id,fresh=false){
   const boss=BOSSES[id];if(!boss||state.busy||state.starting||!state.valid)return;
