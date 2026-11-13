@@ -2126,7 +2126,7 @@ function openTheory(id){
   $("theoryTitle").textContent=m.title;$("theorySubtitle").textContent=m.subtitle;
   $("theoryLevel").textContent=m.level;$("theoryIcon").textContent=m.icon;
   $("theoryPrerequisite").textContent=m.previous
-    ?`Перед этой темой полезно: ${MODULES[m.previous].title}. Это рекомендация, не обязательный замок.`
+    ?`Перед этой темой полезно: ${MODULES[m.previous].title}. Это рекомендация.`
     :"Начало маршрута. Если уже знаешь тему, проверь себя и двигайся дальше.";
   $("theoryContent").innerHTML=m.theoryHTML;renderTheoryStatus();showScreen("theory");haptic();
 }
